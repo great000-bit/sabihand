@@ -36,3 +36,6 @@ export function areaById(id: string): Area | undefined {
 export function tradeById(id: Trade) {
   return TRADES.find((t) => t.id === id)!;
 }
+
+/** Common Nigerian banks, offered as suggestions. Free text is still accepted for the rest. */
+export const BANKS = ["Access Bank", "Citibank Nigeria", "Ecobank", "Fidelity Bank", "First Bank of Nigeria", "First City Monument Bank (FCMB)", "Globus Bank", "Guaranty Trust Bank (GTBank)", "Heritage Bank", "Keystone Bank", "Kuda Bank", "Moniepoint", "OPay", "PalmPay", "Polaris Bank", "Providus Bank", "Stanbic IBTC Bank", "Standard Chartered", "Sterling Bank", "SunTrust Bank", "Union Bank", "United Bank for Africa (UBA)", "Unity Bank", "Wema Bank", "Zenith Bank"];

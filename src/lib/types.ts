@@ -29,6 +29,13 @@ export interface ServicePrice {
   maxKobo: number | null;
 }
 
+export interface BankDetails {
+  bankName: string;
+  /** 10-digit NUBAN account number. */
+  accountNumber: string;
+  accountName: string;
+}
+
 export interface Artisan {
   id: string;
   name: string;
@@ -43,6 +50,8 @@ export interface Artisan {
   joinedAt: string;
   /** Id of the signed-in user who owns this profile. */
   ownerId: string;
+  /** Private. Where released earnings are paid. Only the owner and the Sabihand team ever receive it. */
+  bank?: BankDetails;
   /** Private contact number. Stripped from what other people receive until a booking is paid. */
   phone: string;
 }
@@ -105,6 +114,8 @@ export interface Payment {
   providerRef: string;
   createdAt: string;
   settledAt?: string;
+  /** Set by the Sabihand team once the artisan's share has been sent to their bank. */
+  payout?: { paidAt: string; reference: string };
 }
 
 export interface Review {

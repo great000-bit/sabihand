@@ -106,7 +106,7 @@ function Detail() {
           <Panel title="Payment" tone={payment.status === "held" ? "dark" : "white"}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-display text-3xl font-extrabold">{formatNaira(payment.amountKobo)}</p>
-              <Chip tone={payment.status === "held" ? "gold" : payment.status === "released" ? "green" : "plain"}>{payment.status === "held" ? "Held safely" : payment.status === "released" ? "Paid out to artisan" : "Refunded"}</Chip>
+              <Chip tone={payment.status === "held" ? "gold" : payment.status === "released" ? "green" : "plain"}>{payment.status === "held" ? "Held safely" : payment.status === "released" ? (payment.payout ? "Paid to artisan’s bank" : "Released to artisan") : "Refunded"}</Chip>
             </div>
             <p className={`mt-2 text-sm ${payment.status === "held" ? "text-[#c9d4ee]" : "text-slate"}`}>
               {payment.status === "held" && "The artisan is paid only after you confirm the job is done."}

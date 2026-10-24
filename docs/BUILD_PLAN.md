@@ -17,9 +17,13 @@ How it is built:
 - `src/server/paystack.ts`, `payments.ts`, `/pay/callback`, `/api/paystack/webhook`: checkout, then the payment is recorded only after Paystack confirms it. Safe if both callback and webhook arrive.
 - No sample data exists anywhere. The marketplace is empty until real artisans sign up.
 
-Known limits (honest list): two people changing the same booking in the same instant can overwrite each other
-(fine at pilot scale, add row locking before real volume); payouts to artisan bank accounts are not automated yet
-(the ledger shows "released" and the team pays out); there is no photo upload, notifications, or terms and privacy pages yet.
+Writes are safe under concurrency: every row has a version, an update names the version it read, and a stale write
+rolls back and is replayed on fresh data (`persist` in `src/server/repo.ts`, migration `0003_versions.sql`).
+
+Payouts are manual for now: artisans save a bank account, the admin page lists released jobs with the amount owed and
+the account, and the team records the transfer reference after sending the money. No automated bank transfers yet.
+
+Known limits (honest list): there is no photo upload, notifications, or terms and privacy pages yet.
 
 ## Defaults I picked (change any of them)
 
@@ -49,11 +53,11 @@ Nigeria-wide launch. The build supports both: areas are data, so a campus-only p
 
 1. Onboard the first real artisans (the ~10 who said yes) and verify them from `/admin`.
 2. Paystack test key on Vercel, then a live key after the business account is verified. Set the webhook URL.
-3. Payouts: collect artisan bank details and pay out through Paystack Transfers.
+3. Automate payouts through Paystack Transfers (bank details and a manual payout tracker already exist).
 4. Terms of service and privacy policy (needed before taking real money; NDPA applies). Needs a lawyer's review.
 5. Photo upload for portfolios (Vercel Blob or Cloudflare R2).
 6. Notifications (WhatsApp or SMS) when a request or quote arrives.
-7. Row locking on writes; drop the unused `public.*` tables from `db/migrations/0001_init.sql`.
+7. Drop the unused `public.*` tables from `db/migrations/0001_init.sql` (needs the owner's OK).
 
 ## Run it
 

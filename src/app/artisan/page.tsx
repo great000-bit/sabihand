@@ -9,6 +9,49 @@ import { SignedInOnly } from "@/components/gate";
 import { Button, Card, Chip, ErrorNote, Field, LinkButton, PageHeader, VerifiedBadge, inputCls } from "@/components/ui";
 import { artisanPayoutKobo, formatNaira } from "@/lib/money";
 import { ratingSummary } from "@/lib/reviews";
+import { BANKS } from "@/lib/catalog";
+import type { Artisan } from "@/lib/types";
+
+function PayoutAccount({ me }: { me: Artisan }) {
+  const { act, busy } = useStore();
+  const [open, setOpen] = useState(!me.bank);
+  const [f, setF] = useState({ bankName: me.bank?.bankName ?? "", accountNumber: me.bank?.accountNumber ?? "", accountName: me.bank?.accountName ?? "" });
+  const [err, setErr] = useState<string | null>(null);
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
+  return (
+    <Card className="p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-extrabold">Payout account</h2>
+          <p className="text-slate">{me.bank ? `${me.bank.bankName} · ${me.bank.accountName} · ••••${me.bank.accountNumber.slice(-4)}` : "Add the bank account where your earnings are paid."}</p>
+        </div>
+        {me.bank && !open && <Button variant="ghost" onClick={() => setOpen(true)}>Change</Button>}
+      </div>
+      {open && (
+        <form
+          className="mt-5 grid gap-4 sm:grid-cols-3"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const error = await act(() => actions.saveBankDetails(me.id, f));
+            setErr(error);
+            if (!error) setOpen(false);
+          }}
+        >
+          <Field label="Bank">
+            <input list="banks" value={f.bankName} onChange={set("bankName")} className={inputCls} required maxLength={60} />
+            <datalist id="banks">{BANKS.map((b) => <option key={b} value={b} />)}</datalist>
+          </Field>
+          <Field label="Account number"><input inputMode="numeric" value={f.accountNumber} onChange={set("accountNumber")} className={inputCls} required maxLength={14} /></Field>
+          <Field label="Account name"><input value={f.accountName} onChange={set("accountName")} className={inputCls} required maxLength={80} /></Field>
+          <div className="space-y-3 sm:col-span-3">
+            <ErrorNote message={err} />
+            <Button type="submit" disabled={busy}>Save account</Button>
+          </div>
+        </form>
+      )}
+    </Card>
+  );
+}
 
 function Dashboard() {
   const { state, me, act, busy } = useStore();
@@ -30,6 +73,7 @@ function Dashboard() {
   const done = jobs.filter((b) => !isOpen(b.status));
   const mine = state.payments.filter((p) => jobs.some((b) => b.id === p.bookingId));
   const released = mine.filter((p) => p.status === "released").reduce((s, p) => s + artisanPayoutKobo(p.amountKobo), 0);
+  const paidOut = mine.filter((p) => p.payout).reduce((s, p) => s + artisanPayoutKobo(p.amountKobo), 0);
   const held = mine.filter((p) => p.status === "held").reduce((s, p) => s + artisanPayoutKobo(p.amountKobo), 0);
   const reviews = state.reviews.filter((r) => r.artisanId === me.id);
   const { count, average } = ratingSummary(reviews);
@@ -53,7 +97,13 @@ function Dashboard() {
         <Card className="p-5"><p className="text-sm font-bold text-muted">Held for you</p><p className="font-display text-3xl font-extrabold sm:text-4xl">{formatNaira(held)}</p></Card>
         <Card className="bg-midnight p-5 text-white"><p className="text-sm font-bold text-gold">Earned</p><p className="font-display text-3xl font-extrabold sm:text-4xl">{formatNaira(released)}</p></Card>
       </div>
-      {released > 0 && <p className="-mt-6 text-sm text-muted">Earnings are after the Sabihand commission. The Sabihand team arranges payout to your bank account.</p>}
+      {released > 0 && (
+        <p className="-mt-6 text-sm text-muted">
+          Earnings are after the Sabihand commission. {formatNaira(paidOut)} has been paid to your bank so far.
+          {released > paidOut && !me.bank && " Add your payout account below so the Sabihand team can pay the rest."}
+        </p>
+      )}
+      <PayoutAccount me={me} />
 
       {v.status !== "verified" && (
         <Card className="flex flex-wrap items-center justify-between gap-4 border-gold/50 bg-gold-soft p-6">

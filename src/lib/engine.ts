@@ -203,6 +203,26 @@ export function decideVerification(state: AppState, artisanId: string, decision:
   return { ...state, artisans: replace(state.artisans, { ...a, verification }) };
 }
 
+export function saveBankDetails(state: AppState, artisanId: string, bank: { bankName: string; accountNumber: string; accountName: string }, ctx: Ctx): AppState {
+  const a = mustFind(state.artisans, artisanId, "Artisan");
+  if (a.ownerId !== ctx.user.id) throw new Error(DENIED);
+  const accountNumber = bank.accountNumber.replace(/\s/g, "");
+  if (!bank.bankName.trim()) throw new Error("Choose your bank.");
+  if (!/^\d{10}$/.test(accountNumber)) throw new Error("An account number has 10 digits.");
+  if (bank.accountName.trim().length < 3) throw new Error("Enter the account name exactly as your bank shows it.");
+  return { ...state, artisans: replace(state.artisans, { ...a, bank: { bankName: bank.bankName.trim(), accountNumber, accountName: bank.accountName.trim() } }) };
+}
+
+/** Admin records that an artisan's share of a released payment was sent to their bank. */
+export function markPaidOut(state: AppState, paymentId: string, reference: string, ctx: Ctx): AppState {
+  if (!ctx.user.isAdmin) throw new Error(DENIED);
+  const p = mustFind(state.payments, paymentId, "Payment");
+  if (p.status !== "released") throw new Error("Only a released payment can be paid out.");
+  if (p.payout) throw new Error("This payment was already paid out.");
+  if (!reference.trim()) throw new Error("Enter the transfer reference from your bank or Paystack.");
+  return { ...state, payments: replace(state.payments, { ...p, payout: { paidAt: ctx.now, reference: reference.trim() } }) };
+}
+
 export function registerArtisan(
   state: AppState,
   input: { name: string; businessName: string; phone: string; trade: Trade; areaIds: string[]; bio: string; availability: string; service: { title: string; minNaira: number; maxNaira: number | null } },
