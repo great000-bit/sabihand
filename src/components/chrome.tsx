@@ -58,6 +58,8 @@ function AccountMenu() {
             role="menuitem"
             onClick={async () => {
               await authClient.signOut();
+              // Full reload on purpose: clears every piece of signed-in state the server rendered.
+              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
               window.location.href = "/";
             }}
             className="mt-1 w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-alert hover:bg-alert-soft"
