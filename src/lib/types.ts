@@ -1,7 +1,7 @@
 // Core domain types. Money is always an integer number of kobo (₦1 = 100 kobo).
 
 export type Trade = "plumbing" | "electrical" | "tailoring" | "carpentry";
-export type City = "Lagos" | "Abuja";
+export type City = "Lagos" | "Abuja" | "Port Harcourt";
 export type Role = "customer" | "artisan" | "admin";
 
 export interface Area {

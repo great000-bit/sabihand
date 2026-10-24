@@ -17,7 +17,7 @@ export default function Home() {
       <section className="grid-tex relative overflow-hidden rounded-[2rem] bg-midnight px-6 py-12 text-white sm:px-12 sm:py-16">
         <Image src="/brand/hand-gold.svg" alt="" width={371} height={485} unoptimized aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-[130%] w-auto opacity-[0.12]" />
         <div className="relative max-w-2xl">
-          <p className="mb-4 text-sm font-bold uppercase tracking-widest text-gold">Lagos and Abuja first, then all of Nigeria</p>
+          <p className="mb-4 text-sm font-bold uppercase tracking-widest text-gold">Lagos, Abuja and Port Harcourt first, then all of Nigeria</p>
           <h1 className="text-5xl font-extrabold leading-[1.02] sm:text-7xl">
             Trusted hands, <span className="text-gold">near you.</span>
           </h1>

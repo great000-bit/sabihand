@@ -19,9 +19,17 @@ export const AREAS: Area[] = [
   { id: "abuja-gwarinpa", city: "Abuja", name: "Gwarinpa" },
   { id: "abuja-gwagwalada", city: "Abuja", name: "Gwagwalada (near UniAbuja)" },
   { id: "abuja-kubwa", city: "Abuja", name: "Kubwa" },
+  { id: "ph-gra", city: "Port Harcourt", name: "Old GRA" },
+  { id: "ph-rumuokoro", city: "Port Harcourt", name: "Rumuokoro" },
+  { id: "ph-choba", city: "Port Harcourt", name: "Choba (near UNIPORT)" },
+  { id: "ph-rumuola", city: "Port Harcourt", name: "Rumuola" },
+  { id: "ph-transamadi", city: "Port Harcourt", name: "Trans-Amadi" },
 ];
 
-export const CITIES = ["Lagos", "Abuja"] as const;
+export const CITIES = ["Lagos", "Abuja", "Port Harcourt"] as const;
+
+/** State each launch city sits in, for labels. */
+export const CITY_STATE: Record<(typeof CITIES)[number], string> = { Lagos: "Lagos State", Abuja: "FCT", "Port Harcourt": "Rivers State" };
 
 export function areaById(id: string): Area | undefined {
   return AREAS.find((a) => a.id === id);
@@ -73,6 +81,10 @@ export const SEED_ARTISANS: Artisan[] = [
   art("a10", "Kunle F.", "Kunle Woodworks", "carpentry", ["lagos-yaba", "lagos-surulere", "lagos-ikeja"], "Doors, wardrobes, shelves and furniture repairs.", "Mon to Sat", [["Repair a door or lock", 4000, 12000], ["Build a wardrobe", 80000, null], ["Fix a wobbly table or chair", 3000, 8000]], ["Fitted wardrobe", "Door frame repair", "Study desk"], { status: "verified", checks: ["phone", "id", "address"] }),
   art("a11", "Peter E.", "Peter Carpentry", "carpentry", ["abuja-gwarinpa", "abuja-kubwa", "abuja-wuse"], "Furniture, kitchen cabinets and door fittings.", "Weekdays and Saturday", [["Repair a door or lock", 4000, 14000], ["Kitchen cabinet repair", 10000, 40000]], ["Cabinet refit", "Bed frame"], { status: "pending", checks: [] }),
   art("a12", "Ngozi U.", "Ngozi Interiors & Carpentry", "carpentry", ["lagos-lekki", "lagos-akoka"], "Shelving, TV units and custom furniture for apartments.", "By appointment", [["Mount shelves", 5000, 15000], ["TV unit (custom)", 60000, null]], ["Floating shelves", "TV console"], { status: "unverified" }),
+  art("a13", "Tamuno J.", "Tamuno Plumbing Services", "plumbing", ["ph-gra", "ph-rumuokoro", "ph-rumuola"], "Pipe repairs, tank and borehole connections for homes and offices.", "Mon to Sat, 8am to 6pm", [["Fix a leaking tap", 5000, 12000], ["Borehole and tank connection", 15000, 40000]], ["Overhead tank install", "Bathroom re-pipe"], { status: "verified", checks: ["phone", "id", "address"] }),
+  art("a14", "Ebere W.", "Ebere Power & Wiring", "electrical", ["ph-choba", "ph-rumuokoro", "ph-transamadi"], "House wiring, inverter installs and fault finding. Student rooms near UNIPORT welcome.", "Weekdays, evenings by arrangement", [["Replace a socket or switch", 3000, 8000], ["Install an inverter", 20000, 60000], ["Fault finding", 5000, 15000]], ["Inverter install", "Room rewiring"], { status: "verified", checks: ["phone", "id"] }),
+  art("a15", "Ibinabo K.", "Ibinabo Stitches", "tailoring", ["ph-gra", "ph-choba", "ph-rumuola"], "Alterations, native wear and school uniforms.", "Mon to Sat, 9am to 7pm", [["Hem or take in", 1500, 3500], ["Native wear (full outfit)", 22000, 70000]], ["Native set", "Uniform alterations"], { status: "pending", checks: [] }),
+  art("a16", "Sunny O.", "Sunny Woodworks", "carpentry", ["ph-transamadi", "ph-rumuokoro", "ph-gra"], "Doors, wardrobes, shelves and furniture repairs.", "Mon to Sat", [["Repair a door or lock", 4000, 12000], ["Build a wardrobe", 75000, null]], ["Fitted wardrobe", "Door frame repair"], { status: "unverified" }),
 ];
 
 const CUSTOMER = { id: "c-demo", name: "Ada (demo customer)" };
@@ -113,7 +125,7 @@ export const SEED_BOOKINGS: Booking[] = [
   },
 ];
 
-export const STATE_VERSION = 1;
+export const STATE_VERSION = 2;
 
 export function initialState(): AppState {
   return {

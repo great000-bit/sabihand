@@ -13,7 +13,7 @@ create type payment_status as enum ('held', 'released', 'refunded');
 
 create table areas (
   id text primary key,
-  city text not null check (city in ('Lagos', 'Abuja')),
+  city text not null check (city in ('Lagos', 'Abuja', 'Port Harcourt')),
   name text not null,
   note text
 );

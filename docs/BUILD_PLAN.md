@@ -17,7 +17,7 @@ so moving to a real backend means re-implementing the same functions on the serv
 
 | Decision | Default | Where |
 | --- | --- | --- |
-| Launch | Lagos + Abuja, city by city; first areas near universities (Akoka, Gwagwalada) | `src/lib/seed.ts` |
+| Launch | Lagos, Abuja and Port Harcourt (Rivers State), city by city; first areas near universities (Akoka, Gwagwalada, Choba) | `src/lib/seed.ts` |
 | Trades | Plumber, electrician, tailor, carpenter | `src/lib/seed.ts` |
 | Commission | 10% of the job, taken from the artisan payout | `COMMISSION_BPS` in `src/lib/money.ts` |
 | Payment | Demo provider only. Paystack is the proposed real provider | `payAndHold` in engine |

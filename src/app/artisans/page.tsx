@@ -30,7 +30,7 @@ function Results() {
   }
 
   const tradeLabel = trade ? TRADES.find((t) => t.id === trade)?.plural : "Artisans";
-  const where = area.startsWith("city:") ? area.slice(5) : area ? areaById(area)?.name : "Lagos and Abuja";
+  const where = area.startsWith("city:") ? area.slice(5) : area ? areaById(area)?.name : "Lagos, Abuja and Port Harcourt";
 
   return (
     <div className="space-y-6">
