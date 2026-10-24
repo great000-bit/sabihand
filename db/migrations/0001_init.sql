@@ -1,9 +1,11 @@
--- Sabihand MVP schema. NOT applied to any live project yet; the demo app runs on
--- localStorage. Money is integer kobo everywhere. Run in a fresh Supabase project.
+-- Sabihand schema for Neon Postgres. Money is integer kobo everywhere.
+-- Access control lives in server code (src/lib/engine.ts rules plus per-request
+-- role checks), not in row level security, because Neon has no built-in auth.users.
+-- Sign-in provider is still to be chosen; profiles.auth_id links to it.
 
-create type trade as enum ('plumber', 'electrician', 'tailor', 'carpenter');
+create type trade as enum ('plumbing', 'electrical', 'tailoring', 'carpentry');
 create type app_role as enum ('customer', 'artisan', 'admin');
-create type verification_check as enum ('phone', 'id', 'address', 'referee', 'work_sample');
+create type verification_check as enum ('phone', 'id', 'address', 'guarantor', 'work_sample');
 create type verification_status as enum ('unverified', 'pending', 'verified', 'rejected');
 create type booking_status as enum (
   'pending_response', 'accepted', 'declined', 'awaiting_payment', 'confirmed',
@@ -19,7 +21,8 @@ create table areas (
 );
 
 create table profiles (
-  id uuid primary key references auth.users on delete cascade,
+  id uuid primary key default gen_random_uuid(),
+  auth_id text unique,
   role app_role not null default 'customer',
   full_name text not null,
   phone text,
@@ -132,59 +135,16 @@ create table reports (
   created_at timestamptz not null default now()
 );
 
--- Row level security. Status moves and payments must go through server code
--- (service role) so the booking rules in src/lib/engine.ts are enforced once.
-alter table profiles enable row level security;
-alter table artisans enable row level security;
-alter table artisan_areas enable row level security;
-alter table service_prices enable row level security;
-alter table portfolio_items enable row level security;
-alter table verification_checks enable row level security;
-alter table bookings enable row level security;
-alter table booking_events enable row level security;
-alter table payments enable row level security;
-alter table reviews enable row level security;
-alter table reports enable row level security;
-alter table areas enable row level security;
-
-create or replace function is_admin() returns boolean
-language sql stable security definer set search_path = public as $$
-  select exists (select 1 from profiles where id = auth.uid() and role = 'admin');
-$$;
-
-create policy areas_read on areas for select using (true);
-create policy profiles_self on profiles for select using (id = auth.uid() or is_admin());
-create policy profiles_update_self on profiles for update using (id = auth.uid())
-  with check (id = auth.uid() and role = (select role from profiles where id = auth.uid()));
-
-create policy artisans_public_read on artisans for select using (published or profile_id = auth.uid() or is_admin());
-create policy artisans_owner_write on artisans for all using (profile_id = auth.uid())
-  with check (profile_id = auth.uid() and verification_status in ('unverified', 'pending'));
-
-create policy artisan_areas_read on artisan_areas for select using (true);
-create policy service_prices_read on service_prices for select using (true);
-create policy portfolio_read on portfolio_items for select using (true);
-create policy checks_read on verification_checks for select using (true);
-
-create policy bookings_parties on bookings for select using (
-  customer_id = auth.uid()
-  or artisan_id in (select id from artisans where profile_id = auth.uid())
-  or is_admin()
-);
-create policy bookings_customer_insert on bookings for insert
-  with check (customer_id = auth.uid() and status = 'pending_response');
-
-create policy events_parties on booking_events for select using (
-  booking_id in (select id from bookings)
-);
-create policy payments_parties on payments for select using (
-  booking_id in (select id from bookings)
-);
-create policy reviews_public on reviews for select using (not hidden or is_admin());
-create policy reports_own on reports for select using (reporter_id = auth.uid() or is_admin());
-create policy reports_insert on reports for insert with check (reporter_id = auth.uid());
-
 create index on artisans (trade) where published;
 create index on artisan_areas (area_id);
 create index on bookings (customer_id);
 create index on bookings (artisan_id);
+
+insert into areas (id, city, name) values
+  ('lagos-yaba','Lagos','Yaba'),('lagos-akoka','Lagos','Akoka (near UNILAG)'),('lagos-surulere','Lagos','Surulere'),
+  ('lagos-ikeja','Lagos','Ikeja'),('lagos-lekki','Lagos','Lekki'),
+  ('abuja-wuse','Abuja','Wuse'),('abuja-garki','Abuja','Garki'),('abuja-gwarinpa','Abuja','Gwarinpa'),
+  ('abuja-gwagwalada','Abuja','Gwagwalada (near UniAbuja)'),('abuja-kubwa','Abuja','Kubwa'),
+  ('ph-gra','Port Harcourt','Old GRA'),('ph-rumuokoro','Port Harcourt','Rumuokoro'),
+  ('ph-choba','Port Harcourt','Choba (near UNIPORT)'),('ph-rumuola','Port Harcourt','Rumuola'),
+  ('ph-transamadi','Port Harcourt','Trans-Amadi');

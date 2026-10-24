@@ -39,9 +39,9 @@ Nigeria-wide launch. The build supports both: areas are data, so a campus-only p
 
 ## Next steps
 
-1. Create a Supabase project, apply `supabase/migrations/0001_init.sql`, add phone/email sign-in.
+1. Database: Neon project `sabihand` (aws-us-east-2) already has the schema from `db/migrations/0001_init.sql`. Next: add DATABASE_URL to Vercel, pick a sign-in provider (phone/email) and wire it to `profiles.auth_id`.
 2. Server actions that call the engine and write to Postgres; keep the status moves server-side only.
-3. Real photo upload for portfolios (Supabase Storage).
+3. Real photo upload for portfolios (Vercel Blob or Cloudflare R2).
 4. Paystack test-mode integration behind the same `payAndHold` / `release` functions.
 5. Replace the 12 sample artisans with real ones the team has onboarded; remove the demo banner when real.
 6. Notifications (WhatsApp or SMS) when a request or quote arrives.
