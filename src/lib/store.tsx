@@ -1,89 +1,48 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useSyncExternalStore, type ReactNode } from "react";
-import type { AppState, Role } from "./types";
-import { initialState, STATE_VERSION } from "./seed";
-import type { Ctx } from "./engine";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import type { AppState, Artisan, Viewer } from "./types";
+import { myArtisan } from "./access";
 
-const KEY = "sabihand.demo.v1";
-const SERVER_STATE = initialState();
-
-let current: AppState | null = null;
-const listeners = new Set<() => void>();
-
-function load(): AppState {
-  if (typeof window === "undefined") return SERVER_STATE;
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as AppState;
-      if (parsed.version === STATE_VERSION) return parsed;
-    }
-  } catch {
-    /* storage blocked or corrupt: fall back to seed data */
-  }
-  return initialState();
-}
-
-function getSnapshot(): AppState {
-  if (current === null) current = load();
-  return current;
-}
-
-function set(next: AppState) {
-  current = next;
-  try {
-    window.localStorage.setItem(KEY, JSON.stringify(next));
-  } catch {
-    /* ignore: demo data just will not persist */
-  }
-  listeners.forEach((l) => l());
-}
-
-function subscribe(l: () => void) {
-  listeners.add(l);
-  return () => {
-    listeners.delete(l);
-  };
-}
-
-export function makeCtx(): Ctx {
-  return {
-    now: new Date().toISOString(),
-    id: (p) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
-  };
+export interface Config {
+  paymentsEnabled: boolean;
+  /** False when the database could not be reached, so pages can say so instead of showing an empty marketplace. */
+  dataAvailable: boolean;
 }
 
 interface Api {
+  /** Exactly what the signed-in person is allowed to see, loaded on the server for this request. */
   state: AppState;
-  /** Run an engine action. Returns an error message, or null on success. */
-  run: (fn: (s: AppState, ctx: Ctx) => AppState) => string | null;
-  setRole: (r: Role) => void;
-  setActiveArtisan: (id: string) => void;
-  reset: () => void;
+  viewer: Viewer | null;
+  /** The viewer's own artisan profile, if they have one. */
+  me: Artisan | null;
+  config: Config;
+  busy: boolean;
+  /** Run a server action. Resolves to an error message for the person, or null on success. */
+  act: (fn: () => Promise<{ error: string | null }>) => Promise<string | null>;
 }
 
-const Ctx_ = createContext<Api | null>(null);
+const Ctx = createContext<Api | null>(null);
 
-export function StoreProvider({ children }: { children: ReactNode }) {
-  const state = useSyncExternalStore(subscribe, getSnapshot, () => SERVER_STATE);
-  const run = useCallback((fn: (s: AppState, ctx: Ctx) => AppState) => {
+export function StoreProvider({ state, viewer, config, children }: { state: AppState; viewer: Viewer | null; config: Config; children: ReactNode }) {
+  const [busy, setBusy] = useState(false);
+  const act = useCallback(async (fn: () => Promise<{ error: string | null }>) => {
+    setBusy(true);
     try {
-      set(fn(getSnapshot(), makeCtx()));
-      return null;
-    } catch (err) {
-      return err instanceof Error ? err.message : "Something went wrong";
+      return (await fn()).error;
+    } catch {
+      return "We could not reach Sabihand. Check your connection and try again.";
+    } finally {
+      setBusy(false);
     }
   }, []);
-  const setRole = useCallback((role: Role) => set({ ...getSnapshot(), role }), []);
-  const setActiveArtisan = useCallback((id: string) => set({ ...getSnapshot(), activeArtisanId: id }), []);
-  const reset = useCallback(() => set(initialState()), []);
-  const api = useMemo(() => ({ state, run, setRole, setActiveArtisan, reset }), [state, run, setRole, setActiveArtisan, reset]);
-  return <Ctx_.Provider value={api}>{children}</Ctx_.Provider>;
+  const me = useMemo(() => myArtisan(state.artisans, viewer), [state.artisans, viewer]);
+  const api = useMemo(() => ({ state, viewer, me, config, busy, act }), [state, viewer, me, config, busy, act]);
+  return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
 }
 
 export function useStore(): Api {
-  const v = useContext(Ctx_);
+  const v = useContext(Ctx);
   if (!v) throw new Error("useStore must be used inside StoreProvider");
   return v;
 }

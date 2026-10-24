@@ -1,8 +1,10 @@
 import { AuthForm } from "@/components/auth-form";
+import { safeNext } from "@/lib/auth/next";
 import { signUpWithEmail } from "./actions";
 
-export const metadata = { title: "Create account · Sabihand" };
+export const metadata = { title: "Create account" };
 
-export default function SignUpPage() {
-  return <AuthForm mode="sign-up" action={signUpWithEmail} />;
+export default async function Page({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const { next } = await searchParams;
+  return <AuthForm mode="sign-up" action={signUpWithEmail} next={safeNext(next)} />;
 }

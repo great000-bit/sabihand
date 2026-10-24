@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
-import * as eng from "@/lib/engine";
-import { areaById, tradeById } from "@/lib/seed";
+import * as actions from "@/server/actions";
+import { areaById, tradeById } from "@/lib/catalog";
 import { formatNaira } from "@/lib/money";
 import type { VerificationCheck } from "@/lib/types";
-import { Button, Card, Chip, Empty, ErrorNote, Field, StatusPill, VerifiedBadge, inputCls } from "@/components/ui";
+import { SignedInOnly } from "@/components/gate";
+import { Button, Card, Chip, Empty, ErrorNote, Field, PageHeader, StatusPill, VerifiedBadge, inputCls } from "@/components/ui";
 
 const CHECKS: { id: VerificationCheck; label: string }[] = [
   { id: "phone", label: "Phone number confirmed" },
@@ -17,7 +18,7 @@ const CHECKS: { id: VerificationCheck; label: string }[] = [
 ];
 
 function VerificationCard({ id }: { id: string }) {
-  const { state, run } = useStore();
+  const { state, act, busy } = useStore();
   const a = state.artisans.find((x) => x.id === id)!;
   const [checks, setChecks] = useState<VerificationCheck[]>([]);
   const [note, setNote] = useState("");
@@ -28,6 +29,7 @@ function VerificationCard({ id }: { id: string }) {
         <div>
           <h3 className="text-lg font-extrabold">{a.businessName}</h3>
           <p className="text-sm text-slate">{tradeById(a.trade).label} · {a.name} · {a.areaIds.map((i) => areaById(i)?.name).join(", ")}</p>
+          <p className="text-sm text-slate">Phone: <b>{a.phone}</b></p>
         </div>
         <VerifiedBadge v={a.verification} />
       </div>
@@ -44,18 +46,26 @@ function VerificationCard({ id }: { id: string }) {
       <div className="mt-3 space-y-2">
         <ErrorNote message={err} />
         <div className="flex gap-2">
-          <Button variant="primary" onClick={() => setErr(run((s, c) => eng.decideVerification(s, a.id, "verified", checks, note, c)))}>Approve</Button>
-          <Button variant="danger" onClick={() => setErr(run((s, c) => eng.decideVerification(s, a.id, "rejected", [], note, c)))}>Reject</Button>
+          <Button variant="primary" disabled={busy} onClick={async () => setErr(await act(() => actions.decideVerification(a.id, "verified", checks, note)))}>Approve</Button>
+          <Button variant="danger" disabled={busy} onClick={async () => setErr(await act(() => actions.decideVerification(a.id, "rejected", [], note)))}>Reject</Button>
         </div>
       </div>
     </Card>
   );
 }
 
-export default function Admin() {
-  const { state, run, setRole } = useStore();
-  if (state.role !== "admin") {
-    return <Empty title="Admin area"><Button variant="dark" onClick={() => setRole("admin")}>Switch to admin view</Button></Empty>;
+export default function AdminPage() {
+  return (
+    <SignedInOnly title="Sign in to the admin area">
+      <Admin />
+    </SignedInOnly>
+  );
+}
+
+function Admin() {
+  const { state, viewer, act, busy } = useStore();
+  if (!viewer?.isAdmin) {
+    return <Empty title="This area is for the Sabihand team">Your account does not have admin access.</Empty>;
   }
   const pending = state.artisans.filter((a) => a.verification.status === "pending");
   const openReports = state.reports.filter((r) => !r.resolvedAt);
@@ -74,16 +84,16 @@ export default function Admin() {
 
   return (
     <div className="space-y-10">
-      <h1 className="text-4xl font-extrabold">Admin</h1>
+      <PageHeader title="Admin">Verification, reports and a live view of the marketplace.</PageHeader>
       <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {stats.map(([l, v]) => (
           <Card key={l} className="p-4"><p className="text-xs font-bold uppercase tracking-wide text-muted">{l}</p><p className="font-display text-3xl font-extrabold">{v}</p></Card>
         ))}
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
-        <Card className="bg-midnight p-5 text-white"><p className="text-sm font-bold text-gold">Value of completed jobs (demo)</p><p className="font-display text-3xl font-extrabold">{formatNaira(gmv)}</p></Card>
-        <Card className="bg-gold p-5"><p className="text-sm font-bold">Commission earned (demo)</p><p className="font-display text-3xl font-extrabold">{formatNaira(commission)}</p></Card>
-        <Card className="p-5"><p className="text-sm font-bold text-muted">Held in escrow (demo)</p><p className="font-display text-3xl font-extrabold">{formatNaira(held)}</p></Card>
+        <Card className="bg-midnight p-5 text-white"><p className="text-sm font-bold text-gold">Value of completed jobs</p><p className="font-display text-3xl font-extrabold">{formatNaira(gmv)}</p></Card>
+        <Card className="bg-gold p-5"><p className="text-sm font-bold">Commission earned</p><p className="font-display text-3xl font-extrabold">{formatNaira(commission)}</p></Card>
+        <Card className="p-5"><p className="text-sm font-bold text-muted">Held for jobs in progress</p><p className="font-display text-3xl font-extrabold">{formatNaira(held)}</p></Card>
       </div>
 
       <section className="space-y-3">
@@ -105,8 +115,8 @@ export default function Admin() {
             {!r.resolvedAt && r.kind === "booking" && <Link href={`/requests/${r.targetId}`} className="mt-2 inline-block font-bold text-trust">Open the job to resolve →</Link>}
             {!r.resolvedAt && r.kind === "review" && (
               <div className="mt-3 flex gap-2">
-                <Button variant="danger" onClick={() => run((s, c) => eng.moderateReview(s, r.id, true, c))}>Hide review</Button>
-                <Button variant="ghost" onClick={() => run((s, c) => eng.moderateReview(s, r.id, false, c))}>Keep review</Button>
+                <Button variant="danger" disabled={busy} onClick={() => act(() => actions.moderateReview(r.id, true))}>Hide review</Button>
+                <Button variant="ghost" disabled={busy} onClick={() => act(() => actions.moderateReview(r.id, false))}>Keep review</Button>
               </div>
             )}
           </Card>

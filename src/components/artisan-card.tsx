@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Artisan } from "@/lib/types";
 import { useStore } from "@/lib/store";
-import { areaById, tradeById } from "@/lib/seed";
+import { areaById, tradeById } from "@/lib/catalog";
 import { formatPriceRange } from "@/lib/money";
 import { ratingSummary } from "@/lib/reviews";
 import { Card, Chip, VerifiedBadge } from "./ui";

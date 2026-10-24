@@ -4,21 +4,23 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
-import { areaById, tradeById } from "@/lib/seed";
+import { areaById, tradeById } from "@/lib/catalog";
 import { formatPriceRange } from "@/lib/money";
-import { createRequest } from "@/lib/engine";
+import { createRequest } from "@/server/actions";
+import { normalisePhone } from "@/lib/phone";
 import { Avatar, RatingLine } from "@/components/artisan-card";
-import { Button, Card, Chip, ErrorNote, Field, VerifiedBadge, inputCls } from "@/components/ui";
+import { Button, Card, ErrorNote, Field, LinkButton, VerifiedBadge, inputCls } from "@/components/ui";
 
 export default function ArtisanProfile() {
   const { id } = useParams<{ id: string }>();
-  const { state, run } = useStore();
+  const { state, viewer, act, busy } = useStore();
   const router = useRouter();
   const a = state.artisans.find((x) => x.id === id);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [areaId, setAreaId] = useState("");
   const [date, setDate] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   if (!a) {
@@ -34,17 +36,14 @@ export default function ArtisanProfile() {
   const selectedArea = areaId || a.areaIds[0];
   const v = a.verification;
 
-  function submit(e: React.FormEvent) {
+  const own = Boolean(viewer && a.ownerId === viewer.id);
+
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (state.role !== "customer") {
-      setError("Switch to “Viewing as: Customer” to send a request.");
-      return;
-    }
-    const before = state.bookings.length;
-    const err = run((s, ctx) => createRequest(s, { artisanId: a!.id, trade: a!.trade, areaId: selectedArea, title, description, preferredDate: date || "Flexible" }, ctx));
+    if (!normalisePhone(phone)) return setError("Enter a Nigerian mobile number the artisan can reach you on, like 0803 123 4567.");
+    const err = await act(() => createRequest({ artisanId: a!.id, areaId: selectedArea, title, description, preferredDate: date || "Flexible", phone }));
     if (err) return setError(err);
     setError(null);
-    void before;
     router.push("/requests");
   }
 
@@ -76,6 +75,14 @@ export default function ArtisanProfile() {
               <dd>{a.availability}</dd>
             </div>
           </dl>
+          {a.phone && !own && (
+            <p className="mt-4 rounded-2xl bg-midnight p-4 text-white">
+              <span className="text-sm font-bold text-gold">Contact</span>
+              <br />
+              <a href={`tel:${a.phone}`} className="font-display text-xl font-extrabold">{a.phone}</a>
+              <span className="mt-1 block text-sm text-[#c9d4ee]">Shown because you have paid for a job with {a.name.split(" ")[0]}.</span>
+            </p>
+          )}
           {v.status === "verified" ? (
             <p className="mt-4 rounded-2xl bg-verified-soft p-3 text-sm text-verified">Verified means Sabihand checked: {v.checks.join(", ")}. It does not guarantee the quality of any job.</p>
           ) : (
@@ -94,22 +101,6 @@ export default function ArtisanProfile() {
             ))}
           </ul>
           <p className="mt-3 text-sm text-muted">These are typical ranges. You get a written quote to accept before any payment.</p>
-        </Card>
-
-        <Card className="p-6 sm:p-8">
-          <h2 className="mb-4 text-2xl font-extrabold">Portfolio</h2>
-          {a.portfolio.length === 0 ? (
-            <p className="text-slate">No photos of past work yet.</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {a.portfolio.map((p) => (
-                <figure key={p.id}>
-                  <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-gradient-to-br from-[#dce4f7] to-[#f0f3fa] text-sm font-semibold text-muted">Sample photo</div>
-                  <figcaption className="mt-1.5 text-sm font-semibold">{p.caption}</figcaption>
-                </figure>
-              ))}
-            </div>
-          )}
         </Card>
 
         <Card className="p-6 sm:p-8">
@@ -135,34 +126,48 @@ export default function ArtisanProfile() {
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <Card className="p-6">
           <h2 className="text-2xl font-extrabold">Request a quote</h2>
-          <p className="mb-4 mt-1 text-sm text-slate">Tell {a.name.split(" ")[0]} what you need. You pay nothing yet.</p>
-          <form onSubmit={submit} className="space-y-4">
-            <Field label="What needs doing?">
-              <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputCls} placeholder="e.g. Kitchen tap keeps dripping" />
-            </Field>
-            <Field label="Details" hint="Where in the house, what you have tried, any photos you will share later.">
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className={inputCls} placeholder="Describe the job so the artisan can give a fair price" />
-            </Field>
-            <Field label="Your area">
-              <select value={selectedArea} onChange={(e) => setAreaId(e.target.value)} className={inputCls}>
-                {a.areaIds.map((i) => (
-                  <option key={i} value={i}>
-                    {areaById(i)?.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Preferred date (optional)">
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
-            </Field>
-            <ErrorNote message={error} />
-            <Button type="submit" className="w-full">
-              Send request
-            </Button>
-            <p className="text-center text-xs text-muted">
-              <Chip>Demo</Chip> No real message is sent in demo mode.
-            </p>
-          </form>
+          {own ? (
+            <p className="mt-3 text-slate">This is your own profile. Customers will see this page and can send you requests.</p>
+          ) : !viewer ? (
+            <>
+              <p className="mb-5 mt-1 text-slate">Create a free account to send {a.name.split(" ")[0]} your request. You pay nothing until you accept a quote.</p>
+              <div className="grid gap-3">
+                <LinkButton href={`/auth/sign-up?next=${encodeURIComponent(`/artisans/${a.id}`)}`}>Create an account</LinkButton>
+                <LinkButton href={`/auth/sign-in?next=${encodeURIComponent(`/artisans/${a.id}`)}`} variant="ghost">Sign in</LinkButton>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mb-4 mt-1 text-sm text-slate">Tell {a.name.split(" ")[0]} what you need. You pay nothing yet.</p>
+              <form onSubmit={submit} className="space-y-4">
+                <Field label="What needs doing?">
+                  <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputCls} placeholder="e.g. Kitchen tap keeps dripping" maxLength={120} required />
+                </Field>
+                <Field label="Details" hint="Where in the house, what you have tried.">
+                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className={inputCls} placeholder="Describe the job so the artisan can give a fair price" maxLength={2000} required />
+                </Field>
+                <Field label="Your area">
+                  <select value={selectedArea} onChange={(e) => setAreaId(e.target.value)} className={inputCls}>
+                    {a.areaIds.map((i) => (
+                      <option key={i} value={i}>
+                        {areaById(i)?.name}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Preferred date (optional)">
+                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
+                </Field>
+                <Field label="Your phone number" hint="Shared with the artisan only after you pay.">
+                  <input type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} placeholder="0803 123 4567" required />
+                </Field>
+                <ErrorNote message={error} />
+                <Button type="submit" className="w-full" disabled={busy}>
+                  {busy ? "Sending..." : "Send request"}
+                </Button>
+              </form>
+            </>
+          )}
         </Card>
       </aside>
     </div>

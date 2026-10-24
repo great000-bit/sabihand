@@ -1,5 +1,5 @@
 import type { AppState, Artisan, Trade } from "./types";
-import { areaById } from "./seed";
+import { areaById } from "./catalog";
 import { ratingSummary } from "./reviews";
 
 export type SortKey = "relevance" | "price_low" | "rating";
