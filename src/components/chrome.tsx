@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authClient } from "@/lib/auth/client";
 import { useStore } from "@/lib/store";
 import type { Role } from "@/lib/types";
 
@@ -29,6 +30,26 @@ const NAV: Record<Role, { href: string; label: string }[]> = {
   ],
   admin: [{ href: "/admin", label: "Admin" }],
 };
+
+function AccountMenu() {
+  const { data } = authClient.useSession();
+  const user = data?.user;
+  if (!user) {
+    return (
+      <Link href="/auth/sign-in" className="min-h-10 rounded-full border-2 border-line px-4 py-2 text-sm font-bold text-midnight hover:border-midnight">
+        Sign in
+      </Link>
+    );
+  }
+  return (
+    <span className="flex items-center gap-2 text-sm">
+      <span className="hidden max-w-32 truncate font-bold text-midnight sm:inline">{user.name}</span>
+      <button onClick={() => authClient.signOut()} className="min-h-10 rounded-full px-3 font-semibold text-muted hover:text-ink">
+        Sign out
+      </button>
+    </span>
+  );
+}
 
 export function Header() {
   const { state, setRole, reset } = useStore();
@@ -62,6 +83,7 @@ export function Header() {
           <button onClick={reset} className="hidden min-h-10 rounded-full px-3 text-sm font-semibold text-muted hover:text-ink sm:block" title="Reset all demo data">
             Reset demo
           </button>
+          <AccountMenu />
         </div>
       </div>
     </header>
