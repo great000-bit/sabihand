@@ -30,7 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   let dataAvailable = false;
   if (dbConfigured) {
     try {
-      state = visibleTo(await loadAll(), viewer);
+      state = visibleTo((await loadAll()).state, viewer);
       dataAvailable = true;
     } catch (e) {
       console.error("could not load marketplace data", e);

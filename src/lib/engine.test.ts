@@ -199,6 +199,27 @@ describe("artisan profiles and verification", () => {
   });
 });
 
+describe("payouts", () => {
+  const bank = { bankName: "GTBank", accountNumber: "0123 456 789", accountName: "Tunde Bello" };
+  it("lets only the owner save valid bank details", () => {
+    const s = e.saveBankDetails(empty(), "a1", bank, as(owner));
+    expect(s.artisans[0].bank).toEqual({ bankName: "GTBank", accountNumber: "0123456789", accountName: "Tunde Bello" });
+    expect(() => e.saveBankDetails(empty(), "a1", bank, as(stranger))).toThrow(/cannot do that/);
+    expect(() => e.saveBankDetails(empty(), "a1", { ...bank, accountNumber: "123" }, as(owner))).toThrow(/10 digits/);
+  });
+  it("lets only an admin record a payout, once, and only after release", () => {
+    const { s, id } = bookedJob();
+    const pid = s.payments[0].id;
+    expect(() => e.markPaidOut(s, pid, "TRF-1", as(admin))).toThrow(/released/);
+    const released = e.confirmDone(e.startJob(s, id, as(owner)), id, as(customer));
+    expect(() => e.markPaidOut(released, pid, "TRF-1", as(owner))).toThrow(/cannot do that/);
+    expect(() => e.markPaidOut(released, pid, " ", as(admin))).toThrow(/reference/);
+    const paid = e.markPaidOut(released, pid, "TRF-1", as(admin));
+    expect(paid.payments[0].payout).toMatchObject({ reference: "TRF-1" });
+    expect(() => e.markPaidOut(paid, pid, "TRF-2", as(admin))).toThrow(/already/);
+  });
+});
+
 describe("search", () => {
   const list = [
     artisan({ id: "a1", businessName: "Bello Electricals", verification: { status: "verified", checks: ["phone"] } }),

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useStore } from "@/lib/store";
 import * as actions from "@/server/actions";
 import { areaById, tradeById } from "@/lib/catalog";
-import { formatNaira } from "@/lib/money";
+import { artisanPayoutKobo, formatNaira } from "@/lib/money";
 import type { VerificationCheck } from "@/lib/types";
 import { SignedInOnly } from "@/components/gate";
 import { Button, Card, Chip, Empty, ErrorNote, Field, PageHeader, StatusPill, VerifiedBadge, inputCls } from "@/components/ui";
@@ -16,6 +16,35 @@ const CHECKS: { id: VerificationCheck; label: string }[] = [
   { id: "address", label: "Address confirmed" },
   { id: "guarantor", label: "Guarantor contacted" },
 ];
+
+function PayoutCard({ id }: { id: string }) {
+  const { state, act, busy } = useStore();
+  const p = state.payments.find((x) => x.id === id)!;
+  const b = state.bookings.find((x) => x.id === p.bookingId);
+  const a = state.artisans.find((x) => x.id === b?.artisanId);
+  const [ref, setRef] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  return (
+    <Card className="p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-extrabold">{a?.businessName ?? "Artisan"} · {b?.title}</h3>
+          {a?.bank ? (
+            <p className="text-sm text-slate">{a.bank.bankName} · <b>{a.bank.accountNumber}</b> · {a.bank.accountName}</p>
+          ) : (
+            <p className="text-sm font-semibold text-alert">No bank account added yet. Ask {a?.name} to add one in their dashboard{a?.phone ? ` (${a.phone})` : ""}.</p>
+          )}
+        </div>
+        <p className="font-display text-2xl font-extrabold">{formatNaira(artisanPayoutKobo(p.amountKobo))}</p>
+      </div>
+      <div className="mt-3 flex flex-wrap items-end gap-2">
+        <div className="min-w-56 flex-1"><Field label="Transfer reference"><input value={ref} onChange={(e) => setRef(e.target.value)} className={inputCls} placeholder="From your bank or Paystack" maxLength={80} /></Field></div>
+        <Button disabled={busy || !a?.bank} onClick={async () => setErr(await act(() => actions.markPaidOut(p.id, ref)))}>Mark as paid</Button>
+      </div>
+      <div className="mt-2"><ErrorNote message={err} /></div>
+    </Card>
+  );
+}
 
 function VerificationCard({ id }: { id: string }) {
   const { state, act, busy } = useStore();
@@ -72,6 +101,7 @@ function Admin() {
   const gmv = state.payments.filter((p) => p.status === "released").reduce((s, p) => s + p.amountKobo, 0);
   const commission = state.payments.filter((p) => p.status === "released").reduce((s, p) => s + p.commissionKobo, 0);
   const held = state.payments.filter((p) => p.status === "held").reduce((s, p) => s + p.amountKobo, 0);
+  const due = state.payments.filter((p) => p.status === "released" && !p.payout);
   const completed = state.bookings.filter((b) => b.status === "completed").length;
 
   const stats = [
@@ -95,6 +125,12 @@ function Admin() {
         <Card className="bg-gold p-5"><p className="text-sm font-bold">Commission earned</p><p className="font-display text-3xl font-extrabold">{formatNaira(commission)}</p></Card>
         <Card className="p-5"><p className="text-sm font-bold text-muted">Held for jobs in progress</p><p className="font-display text-3xl font-extrabold">{formatNaira(held)}</p></Card>
       </div>
+
+      <section className="space-y-3">
+        <h2 className="text-2xl font-extrabold">Payouts due</h2>
+        <p className="text-slate">Released jobs where the artisan has not been paid yet. Send the amount (after commission) to the bank account, then record the transfer reference.</p>
+        {due.length === 0 ? <p className="text-slate">Nothing to pay out.</p> : due.map((p) => <PayoutCard key={p.id} id={p.id} />)}
+      </section>
 
       <section className="space-y-3">
         <h2 className="text-2xl font-extrabold">Verification queue</h2>

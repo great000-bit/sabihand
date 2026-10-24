@@ -54,6 +54,13 @@ describe("what each person receives", () => {
     expect(admin.reports).toHaveLength(1);
     expect(admin.reviews).toHaveLength(2);
   });
+  it("keeps bank details to the owner and the admin", () => {
+    const withBank = state({ artisans: [{ ...artisan, bank: { bankName: "GTBank", accountNumber: "0123456789", accountName: "Tunde" } }] });
+    expect(visibleTo(withBank, v("stranger")).artisans[0].bank).toBeUndefined();
+    expect(visibleTo(withBank, v("cust")).artisans[0].bank).toBeUndefined();
+    expect(visibleTo(withBank, v("owner")).artisans[0].bank?.accountNumber).toBe("0123456789");
+    expect(visibleTo(withBank, v("boss", true)).artisans[0].bank?.accountNumber).toBe("0123456789");
+  });
   it("does not leak another customer's booking", () => {
     expect(visibleTo(state(), v("other-customer")).bookings).toHaveLength(0);
   });

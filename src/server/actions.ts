@@ -7,7 +7,7 @@ import { actorOn } from "@/lib/access";
 import { nairaToKobo } from "@/lib/money";
 import type { AppState, Trade, VerificationCheck } from "@/lib/types";
 import { getViewer } from "./session";
-import { loadAll, persist } from "./repo";
+import { ConflictError, loadAll, persist, type Snapshot } from "./repo";
 import { newId } from "./ids";
 import { initializeTransaction, paystackEnabled } from "./paystack";
 
@@ -24,31 +24,39 @@ function str(v: unknown, max = 2000): string {
   return s;
 }
 
-/** Load, apply one engine function as the signed-in person, save. Engine errors are written for people and shown as is. */
+/**
+ * Load, apply one engine function as the signed-in person, save. Engine errors are written for people and shown as is.
+ * If someone else wrote to the same rows in between, the whole step is replayed on fresh data, so a stale screen
+ * can never overwrite newer work: the engine simply re-checks the rules against what is true now.
+ */
 async function mutate(fn: (s: AppState, ctx: eng.Ctx) => AppState): Promise<Result> {
   const user = await getViewer();
   if (!user) return { error: SIGN_IN };
-  let before: AppState;
-  let after: AppState;
-  try {
-    before = await loadAll();
-  } catch (e) {
-    console.error("load failed", e);
-    return { error: SAVE_FAILED };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let before: Snapshot;
+    let after: AppState;
+    try {
+      before = await loadAll();
+    } catch (e) {
+      console.error("load failed", e);
+      return { error: SAVE_FAILED };
+    }
+    try {
+      after = fn(before.state, { now: new Date().toISOString(), id: newId, user });
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : "Something went wrong." };
+    }
+    try {
+      await persist(before, after);
+    } catch (e) {
+      if (e instanceof ConflictError) continue;
+      console.error("save failed", e);
+      return { error: SAVE_FAILED };
+    }
+    revalidatePath("/", "layout");
+    return ok;
   }
-  try {
-    after = fn(before, { now: new Date().toISOString(), id: newId, user });
-  } catch (e) {
-    return { error: e instanceof Error ? e.message : "Something went wrong." };
-  }
-  try {
-    await persist(before, after);
-  } catch (e) {
-    console.error("save failed", e);
-    return { error: SAVE_FAILED };
-  }
-  revalidatePath("/", "layout");
-  return ok;
+  return { error: "That request changed while you were acting. Refresh and try again." };
 }
 
 export async function registerArtisan(i: { name: string; businessName: string; phone: string; trade: Trade; areaIds: string[]; bio: string; availability: string; service: string; minNaira: number; maxNaira: number | null }) {
@@ -93,6 +101,9 @@ export const resolveDispute = async (bookingId: string, outcome: "release" | "re
 export const submitReview = async (bookingId: string, rating: number, text: string) => mutate((s, c) => eng.submitReview(s, str(bookingId, 60), Number(rating), str(text, 1000), c));
 export const reportReview = async (reviewId: string, reason: string) => mutate((s, c) => eng.reportReview(s, str(reviewId, 60), str(reason, 1000), c));
 export const moderateReview = async (reportId: string, hide: boolean) => mutate((s, c) => eng.moderateReview(s, str(reportId, 60), hide === true, c));
+export const saveBankDetails = async (artisanId: string, b: { bankName: string; accountNumber: string; accountName: string }) =>
+  mutate((s, c) => eng.saveBankDetails(s, str(artisanId, 60), { bankName: str(b?.bankName, 60), accountNumber: str(b?.accountNumber, 20), accountName: str(b?.accountName, 80) }, c));
+export const markPaidOut = async (paymentId: string, reference: string) => mutate((s, c) => eng.markPaidOut(s, str(paymentId, 60), str(reference, 80), c));
 export const submitVerification = async (artisanId: string) => mutate((s, c) => eng.submitVerification(s, str(artisanId, 60), c));
 export const decideVerification = async (artisanId: string, decision: "verified" | "rejected", checks: VerificationCheck[], note: string) =>
   mutate((s, c) => eng.decideVerification(s, str(artisanId, 60), decision === "verified" ? "verified" : "rejected", (Array.isArray(checks) ? checks : []).filter((x) => ["phone", "id", "address", "guarantor"].includes(x)), str(note, 500), c));
@@ -104,7 +115,7 @@ export async function startPayment(bookingId: string): Promise<Result & { url?: 
   if (!paystackEnabled()) return { error: "Online payment is not switched on yet." };
   let state: AppState;
   try {
-    state = await loadAll();
+    state = (await loadAll()).state;
   } catch (e) {
     console.error("load failed", e);
     return { error: SAVE_FAILED };
