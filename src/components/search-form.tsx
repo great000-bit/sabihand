@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AREAS, CITIES, CITY_STATE, TRADES } from "@/lib/seed";
+import { AREAS, CITIES, CITY_STATE, TRADES } from "@/lib/catalog";
 import { Button, inputCls } from "./ui";
 
 export function AreaSelect({ value, onChange, id, allLabel = "Anywhere in Lagos, Abuja and Port Harcourt" }: { value: string; onChange: (v: string) => void; id?: string; allLabel?: string }) {

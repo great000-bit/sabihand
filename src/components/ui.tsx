@@ -101,3 +101,19 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
     </Card>
   );
 }
+
+export function PageHeader({ title, children, action }: { title: ReactNode; children?: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">{title}</h1>
+        {children && <p className="mt-2 max-w-2xl text-lg text-slate">{children}</p>}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+export function Eyebrow({ children, tone = "gold" }: { children: ReactNode; tone?: "gold" | "blue" }) {
+  return <p className={`mb-3 text-[13px] font-extrabold uppercase tracking-[0.14em] ${tone === "gold" ? "text-gold" : "text-trust"}`}>{children}</p>;
+}

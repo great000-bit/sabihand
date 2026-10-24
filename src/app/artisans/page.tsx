@@ -4,16 +4,16 @@ import { Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { searchArtisans, type SortKey } from "@/lib/search";
-import { TRADES, areaById } from "@/lib/seed";
+import { TRADES, areaById } from "@/lib/catalog";
 import type { Trade } from "@/lib/types";
 import { ArtisanCard } from "@/components/artisan-card";
 import { AreaSelect } from "@/components/search-form";
-import { Empty, Field, inputCls } from "@/components/ui";
+import { Empty, Field, LinkButton, PageHeader, inputCls } from "@/components/ui";
 
 function Results() {
   const sp = useSearchParams();
   const router = useRouter();
-  const { state } = useStore();
+  const { state, config } = useStore();
   const trade = (sp.get("trade") ?? "") as Trade | "";
   const area = sp.get("area") ?? "";
   const verifiedOnly = sp.get("verified") === "1";
@@ -33,15 +33,10 @@ function Results() {
   const where = area.startsWith("city:") ? area.slice(5) : area ? areaById(area)?.name : "Lagos, Abuja and Port Harcourt";
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-4xl font-extrabold">
-          {tradeLabel} <span className="text-muted">in {where}</span>
-        </h1>
-        <p className="mt-1 text-slate">
-          {results.length} {results.length === 1 ? "artisan" : "artisans"} found. Verified artisans are shown first.
-        </p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader title={<>{tradeLabel} <span className="text-muted">in {where}</span></>}>
+        {results.length} {results.length === 1 ? "artisan" : "artisans"} found. Verified artisans are shown first.
+      </PageHeader>
 
       <div className="grid gap-3 rounded-3xl border-2 border-line bg-white p-4 sm:grid-cols-[1fr_1.3fr_1fr_auto] sm:items-end">
         <Field label="Trade">
@@ -71,9 +66,19 @@ function Results() {
       </div>
 
       {results.length === 0 ? (
-        <Empty title="No artisans match yet">
-          We have no {tradeLabel?.toLowerCase()} serving {where} yet. Try another area, switch off “Verified only”, or look at all of the city.
-        </Empty>
+        !config.dataAvailable ? (
+          <Empty title="Artisans are temporarily unavailable">We could not load artisans just now. Please refresh in a moment.</Empty>
+        ) : state.artisans.length === 0 ? (
+          <Empty title="We are signing up our first artisans">
+            Sabihand is opening in {where}. Be one of the first {tradeLabel?.toLowerCase()} customers will find.
+            <div className="mt-5"><LinkButton href="/artisan/join" variant="dark">Create your artisan profile</LinkButton></div>
+          </Empty>
+        ) : (
+          <Empty title="No artisans match yet">
+            We have no {tradeLabel?.toLowerCase()} serving {where} yet. Try another area, switch off “Verified only”, or look at the whole city.
+            <div className="mt-5"><LinkButton href="/artisan/join" variant="ghost">Are you a {tradeLabel?.toLowerCase().replace(/s$/, "")}? Join Sabihand</LinkButton></div>
+          </Empty>
+        )
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {results.map((a) => (

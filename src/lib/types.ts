@@ -41,7 +41,10 @@ export interface Artisan {
   portfolio: { id: string; caption: string }[];
   verification: Verification;
   joinedAt: string;
-  isSample: boolean;
+  /** Id of the signed-in user who owns this profile. */
+  ownerId: string;
+  /** Private contact number. Stripped from what other people receive until a booking is paid. */
+  phone: string;
 }
 
 export type BookingStatus =
@@ -75,6 +78,8 @@ export interface Booking {
   artisanId: string;
   customerId: string;
   customerName: string;
+  /** Private. Only the artisan sees it, and only once the booking is paid. */
+  customerPhone: string;
   trade: Trade;
   areaId: string;
   title: string;
@@ -95,8 +100,9 @@ export interface Payment {
   amountKobo: number;
   commissionKobo: number;
   status: PaymentStatus;
-  /** "demo" means no real money moved. */
-  provider: "demo" | "paystack";
+  provider: "paystack";
+  /** Paystack transaction reference; unique, so a payment can only be recorded once. */
+  providerRef: string;
   createdAt: string;
   settledAt?: string;
 }
@@ -123,11 +129,15 @@ export interface Report {
   resolution?: string;
 }
 
+/** The signed-in person making a request. Resolved on the server from the session, never from the client. */
+export interface Viewer {
+  id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+}
+
 export interface AppState {
-  version: number;
-  role: Role;
-  customerName: string;
-  activeArtisanId: string;
   artisans: Artisan[];
   bookings: Booking[];
   payments: Payment[];

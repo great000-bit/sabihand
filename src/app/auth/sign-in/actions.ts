@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { authConfigured, getAuth } from "@/lib/auth/server";
+import { safeNext } from "@/lib/auth/next";
 
 export async function signInWithEmail(_prev: { error: string } | null, form: FormData) {
   if (!authConfigured) return { error: "Sign-in is not set up in this environment." };
@@ -10,5 +11,5 @@ export async function signInWithEmail(_prev: { error: string } | null, form: For
     password: String(form.get("password") ?? ""),
   });
   if (error) return { error: error.message || "Could not sign in. Check your email and password." };
-  redirect("/");
+  redirect(safeNext(form.get("next")));
 }

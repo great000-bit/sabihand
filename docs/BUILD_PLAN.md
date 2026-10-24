@@ -1,26 +1,34 @@
 # Sabihand build plan
 
-Status: foundation done (demo mode). Written 2026-10-24 for the team (Faith, Emman-Wori, Osose, Destiny).
+Status: real product, no demo data. Updated 2026-10-24 for the team (Faith, Emman-Wori, Osose, Destiny).
 
 ## What exists
 
-A mobile-first Next.js app that runs the whole PRD loop with sample data and a pretend payment:
-find an artisan, request a quote, artisan quotes, customer accepts and pays into a hold, artisan does the job,
-customer confirms, money is released minus commission, customer reviews. Admin verifies artisans and resolves disputes.
+Everyone has a real account (Neon Auth, email and password). The whole PRD loop runs on a real database:
+an artisan creates a profile, a customer requests a quote, the artisan quotes, the customer accepts and pays through
+Paystack into a hold, the artisan does the job, the customer confirms, the payment is released minus commission,
+the customer reviews. The Sabihand team verifies artisans and resolves disputes from `/admin`.
 
-Switch roles in the header ("Viewing as"). "Reset demo" restores the seed data. State lives in the browser (localStorage).
+How it is built:
 
-All the rules live in `src/lib/engine.ts` (pure functions, 12 tests in `engine.test.ts`). The UI only calls them,
-so moving to a real backend means re-implementing the same functions on the server, not rewriting screens.
+- `src/lib/engine.ts`: every rule, as pure functions that also check who is acting. Covered by tests (`engine.test.ts`).
+- `src/server/actions.ts`: server actions. Each loads the data, runs one engine function as the signed-in person, and saves only what changed.
+- `src/server/repo.ts`: Neon tables in schema `app` (one JSON document per object plus the columns we filter on) and `visibleTo`, which decides what each person is sent. Phone numbers stay private until a booking is paid.
+- `src/server/paystack.ts`, `payments.ts`, `/pay/callback`, `/api/paystack/webhook`: checkout, then the payment is recorded only after Paystack confirms it. Safe if both callback and webhook arrive.
+- No sample data exists anywhere. The marketplace is empty until real artisans sign up.
+
+Known limits (honest list): two people changing the same booking in the same instant can overwrite each other
+(fine at pilot scale, add row locking before real volume); payouts to artisan bank accounts are not automated yet
+(the ledger shows "released" and the team pays out); there is no photo upload, notifications, or terms and privacy pages yet.
 
 ## Defaults I picked (change any of them)
 
 | Decision | Default | Where |
 | --- | --- | --- |
-| Launch | Lagos, Abuja and Port Harcourt (Rivers State), city by city; first areas near universities (Akoka, Gwagwalada, Choba) | `src/lib/seed.ts` |
-| Trades | Plumber, electrician, tailor, carpenter | `src/lib/seed.ts` |
+| Launch | Lagos, Abuja and Port Harcourt (Rivers State), city by city; first areas near universities (Akoka, Gwagwalada, Choba) | `src/lib/catalog.ts` |
+| Trades | Plumber, electrician, tailor, carpenter | `src/lib/catalog.ts` |
 | Commission | 10% of the job, taken from the artisan payout | `COMMISSION_BPS` in `src/lib/money.ts` |
-| Payment | Demo provider only. Paystack is the proposed real provider | `payAndHold` in engine |
+| Payment | Paystack (card checkout). Needs `PAYSTACK_SECRET_KEY` | `src/server/paystack.ts`, `recordPayment` in engine |
 | Money | Integer kobo, never floats | `money.ts` |
 | Ratings | Only from a completed booking, one per booking. No fake reviews | `reviews.ts` |
 | Verification | A badge only lists checks that were actually done | `submitVerification`, `decideVerification` |
@@ -39,18 +47,19 @@ Nigeria-wide launch. The build supports both: areas are data, so a campus-only p
 
 ## Next steps
 
-1. Database: Neon project `sabihand` (aws-us-east-2) already has the schema from `db/migrations/0001_init.sql`. Next: add DATABASE_URL to Vercel, pick a sign-in provider (phone/email) and wire it to `profiles.auth_id`.
-2. Server actions that call the engine and write to Postgres; keep the status moves server-side only.
-3. Real photo upload for portfolios (Vercel Blob or Cloudflare R2).
-4. Paystack test-mode integration behind the same `payAndHold` / `release` functions.
-5. Replace the 12 sample artisans with real ones the team has onboarded; remove the demo banner when real.
+1. Onboard the first real artisans (the ~10 who said yes) and verify them from `/admin`.
+2. Paystack test key on Vercel, then a live key after the business account is verified. Set the webhook URL.
+3. Payouts: collect artisan bank details and pay out through Paystack Transfers.
+4. Terms of service and privacy policy (needed before taking real money; NDPA applies). Needs a lawyer's review.
+5. Photo upload for portfolios (Vercel Blob or Cloudflare R2).
 6. Notifications (WhatsApp or SMS) when a request or quote arrives.
+7. Row locking on writes; drop the unused `public.*` tables from `db/migrations/0001_init.sql`.
 
 ## Run it
 
 ```
 npm install
 npm run dev      # http://localhost:3000
-npm test         # engine tests
+npm test         # engine and privacy tests
 npm run typecheck && npm run lint && npm run build
 ```
