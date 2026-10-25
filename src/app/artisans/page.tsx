@@ -41,7 +41,7 @@ function Results() {
         {results.length} {results.length === 1 ? "artisan" : "artisans"} found. Verified artisans are shown first.
       </PageHeader>
 
-      <div className="grid gap-3 rounded-3xl border-2 border-line bg-white p-4 sm:grid-cols-[1fr_2.2fr] lg:grid-cols-[1fr_2.2fr_1fr_auto] sm:items-start">
+      <div className="grid gap-3 rounded-3xl border-2 border-line bg-surface p-4 sm:grid-cols-[1fr_2.2fr] lg:grid-cols-[1fr_2.2fr_1fr_auto] sm:items-start">
         <Field label="Trade">
           <select value={trade} onChange={(e) => set("trade", e.target.value)} className={inputCls}>
             <option value="">All trades</option>

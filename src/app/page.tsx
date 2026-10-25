@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Hero } from "@/components/hero";
 import { Marquee } from "@/components/marquee";
-import { FeatureRow, Ticks, ICONS } from "@/components/feature-row";
+import { FeatureRow, Ticks } from "@/components/feature-row";
 import { LAUNCH_CITIES, STATES } from "@/lib/catalog";
 import { Eyebrow, LinkButton } from "@/components/ui";
 
@@ -17,15 +17,14 @@ export default function Home() {
     <div className="space-y-20 sm:space-y-28">
       <section className="pt-4 sm:pt-10">
         <Hero />
-        <div data-aos="fade-up" data-aos-delay="150" className="relative mt-10 overflow-hidden rounded-[2rem] bg-gradient-to-br from-midnight via-[#16388a] to-trust px-0 pb-8 pt-6 sm:mt-14 sm:rounded-[2.5rem] sm:pb-12 sm:pt-10">
+        <div data-aos="fade-up" data-aos-delay="150" className="relative mt-10 overflow-hidden rounded-[2rem] bg-midnight grain px-0 pb-8 pt-6 sm:mt-14 sm:rounded-[2.5rem] sm:pb-12 sm:pt-10">
           <Marquee />
           <p className="mt-5 px-4 text-center text-[13px] font-semibold text-white/70 sm:mt-7 sm:text-sm">Plumbers, electricians, tailors and carpenters in every state across Nigeria</p>
         </div>
       </section>
 
       <FeatureRow
-        tone="bg-[#eaf0fd]"
-        icon={ICONS.search}
+        tone="bg-tint-blue"
         eyebrow="Find"
         title="Find a verified artisan near you"
         action={<LinkButton href="/artisans" variant="dark">Find an artisan</LinkButton>}
@@ -35,8 +34,7 @@ export default function Home() {
       </FeatureRow>
 
       <FeatureRow
-        tone="bg-[#fff3d6]"
-        icon={ICONS.quote}
+        tone="bg-tint-gold"
         flip
         eyebrow="Quote"
         title="Know the price before the work starts"
@@ -49,7 +47,6 @@ export default function Home() {
       <FeatureRow
         tone="bg-midnight"
         dark
-        icon={ICONS.shield}
         eyebrow="Protected"
         title="Your money waits until the job is done"
         action={<LinkButton href="/#how-it-works" variant="gold">See how it works</LinkButton>}
@@ -82,7 +79,7 @@ export default function Home() {
         </div>
         <div className="flex flex-wrap justify-center gap-3">
           {LAUNCH_CITIES.map((c, i) => (
-            <Link key={c.stateId} href={`/artisans?area=state:${c.stateId}`} data-aos="fade-up" data-aos-delay={i * 80} className="rounded-full bg-white px-7 py-4 text-center shadow-[0_10px_30px_-14px_rgba(11,31,75,0.18)] transition hover:-translate-y-1 hover:shadow-lg">
+            <Link key={c.stateId} href={`/artisans?area=state:${c.stateId}`} data-aos="fade-up" data-aos-delay={i * 80} className="rounded-full bg-surface px-7 py-4 text-center shadow-[0_10px_30px_-14px_rgba(11,31,75,0.18)] transition hover:-translate-y-1 hover:shadow-lg">
               <span className="block font-display text-xl font-extrabold sm:text-2xl">{c.name}</span>
               <span className="block text-sm text-slate">First artisans signing up</span>
             </Link>
@@ -95,11 +92,10 @@ export default function Home() {
       </section>
 
       <FeatureRow
-        tone="bg-gradient-to-br from-midnight via-[#16388a] to-trust"
+        tone="bg-midnight"
         dark
         small
         flip
-        icon={ICONS.tools}
         eyebrow="For artisans"
         title="Plumber, electrician, tailor or carpenter?"
         action={<LinkButton href="/artisan/join" variant="gold" className="!min-h-12 !px-8 !text-base">Create your free profile</LinkButton>}

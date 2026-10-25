@@ -146,7 +146,7 @@ function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <button className="mt-2 text-sm font-bold text-trust" onClick={() => setReporting(r.id)}>Report this review</button>
+                <button className="mt-2 text-sm font-bold text-link" onClick={() => setReporting(r.id)}>Report this review</button>
               )}
             </Card>
           ))}

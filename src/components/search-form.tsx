@@ -12,7 +12,7 @@ export function SearchForm() {
   const [area, setArea] = useState("");
   return (
     <form
-      className="grid gap-2 rounded-[1.75rem] border-2 border-line bg-white p-2.5 text-left shadow-[0_12px_40px_-12px_rgba(11,31,75,0.25)] sm:grid-cols-[1fr_2.2fr_auto] sm:items-start"
+      className="grid gap-2 rounded-[1.75rem] border-2 border-line bg-surface p-2.5 text-left shadow-[0_12px_40px_-12px_rgba(11,31,75,0.25)] sm:grid-cols-[1fr_2.2fr_auto] sm:items-start"
       onSubmit={(e) => {
         e.preventDefault();
         const q = new URLSearchParams({ trade });

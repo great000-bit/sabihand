@@ -74,13 +74,13 @@ function JoinForm() {
                 <div className="mt-3 space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
                     {inState.length > 12 && <input value={find} onChange={(e) => setFind(e.target.value)} className={`${inputCls} sm:max-w-xs`} placeholder={`Search ${stateById(stateId)?.name} areas`} aria-label="Search areas" />}
-                    <button type="button" className="min-h-10 rounded-full px-3 text-sm font-bold text-trust underline-offset-2 hover:underline" onClick={() => setAreas(allOn ? areas.filter((id) => !inState.some((a) => a.id === id)) : [...new Set([...areas, ...inState.map((a) => a.id)])].slice(0, MAX_AREAS))}>
+                    <button type="button" className="min-h-10 rounded-full px-3 text-sm font-bold text-link underline-offset-2 hover:underline" onClick={() => setAreas(allOn ? areas.filter((id) => !inState.some((a) => a.id === id)) : [...new Set([...areas, ...inState.map((a) => a.id)])].slice(0, MAX_AREAS))}>
                       {allOn ? `Clear ${stateById(stateId)?.name}` : `Select all of ${stateById(stateId)?.name}`}
                     </button>
                   </div>
                   <div className="grid max-h-72 gap-2 overflow-y-auto sm:grid-cols-2">
                     {shown.map((a) => (
-                      <label key={a.id} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border-2 border-line px-3 text-sm font-semibold has-[:checked]:border-trust has-[:checked]:bg-[#eef2fd]">
+                      <label key={a.id} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border-2 border-line px-3 text-sm font-semibold has-[:checked]:border-trust has-[:checked]:bg-tint-blue">
                         <input type="checkbox" className="h-5 w-5 accent-trust" checked={areas.includes(a.id)} onChange={(e) => setAreas(e.target.checked ? (areas.length >= MAX_AREAS ? areas : [...areas, a.id]) : areas.filter((x) => x !== a.id))} />
                         {a.name}
                       </label>
@@ -95,7 +95,7 @@ function JoinForm() {
                 <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-muted">You serve {areas.length} {areas.length === 1 ? "area" : "areas"}</p>
                 <div className="flex flex-wrap gap-2">
                   {areas.slice(0, 12).map((id) => (
-                    <button type="button" key={id} onClick={() => setAreas(areas.filter((x) => x !== id))} className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-[#eef2fd] px-3 text-[13px] font-bold text-trust" aria-label={`Remove ${areaLabel(id)}`}>
+                    <button type="button" key={id} onClick={() => setAreas(areas.filter((x) => x !== id))} className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-tint-blue px-3 text-[13px] font-bold text-link" aria-label={`Remove ${areaLabel(id)}`}>
                       {areaLabel(id)} <span aria-hidden>×</span>
                     </button>
                   ))}

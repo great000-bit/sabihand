@@ -18,7 +18,7 @@ function fmtDate(iso: string) {
 }
 
 function Panel({ title, children, tone = "white" }: { title: string; children: React.ReactNode; tone?: "white" | "gold" | "dark" }) {
-  const c = { white: "bg-white", gold: "bg-gold-soft border-gold/40", dark: "bg-midnight text-white border-midnight" }[tone];
+  const c = { white: "bg-surface", gold: "bg-gold-soft border-gold/40", dark: "bg-midnight text-white border-midnight" }[tone];
   return (
     <Card className={`p-6 ${c}`}>
       <h2 className="mb-3 text-xl font-extrabold">{title}</h2>
@@ -48,7 +48,7 @@ function Detail() {
   const [reviewText, setReviewText] = useState("");
 
   const b: Booking | undefined = state.bookings.find((x) => x.id === id);
-  if (!b) return <Card className="p-10 text-center"><h1 className="text-2xl font-extrabold">Request not found</h1><p className="mt-1 text-slate">It may belong to another account.</p><Link href="/requests" className="mt-3 inline-block font-bold text-trust">Back to requests</Link></Card>;
+  if (!b) return <Card className="p-10 text-center"><h1 className="text-2xl font-extrabold">Request not found</h1><p className="mt-1 text-slate">It may belong to another account.</p><Link href="/requests" className="mt-3 inline-block font-bold text-link">Back to requests</Link></Card>;
 
   const artisan = state.artisans.find((a) => a.id === b.artisanId);
   const payment = state.payments.find((p) => p.bookingId === b.id);
@@ -73,7 +73,7 @@ function Detail() {
         <Card className="p-6 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <Link href={back} className="text-sm font-bold text-trust">← Back</Link>
+              <Link href={back} className="text-sm font-bold text-link">← Back</Link>
               <h1 className="mt-2 text-3xl font-extrabold">{b.title}</h1>
               <p className="text-slate">
                 {tradeById(b.trade).label} · {artisan?.businessName} · {areaLabel(b.areaId)}
@@ -152,7 +152,7 @@ function Detail() {
                 {config.paymentsEnabled ? (
                   <Button className="w-full" variant="gold" disabled={busy} onClick={pay}>Pay {formatNaira(b.quote!.amountKobo)} securely</Button>
                 ) : (
-                  <p className="rounded-2xl bg-gold-soft p-3 text-sm font-semibold text-[#7a5200]">Online payment is not switched on yet, so this request cannot be paid for. You will be able to pay here as soon as it is.</p>
+                  <p className="rounded-2xl bg-gold-soft p-3 text-sm font-semibold text-gold-ink">Online payment is not switched on yet, so this request cannot be paid for. You will be able to pay here as soon as it is.</p>
                 )}
               </>
             )}

@@ -1,22 +1,106 @@
 @import "tailwindcss";
 
+/* Dark mode is switched by data-theme on <html>, set before first paint by the script in layout.tsx. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Colours that change with the theme. Brand fills (midnight, trust, gold) stay the same in both. */
+:root {
+  --c-mist: #f5f7fb;
+  --c-surface: #ffffff;
+  --c-ink: #0b1f4b;
+  --c-slate: #44516b;
+  --c-muted: #6b7794;
+  --c-line: #d8deea;
+  --c-link: #2250d6;
+  --c-verified: #0b7a4b;
+  --c-verified-soft: #e3f4ec;
+  --c-gold-soft: #fff6df;
+  --c-gold-ink: #7a5200;
+  --c-alert: #c2382c;
+  --c-alert-soft: #fdecea;
+  --c-tint-blue: #eaf0fd;
+  --c-tint-gold: #fff3d6;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --c-mist: #080f22;
+  --c-surface: #111b37;
+  --c-ink: #e8eeff;
+  --c-slate: #b4c0dc;
+  --c-muted: #8f9dbf;
+  --c-line: #27355c;
+  --c-link: #8aaaff;
+  --c-verified: #52d39b;
+  --c-verified-soft: #0f2f28;
+  --c-gold-soft: #33280d;
+  --c-gold-ink: #f4d27c;
+  --c-alert: #ff8f82;
+  --c-alert-soft: #3a1815;
+  --c-tint-blue: #14234d;
+  --c-tint-gold: #2c2410;
+  color-scheme: dark;
+}
+/* Without JavaScript the theme follows the device. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --c-mist: #080f22;
+    --c-surface: #111b37;
+    --c-ink: #e8eeff;
+    --c-slate: #b4c0dc;
+    --c-muted: #8f9dbf;
+    --c-line: #27355c;
+    --c-link: #8aaaff;
+    --c-verified: #52d39b;
+    --c-verified-soft: #0f2f28;
+    --c-gold-soft: #33280d;
+    --c-gold-ink: #f4d27c;
+    --c-alert: #ff8f82;
+    --c-alert-soft: #3a1815;
+    --c-tint-blue: #14234d;
+    --c-tint-gold: #2c2410;
+    color-scheme: dark;
+  }
+}
+
 @theme inline {
   --color-midnight: #0b1f4b;
   --color-midnight-2: #14306f;
   --color-trust: #2250d6;
-  --color-verified: #0b7a4b;
-  --color-verified-soft: #e3f4ec;
   --color-gold: #e3a92b;
-  --color-gold-soft: #fff6df;
-  --color-mist: #f5f7fb;
-  --color-ink: #0b1f4b;
-  --color-slate: #44516b;
-  --color-muted: #6b7794;
-  --color-line: #d8deea;
-  --color-alert: #c2382c;
-  --color-alert-soft: #fdecea;
+  --color-mist: var(--c-mist);
+  --color-surface: var(--c-surface);
+  --color-ink: var(--c-ink);
+  --color-slate: var(--c-slate);
+  --color-muted: var(--c-muted);
+  --color-line: var(--c-line);
+  --color-link: var(--c-link);
+  --color-verified: var(--c-verified);
+  --color-verified-soft: var(--c-verified-soft);
+  --color-gold-soft: var(--c-gold-soft);
+  --color-gold-ink: var(--c-gold-ink);
+  --color-alert: var(--c-alert);
+  --color-alert-soft: var(--c-alert-soft);
+  --color-tint-blue: var(--c-tint-blue);
+  --color-tint-gold: var(--c-tint-gold);
   --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* A fine film grain behind a card's content: add the class to any rounded card. */
+.grain {
+  position: relative;
+  isolation: isolate;
+}
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 html {
@@ -36,7 +120,7 @@ h1, h2, h3, .font-display {
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-trust);
+  outline: 3px solid var(--color-link);
   outline-offset: 2px;
 }
 

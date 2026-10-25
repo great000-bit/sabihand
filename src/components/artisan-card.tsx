@@ -32,7 +32,7 @@ export function ArtisanCard({ a }: { a: Artisan }) {
   const areas = areaSummary(a.areaIds, 2);
   return (
     <Link href={`/artisans/${a.id}`} className="block">
-      <Card className="p-5 transition hover:border-midnight">
+      <Card className="p-5 transition hover:border-ink">
         <div className="flex gap-4">
           <Avatar name={a.name} />
           <div className="min-w-0 flex-1">

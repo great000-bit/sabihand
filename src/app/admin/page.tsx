@@ -148,7 +148,7 @@ function Admin() {
             </div>
             <p className="mt-1 text-slate">{r.reason}</p>
             {r.resolution && <p className="mt-1 text-sm text-muted">Outcome: {r.resolution}</p>}
-            {!r.resolvedAt && r.kind === "booking" && <Link href={`/requests/${r.targetId}`} className="mt-2 inline-block font-bold text-trust">Open the job to resolve →</Link>}
+            {!r.resolvedAt && r.kind === "booking" && <Link href={`/requests/${r.targetId}`} className="mt-2 inline-block font-bold text-link">Open the job to resolve →</Link>}
             {!r.resolvedAt && r.kind === "review" && (
               <div className="mt-3 flex gap-2">
                 <Button variant="danger" disabled={busy} onClick={() => act(() => actions.moderateReview(r.id, true))}>Hide review</Button>
@@ -163,7 +163,7 @@ function Admin() {
         <h2 className="text-2xl font-extrabold">All requests</h2>
         {state.bookings.map((b) => (
           <Link key={b.id} href={`/requests/${b.id}`} className="block">
-            <Card className="flex flex-wrap items-center justify-between gap-2 p-4 hover:border-midnight">
+            <Card className="flex flex-wrap items-center justify-between gap-2 p-4 hover:border-ink">
               <span className="font-bold">{b.title} <span className="font-medium text-muted">· {state.artisans.find((a) => a.id === b.artisanId)?.businessName}</span></span>
               <span className="flex items-center gap-3">{b.quote && <b className="font-display">{formatNaira(b.quote.amountKobo)}</b>}<StatusPill status={b.status} /></span>
             </Card>
