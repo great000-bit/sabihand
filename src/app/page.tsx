@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Hero } from "@/components/hero";
 import { Marquee } from "@/components/marquee";
-import { FeatureRow, Ticks } from "@/components/feature-row";
+import { FeatureRow, Ticks, ICONS } from "@/components/feature-row";
 import { CITIES, CITY_STATE } from "@/lib/catalog";
 import { Eyebrow, LinkButton } from "@/components/ui";
 
@@ -25,8 +25,7 @@ export default function Home() {
 
       <FeatureRow
         tone="bg-[#eaf0fd]"
-        image="/artisans/plumber.jpg"
-        alt="A plumber fitting a flexible waste pipe under a kitchen sink"
+        icon={ICONS.search}
         eyebrow="Find"
         title="Find a verified artisan near you"
         action={<LinkButton href="/artisans" variant="dark">Find an artisan</LinkButton>}
@@ -37,8 +36,7 @@ export default function Home() {
 
       <FeatureRow
         tone="bg-[#fff3d6]"
-        image="/artisans/tailor.jpg"
-        alt="A tailor at his sewing machine"
+        icon={ICONS.quote}
         flip
         eyebrow="Quote"
         title="Know the price before the work starts"
@@ -51,8 +49,7 @@ export default function Home() {
       <FeatureRow
         tone="bg-midnight"
         dark
-        image="/artisans/electrician.jpg"
-        alt="An electrician carrying a solar panel and inverter"
+        icon={ICONS.shield}
         eyebrow="Protected"
         title="Your money waits until the job is done"
         action={<LinkButton href="/#how-it-works" variant="gold">See how it works</LinkButton>}
@@ -97,8 +94,7 @@ export default function Home() {
         dark
         small
         flip
-        image="/artisans/carpenter.jpg"
-        alt="A carpenter measuring a timber frame"
+        icon={ICONS.tools}
         eyebrow="For artisans"
         title="Plumber, electrician, tailor or carpenter?"
         action={<LinkButton href="/artisan/join" variant="gold" className="!min-h-12 !px-8 !text-base">Create your free profile</LinkButton>}
