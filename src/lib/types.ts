@@ -53,7 +53,10 @@ export interface Artisan {
   bio: string;
   availability: string;
   services: ServicePrice[];
-  portfolio: { id: string; caption: string }[];
+  /** Id of the profile photo in app.images, served at /api/images/<id>. */
+  photoId?: string;
+  /** Photos of past work, newest last. */
+  portfolio: { id: string; caption: string; imageId: string }[];
   verification: Verification;
   joinedAt: string;
   /** Id of the signed-in user who owns this profile. */

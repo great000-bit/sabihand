@@ -223,6 +223,29 @@ export function markPaidOut(state: AppState, paymentId: string, reference: strin
   return { ...state, payments: replace(state.payments, { ...p, payout: { paidAt: ctx.now, reference: reference.trim() } }) };
 }
 
+export const MAX_PORTFOLIO = 8;
+
+export function setProfilePhoto(state: AppState, artisanId: string, imageId: string | null, ctx: Ctx): AppState {
+  const a = mustFind(state.artisans, artisanId, "Artisan");
+  if (a.ownerId !== ctx.user.id) throw new Error(DENIED);
+  return { ...state, artisans: replace(state.artisans, { ...a, photoId: imageId ?? undefined }) };
+}
+
+export function addPortfolioItem(state: AppState, artisanId: string, imageId: string, caption: string, ctx: Ctx): AppState {
+  const a = mustFind(state.artisans, artisanId, "Artisan");
+  if (a.ownerId !== ctx.user.id) throw new Error(DENIED);
+  if (a.portfolio.length >= MAX_PORTFOLIO) throw new Error(`You can show up to ${MAX_PORTFOLIO} photos of your work. Remove one first.`);
+  if (a.portfolio.some((p) => p.imageId === imageId)) throw new Error("That photo is already on your profile.");
+  return { ...state, artisans: replace(state.artisans, { ...a, portfolio: [...a.portfolio, { id: ctx.id("w"), caption: caption.trim().slice(0, 120), imageId }] }) };
+}
+
+export function removePortfolioItem(state: AppState, artisanId: string, itemId: string, ctx: Ctx): AppState {
+  const a = mustFind(state.artisans, artisanId, "Artisan");
+  if (a.ownerId !== ctx.user.id) throw new Error(DENIED);
+  if (!a.portfolio.some((p) => p.id === itemId)) throw new Error("That photo is not on your profile.");
+  return { ...state, artisans: replace(state.artisans, { ...a, portfolio: a.portfolio.filter((p) => p.id !== itemId) }) };
+}
+
 export function registerArtisan(
   state: AppState,
   input: { name: string; businessName: string; phone: string; trade: Trade; areaIds: string[]; bio: string; availability: string; service: { title: string; minNaira: number; maxNaira: number | null } },
