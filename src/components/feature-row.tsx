@@ -9,6 +9,7 @@ export function FeatureRow({
   tone,
   image,
   alt,
+  graphic,
   flip = false,
   eyebrow,
   title,
@@ -21,6 +22,8 @@ export function FeatureRow({
   /** Optional. Never reuse a photo already shown elsewhere on the page. */
   image?: string;
   alt?: string;
+  /** An animated graphic for the picture slot. It is drawn light, so the slot behind it is always dark. */
+  graphic?: ReactNode;
   flip?: boolean;
   eyebrow: string;
   title: string;
@@ -33,7 +36,8 @@ export function FeatureRow({
   return (
     <section data-aos="fade-up" className={`grain grid items-center gap-8 overflow-hidden rounded-[2rem] p-6 sm:rounded-[2.5rem] sm:p-12 md:grid-cols-2 md:gap-14 lg:p-16 ${tone} ${dark ? "text-white" : "text-ink"}`}>
       <div className={`mx-auto w-full ${small ? "max-w-[220px] sm:max-w-[260px]" : "max-w-[240px] sm:max-w-sm"} ${flip ? "md:order-2" : ""}`}>
-        <div className={`relative aspect-[4/5] overflow-hidden rounded-[1.75rem] ring-4 ${dark ? "bg-white/10 ring-white/15" : "bg-white/60 ring-white/70 dark:bg-white/5 dark:ring-white/10"}`}>
+        <div className={`relative aspect-[4/5] overflow-hidden rounded-[1.75rem] ring-4 ${graphic ? "bg-midnight ring-white/70 dark:bg-black/60 dark:ring-white/10" : dark ? "bg-white/10 ring-white/15" : "bg-white/60 ring-white/70 dark:bg-white/5 dark:ring-white/10"}`}>
+          {graphic}
           {image && <Image src={image} alt={alt ?? ""} fill sizes="(max-width: 768px) 260px, 380px" className="object-cover object-top" />}
         </div>
       </div>

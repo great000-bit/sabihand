@@ -100,7 +100,7 @@ export function Marquee({ speed = 55 }: { speed?: number }) {
         {Array.from({ length: COPIES }, (_, c) => TILES.map((t) => <Card key={`${c}-${t.image}`} t={t} hidden={c > 0} />)).flat()}
       </div>
       {/* The line the photos change at. */}
-      <span aria-hidden className="pointer-events-none absolute inset-y-3 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white to-transparent shadow-[0_0_10px_2px_rgba(255,120,230,0.65),0_0_36px_8px_rgba(150,90,255,0.35)] motion-reduce:hidden" />
+      <span aria-hidden className="pointer-events-none absolute inset-y-3 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-violet-500 to-transparent shadow-[0_0_10px_2px_rgba(255,120,230,0.55),0_0_36px_8px_rgba(150,90,255,0.3)] dark:via-white dark:shadow-[0_0_10px_2px_rgba(255,120,230,0.65),0_0_36px_8px_rgba(150,90,255,0.35)] motion-reduce:hidden" />
     </div>
   );
 }
