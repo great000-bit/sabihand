@@ -26,7 +26,7 @@ export function LinkButton({ href, variant = "primary", children, className = ""
 }
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-3xl border-2 border-line bg-white ${className}`}>{children}</div>;
+  return <div className={`rounded-3xl border border-line/70 bg-white shadow-[0_1px_2px_rgba(11,31,75,0.04),0_10px_30px_-14px_rgba(11,31,75,0.14)] ${className}`}>{children}</div>;
 }
 
 export function Chip({ children, tone = "plain" }: { children: ReactNode; tone?: "plain" | "dark" | "gold" | "green" | "alert" | "blue" }) {
