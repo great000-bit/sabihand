@@ -88,18 +88,18 @@ export function Header() {
   const active = (href: string) => path === href || path.startsWith(href + "/");
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur-xl dark:bg-black/50">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
-        <Link href="/" aria-label="Sabihand home" className="flex-none">
+      <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto] items-center gap-4 px-4 py-3 sm:px-6 md:grid-cols-[1fr_auto_1fr]">
+        <Link href="/" aria-label="Sabihand home" className="flex-none justify-self-start">
           <Logo width={132} />
         </Link>
-        <div className="ml-auto flex items-center gap-2">
-          <nav className="mr-2 hidden gap-1 md:flex" aria-label="Main">
-            {items.map((i) => (
-              <Link key={i.href} href={i.href} aria-current={active(i.href) ? "page" : undefined} className={`rounded-full px-4 py-2 text-[15px] font-bold ${active(i.href) ? "bg-midnight text-white dark:bg-trust" : "text-slate hover:bg-mist"}`}>
-                {i.label}
-              </Link>
-            ))}
-          </nav>
+        <nav className="hidden gap-1 md:flex" aria-label="Main">
+          {items.map((i) => (
+            <Link key={i.href} href={i.href} aria-current={active(i.href) ? "page" : undefined} className={`rounded-full px-4 py-2 text-[15px] font-bold ${active(i.href) ? "bg-midnight text-white dark:bg-trust" : "text-slate hover:bg-mist"}`}>
+              {i.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex items-center gap-2 justify-self-end">
           <AccountMenu guestView={path === "/"} />
           <button onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Menu" className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-line md:hidden">
             <span aria-hidden className="text-lg leading-none">{menu ? "✕" : "☰"}</span>
