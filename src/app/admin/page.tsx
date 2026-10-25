@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import * as actions from "@/server/actions";
+import { addAdmin, listAdmins, removeAdmin, type AdminRow } from "@/server/admin-actions";
 import { areaSummary, tradeById } from "@/lib/catalog";
 import { artisanPayoutKobo, formatNaira } from "@/lib/money";
 import type { VerificationCheck } from "@/lib/types";
@@ -30,7 +31,10 @@ function PayoutCard({ id }: { id: string }) {
         <div>
           <h3 className="text-lg font-extrabold">{a?.businessName ?? "Artisan"} · {b?.title}</h3>
           {a?.bank ? (
-            <p className="text-sm text-slate">{a.bank.bankName} · <b>{a.bank.accountNumber}</b> · {a.bank.accountName}</p>
+            <>
+              <p className="text-sm text-slate">{a.bank.bankName} · <b>{a.bank.accountNumber}</b> · {a.bank.accountName}</p>
+              {a.bank.verified ? <p className="text-sm font-semibold text-verified">✓ Name confirmed by the bank</p> : <p className="text-sm font-semibold text-gold-ink">Name typed by the artisan and not checked by the bank. Confirm it before you pay.</p>}
+            </>
           ) : (
             <p className="text-sm font-semibold text-alert">No bank account added yet. Ask {a?.name} to add one in their dashboard{a?.phone ? ` (${a.phone})` : ""}.</p>
           )}
@@ -83,6 +87,81 @@ function VerificationCard({ id }: { id: string }) {
   );
 }
 
+function TeamSection() {
+  const [rows, setRows] = useState<AdminRow[] | null>(null);
+  const [email, setEmail] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const load = useCallback(async () => {
+    const r = await listAdmins();
+    setRows(r.admins);
+    if (r.error) setErr(r.error);
+  }, []);
+  useEffect(() => {
+    let off = false;
+    void listAdmins().then((r) => {
+      if (off) return;
+      setRows(r.admins);
+      if (r.error) setErr(r.error);
+    });
+    return () => {
+      off = true;
+    };
+  }, []);
+  return (
+    <section className="space-y-3">
+      <h2 className="text-2xl font-extrabold">Admin team</h2>
+      <p className="text-slate">Only super admins see this. Add someone by the email they signed up with. They get the admin area as soon as they reload.</p>
+      <Card className="space-y-4 p-5">
+        <form
+          className="flex flex-wrap items-end gap-2"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setBusy(true);
+            const r = await addAdmin(email);
+            setBusy(false);
+            setErr(r.error);
+            if (!r.error) {
+              setEmail("");
+              await load();
+            }
+          }}
+        >
+          <div className="min-w-56 flex-1"><Field label="Email of the new admin"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="name@example.com" required maxLength={200} /></Field></div>
+          <Button type="submit" disabled={busy}>Make admin</Button>
+        </form>
+        <ErrorNote message={err} />
+        <ul className="divide-y divide-line">
+          {rows === null && <li className="py-3 text-slate">Loading…</li>}
+          {rows?.map((r) => (
+            <li key={r.userId} className="flex flex-wrap items-center justify-between gap-2 py-3">
+              <div>
+                <p className="font-bold">{r.name} {r.super && <Chip tone="gold">Super admin</Chip>}</p>
+                <p className="text-sm text-slate">{r.email}</p>
+              </div>
+              {!r.super && (
+                <Button
+                  variant="danger"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    const x = await removeAdmin(r.userId);
+                    setBusy(false);
+                    setErr(x.error);
+                    await load();
+                  }}
+                >
+                  Remove
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Card>
+    </section>
+  );
+}
+
 export default function AdminPage() {
   return (
     <SignedInOnly title="Sign in to the admin area">
@@ -114,7 +193,7 @@ function Admin() {
 
   return (
     <div className="space-y-10">
-      <PageHeader title="Admin">Verification, reports and a live view of the marketplace.</PageHeader>
+      <PageHeader title={viewer.isSuperAdmin ? "Super admin" : "Admin"}>Verification, reports and a live view of the marketplace.</PageHeader>
       <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {stats.map(([l, v]) => (
           <Card key={l} className="p-4"><p className="text-xs font-bold uppercase tracking-wide text-muted">{l}</p><p className="font-display text-3xl font-extrabold">{v}</p></Card>
@@ -125,6 +204,8 @@ function Admin() {
         <Card className="bg-gold p-5"><p className="text-sm font-bold">Commission earned</p><p className="font-display text-3xl font-extrabold">{formatNaira(commission)}</p></Card>
         <Card className="p-5"><p className="text-sm font-bold text-muted">Held for jobs in progress</p><p className="font-display text-3xl font-extrabold">{formatNaira(held)}</p></Card>
       </div>
+
+      {viewer.isSuperAdmin && <TeamSection />}
 
       <section className="space-y-3">
         <h2 className="text-2xl font-extrabold">Payouts due</h2>

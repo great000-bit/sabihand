@@ -203,7 +203,9 @@ describe("payouts", () => {
   const bank = { bankName: "GTBank", accountNumber: "0123 456 789", accountName: "Tunde Bello" };
   it("lets only the owner save valid bank details", () => {
     const s = e.saveBankDetails(empty(), "a1", bank, as(owner));
-    expect(s.artisans[0].bank).toEqual({ bankName: "GTBank", accountNumber: "0123456789", accountName: "Tunde Bello" });
+    expect(s.artisans[0].bank).toEqual({ bankName: "GTBank", accountNumber: "0123456789", accountName: "Tunde Bello", verified: false });
+    const checked = e.saveBankDetails(empty(), "a1", { ...bank, bankCode: "058", verified: true }, as(owner));
+    expect(checked.artisans[0].bank).toMatchObject({ bankCode: "058", verified: true });
     expect(() => e.saveBankDetails(empty(), "a1", bank, as(stranger))).toThrow(/cannot do that/);
     expect(() => e.saveBankDetails(empty(), "a1", { ...bank, accountNumber: "123" }, as(owner))).toThrow(/10 digits/);
   });

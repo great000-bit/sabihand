@@ -48,3 +48,29 @@ export function validSignature(rawBody: string, signature: string | null): boole
   const b = Buffer.from(signature);
   return a.length === b.length && timingSafeEqual(a, b);
 }
+
+export interface Bank {
+  name: string;
+  code: string;
+}
+
+/** Nigerian banks with their Paystack codes. The list barely changes, so it is cached for a day. */
+export async function listBanks(): Promise<Bank[]> {
+  const key = process.env.PAYSTACK_SECRET_KEY;
+  if (!key) throw new Error("Bank lookup is not switched on yet.");
+  const res = await fetch(`${API}/bank?country=nigeria&perPage=200&use_cursor=false`, { headers: { Authorization: `Bearer ${key}` }, next: { revalidate: 86400 } });
+  const body = (await res.json().catch(() => null)) as { status?: boolean; data?: { name: string; code: string; active?: boolean; is_deleted?: boolean | null }[] } | null;
+  if (!res.ok || !body?.status || !body.data) throw new Error("Could not load the list of banks. Try again.");
+  const seen = new Set<string>();
+  return body.data
+    .filter((b) => b.active !== false && !b.is_deleted)
+    .filter((b) => (seen.has(b.code) ? false : (seen.add(b.code), true)))
+    .map((b) => ({ name: b.name, code: b.code }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Asks the bank who owns an account number. Returns the name exactly as the bank holds it. */
+export async function resolveAccount(accountNumber: string, bankCode: string): Promise<string> {
+  const data = await call<{ account_name: string }>(`/bank/resolve?account_number=${encodeURIComponent(accountNumber)}&bank_code=${encodeURIComponent(bankCode)}`);
+  return data.account_name;
+}

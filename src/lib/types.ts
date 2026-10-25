@@ -38,6 +38,10 @@ export interface BankDetails {
   /** 10-digit NUBAN account number. */
   accountNumber: string;
   accountName: string;
+  /** Paystack bank code, when the bank was picked from the live list. */
+  bankCode?: string;
+  /** True when the account name came from the bank's own record, not from what the artisan typed. */
+  verified?: boolean;
 }
 
 export interface Artisan {
@@ -150,6 +154,8 @@ export interface Viewer {
   name: string;
   email: string;
   isAdmin: boolean;
+  /** Can make other people admins. Named in SUPER_ADMIN_USER_IDS; always also an admin. */
+  isSuperAdmin?: boolean;
 }
 
 export interface AppState {

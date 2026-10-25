@@ -9,7 +9,7 @@ import type { AppState, Trade, VerificationCheck } from "@/lib/types";
 import { getViewer } from "./session";
 import { ConflictError, loadAll, persist, type Snapshot } from "./repo";
 import { newId } from "./ids";
-import { initializeTransaction, paystackEnabled } from "./paystack";
+import { initializeTransaction, listBanks as paystackBanks, paystackEnabled, resolveAccount, type Bank } from "./paystack";
 
 export type Result = { error: string | null };
 
@@ -101,8 +101,53 @@ export const resolveDispute = async (bookingId: string, outcome: "release" | "re
 export const submitReview = async (bookingId: string, rating: number, text: string) => mutate((s, c) => eng.submitReview(s, str(bookingId, 60), Number(rating), str(text, 1000), c));
 export const reportReview = async (reviewId: string, reason: string) => mutate((s, c) => eng.reportReview(s, str(reviewId, 60), str(reason, 1000), c));
 export const moderateReview = async (reportId: string, hide: boolean) => mutate((s, c) => eng.moderateReview(s, str(reportId, 60), hide === true, c));
-export const saveBankDetails = async (artisanId: string, b: { bankName: string; accountNumber: string; accountName: string }) =>
-  mutate((s, c) => eng.saveBankDetails(s, str(artisanId, 60), { bankName: str(b?.bankName, 60), accountNumber: str(b?.accountNumber, 20), accountName: str(b?.accountName, 80) }, c));
+/** The banks to choose from, with codes. Empty when live lookup is not switched on: the form then falls back to typing. */
+export async function listBanks(): Promise<{ error: string | null; banks: Bank[] }> {
+  if (!(await getViewer())) return { error: SIGN_IN, banks: [] };
+  if (!paystackEnabled()) return { error: null, banks: [] };
+  try {
+    return { error: null, banks: await paystackBanks() };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not load banks.", banks: [] };
+  }
+}
+
+/** Looks up the name on an account. Only for signed-in people; the number never leaves the server except to the bank lookup. */
+export async function lookupAccount(bankCode: string, accountNumber: string): Promise<{ error: string | null; name?: string }> {
+  if (!(await getViewer())) return { error: SIGN_IN };
+  const num = str(accountNumber, 20).replace(/\s/g, "");
+  const code = str(bankCode, 12);
+  if (!/^\d{10}$/.test(num)) return { error: "An account number has 10 digits." };
+  if (!code) return { error: "Choose your bank first." };
+  if (!paystackEnabled()) return { error: "Automatic name lookup is not switched on yet." };
+  try {
+    return { error: null, name: await resolveAccount(num, code) };
+  } catch (e) {
+    return { error: e instanceof Error && e.message ? "We could not find that account. Check the bank and the number." : "We could not check that account." };
+  }
+}
+
+/**
+ * With live lookup on, the name is always fetched from the bank here and whatever the browser sent is ignored, so a
+ * name can never be made up. With it off, the typed name is kept but marked as not checked.
+ */
+export const saveBankDetails = async (artisanId: string, b: { bankName: string; bankCode?: string; accountNumber: string; accountName: string }): Promise<Result> => {
+  const bankName = str(b?.bankName, 80);
+  const accountNumber = str(b?.accountNumber, 20).replace(/\s/g, "");
+  const bankCode = str(b?.bankCode, 12);
+  let accountName = str(b?.accountName, 80);
+  let verified = false;
+  if (paystackEnabled() && bankCode) {
+    if (!/^\d{10}$/.test(accountNumber)) return { error: "An account number has 10 digits." };
+    try {
+      accountName = await resolveAccount(accountNumber, bankCode);
+      verified = true;
+    } catch {
+      return { error: "We could not find that account. Check the bank and the number." };
+    }
+  }
+  return mutate((s, c) => eng.saveBankDetails(s, str(artisanId, 60), { bankName, accountNumber, accountName, bankCode: bankCode || undefined, verified }, c));
+};
 export const markPaidOut = async (paymentId: string, reference: string) => mutate((s, c) => eng.markPaidOut(s, str(paymentId, 60), str(reference, 80), c));
 export const submitVerification = async (artisanId: string) => mutate((s, c) => eng.submitVerification(s, str(artisanId, 60), c));
 export const decideVerification = async (artisanId: string, decision: "verified" | "rejected", checks: VerificationCheck[], note: string) =>
