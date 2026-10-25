@@ -25,7 +25,6 @@ function useNav() {
   if (viewer) items.push({ href: "/requests", label: "My requests" });
   items.push(me ? { href: "/artisan", label: "My jobs" } : { href: "/artisan/join", label: "For artisans" });
   if (!viewer) items.splice(1, 0, { href: "/#how-it-works", label: "How it works" });
-  if (viewer?.isAdmin) items.push({ href: "/admin", label: "Admin" });
   return items;
 }
 
