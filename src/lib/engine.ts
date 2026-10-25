@@ -203,14 +203,14 @@ export function decideVerification(state: AppState, artisanId: string, decision:
   return { ...state, artisans: replace(state.artisans, { ...a, verification }) };
 }
 
-export function saveBankDetails(state: AppState, artisanId: string, bank: { bankName: string; accountNumber: string; accountName: string }, ctx: Ctx): AppState {
+export function saveBankDetails(state: AppState, artisanId: string, bank: { bankName: string; accountNumber: string; accountName: string; bankCode?: string; verified?: boolean }, ctx: Ctx): AppState {
   const a = mustFind(state.artisans, artisanId, "Artisan");
   if (a.ownerId !== ctx.user.id) throw new Error(DENIED);
   const accountNumber = bank.accountNumber.replace(/\s/g, "");
   if (!bank.bankName.trim()) throw new Error("Choose your bank.");
   if (!/^\d{10}$/.test(accountNumber)) throw new Error("An account number has 10 digits.");
   if (bank.accountName.trim().length < 3) throw new Error("Enter the account name exactly as your bank shows it.");
-  return { ...state, artisans: replace(state.artisans, { ...a, bank: { bankName: bank.bankName.trim(), accountNumber, accountName: bank.accountName.trim() } }) };
+  return { ...state, artisans: replace(state.artisans, { ...a, bank: { bankName: bank.bankName.trim(), accountNumber, accountName: bank.accountName.trim(), ...(bank.bankCode ? { bankCode: bank.bankCode } : {}), verified: bank.verified === true } }) };
 }
 
 /** Admin records that an artisan's share of a released payment was sent to their bank. */
