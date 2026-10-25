@@ -29,6 +29,11 @@ export function AuthForm({ mode, action, next }: { mode: "sign-in" | "sign-up"; 
           <Field label="Password" hint={up ? "At least 8 characters." : undefined}>
             <input name="password" type="password" autoComplete={up ? "new-password" : "current-password"} minLength={up ? 8 : undefined} required className={inputCls} />
           </Field>
+          {!up && (
+            <Link href="/auth/forgot-password" className="-mt-2 justify-self-end text-sm font-bold text-link">
+              Forgot your password?
+            </Link>
+          )}
           <ErrorNote message={state?.error ?? null} />
           <Button type="submit" disabled={pending} className="mt-1 w-full">
             {pending ? "One moment..." : up ? "Create account" : "Sign in"}
