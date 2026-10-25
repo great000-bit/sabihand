@@ -79,7 +79,7 @@ export default function Home() {
         <div data-aos="fade-up" className="mb-8 text-center">
           <Eyebrow tone="blue">Where we work</Eyebrow>
           <h2 className="text-3xl font-extrabold sm:text-5xl">All of Nigeria, from your own area.</h2>
-          <p className="mx-auto mt-3 max-w-xl text-slate">Sabihand covers all {STATES.length - 1} states and the FCT, down to your local government area. Sign in, then tap the pin on the search to let your phone find yours.</p>
+          <p className="mx-auto mt-3 max-w-xl text-slate">Sabihand covers all {STATES.length - 1} states and the FCT, down to your local government area. Sign in, then tap the pin on the search to let your phone find your area.</p>
         </div>
         <div className="flex flex-wrap justify-center gap-3">
           {LAUNCH_CITIES.map((c, i) => (

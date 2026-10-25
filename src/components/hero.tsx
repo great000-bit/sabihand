@@ -1,16 +1,13 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { SearchForm } from "./search-form";
 import { LiveStrip } from "./live-strip";
-import { useStore } from "@/lib/store";
 import { LinkButton } from "./ui";
 
 const item = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } } };
 
 export function Hero() {
   const reduce = useReducedMotion();
-  const { viewer } = useStore();
   return (
     <motion.div className="mx-auto max-w-3xl text-center" initial={reduce ? "show" : "hidden"} animate="show" transition={{ staggerChildren: 0.12 }}>
       <motion.h1 variants={item} className="text-[2.6rem] font-extrabold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
@@ -20,17 +17,11 @@ export function Hero() {
         Find a verified plumber, electrician, tailor or carpenter near you. See the price first, and pay into a hold that is released only when you confirm the job.
       </motion.p>
       <motion.div variants={item} className="mx-auto mt-8 max-w-2xl">
-        {viewer ? (
-          <SearchForm />
-        ) : (
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex flex-wrap justify-center gap-3">
-              <LinkButton href="/auth/sign-up" variant="gold" className="!min-h-12 !px-8 !text-base">Create your free account</LinkButton>
-              <LinkButton href="/auth/sign-in" variant="ghost" className="!min-h-12 !px-8 !text-base">Sign in</LinkButton>
-            </div>
-            <p className="text-sm text-muted">Sign in to search for artisans near you.</p>
-          </div>
-        )}
+        <div className="flex flex-wrap justify-center gap-3">
+          <LinkButton href="/auth/sign-up" variant="gold" className="!min-h-12 !px-8 !text-base">Create your free account</LinkButton>
+          <LinkButton href="/auth/sign-in" variant="ghost" className="!min-h-12 !px-8 !text-base">Sign in</LinkButton>
+        </div>
+        <p className="mt-3 text-sm text-muted">Sign in to search for artisans near you.</p>
         <LiveStrip />
       </motion.div>
     </motion.div>
