@@ -199,6 +199,28 @@ describe("artisan profiles and verification", () => {
   });
 });
 
+describe("profile photos", () => {
+  it("only the owner sets or clears the profile photo", () => {
+    const s = e.setProfilePhoto(empty(), "a1", "img_0123456789abcdef", as(owner));
+    expect(s.artisans[0].photoId).toBe("img_0123456789abcdef");
+    expect(e.setProfilePhoto(s, "a1", null, as(owner)).artisans[0].photoId).toBeUndefined();
+    expect(() => e.setProfilePhoto(empty(), "a1", "img_0123456789abcdef", as(stranger))).toThrow();
+  });
+  it("adds and removes work photos, owner only, no duplicates, capped", () => {
+    expect(() => e.addPortfolioItem(empty(), "a1", "img_a", "x", as(stranger))).toThrow();
+    let s = e.addPortfolioItem(empty(), "a1", "img_a", "  New wiring  ", as(owner));
+    expect(s.artisans[0].portfolio).toMatchObject([{ imageId: "img_a", caption: "New wiring" }]);
+    expect(() => e.addPortfolioItem(s, "a1", "img_a", "", as(owner))).toThrow(/already/);
+    const id = s.artisans[0].portfolio[0].id;
+    expect(() => e.removePortfolioItem(s, "a1", id, as(stranger))).toThrow();
+    expect(() => e.removePortfolioItem(s, "a1", "nope", as(owner))).toThrow(/not on your profile/);
+    s = e.removePortfolioItem(s, "a1", id, as(owner));
+    expect(s.artisans[0].portfolio).toHaveLength(0);
+    for (let i = 0; i < e.MAX_PORTFOLIO; i++) s = e.addPortfolioItem(s, "a1", `img_${i}`, "", as(owner));
+    expect(() => e.addPortfolioItem(s, "a1", "img_extra", "", as(owner))).toThrow(/up to/);
+  });
+});
+
 describe("payouts", () => {
   const bank = { bankName: "GTBank", accountNumber: "0123 456 789", accountName: "Tunde Bello" };
   it("lets only the owner save valid bank details", () => {

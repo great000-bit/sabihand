@@ -9,6 +9,7 @@ import type { AppState, Trade, VerificationCheck } from "@/lib/types";
 import { getViewer } from "./session";
 import { ConflictError, loadAll, persist, type Snapshot } from "./repo";
 import { newId } from "./ids";
+import { ownsImage, pruneImages } from "./images";
 import { initializeTransaction, listBanks as paystackBanks, paystackEnabled, resolveAccount, type Bank } from "./paystack";
 
 export type Result = { error: string | null };
@@ -183,4 +184,35 @@ export async function startPayment(bookingId: string): Promise<Result & { url?: 
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Could not start the payment." };
   }
+}
+
+/** Photo steps: the image must have been uploaded by this same person, then the engine checks they own the profile. */
+async function withOwnImage(imageId: string, fn: () => Promise<Result>): Promise<Result> {
+  const user = await getViewer();
+  if (!user) return { error: SIGN_IN };
+  try {
+    if (!(await ownsImage(user.id, str(imageId, 40)))) return { error: "That photo was not uploaded by you. Upload it again." };
+  } catch {
+    return { error: SAVE_FAILED };
+  }
+  const r = await fn();
+  if (!r.error) await pruneImages(user.id).catch(() => undefined);
+  return r;
+}
+
+export const setProfilePhoto = async (artisanId: string, imageId: string) => withOwnImage(imageId, () => mutate((s, c) => eng.setProfilePhoto(s, str(artisanId, 60), str(imageId, 40), c)));
+export const addPortfolioPhoto = async (artisanId: string, imageId: string, caption: string) => withOwnImage(imageId, () => mutate((s, c) => eng.addPortfolioItem(s, str(artisanId, 60), str(imageId, 40), str(caption, 120), c)));
+
+export async function removeProfilePhoto(artisanId: string): Promise<Result> {
+  const r = await mutate((s, c) => eng.setProfilePhoto(s, str(artisanId, 60), null, c));
+  const user = await getViewer();
+  if (!r.error && user) await pruneImages(user.id).catch(() => undefined);
+  return r;
+}
+
+export async function removePortfolioPhoto(artisanId: string, itemId: string): Promise<Result> {
+  const r = await mutate((s, c) => eng.removePortfolioItem(s, str(artisanId, 60), str(itemId, 60), c));
+  const user = await getViewer();
+  if (!r.error && user) await pruneImages(user.id).catch(() => undefined);
+  return r;
 }

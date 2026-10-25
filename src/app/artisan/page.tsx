@@ -5,6 +5,7 @@ import { useStore } from "@/lib/store";
 import * as actions from "@/server/actions";
 import { isOpen } from "@/lib/booking";
 import { BookingRow } from "@/components/booking-row";
+import { ProfilePhotos } from "@/components/photo-tools";
 import { SignedInOnly } from "@/components/gate";
 import { Button, Card, Chip, ErrorNote, Field, LinkButton, PageHeader, StatCard, Tabs, VerifiedBadge, inputCls } from "@/components/ui";
 import { artisanPayoutKobo, formatNaira } from "@/lib/money";
@@ -175,6 +176,7 @@ function Dashboard() {
           {released > paidOut && !me.bank && " Add your payout account below so the Sabihand team can pay the rest."}
         </p>
       )}
+      <ProfilePhotos me={me} />
       <PayoutAccount me={me} />
 
       {v.status !== "verified" && (

@@ -26,16 +26,21 @@ export function PinIcon({ className = "h-3.5 w-3.5 flex-none" }: { className?: s
   );
 }
 
-export function Avatar({ name, size = 52, trade, ring = false, verified = false }: { name: string; size?: number; trade?: Trade; ring?: boolean; verified?: boolean }) {
+export function Avatar({ name, size = 52, trade, ring = false, verified = false, photoId }: { name: string; size?: number; trade?: Trade; ring?: boolean; verified?: boolean; photoId?: string }) {
   const [a, b] = trade ? TRADE_GRADIENT[trade] : ["#2250d6", "#0b1f4b"];
   return (
     <span className="relative flex-none" style={{ width: size, height: size }}>
-      <span
-        style={{ width: size, height: size, fontSize: size * 0.4, backgroundImage: `linear-gradient(135deg, ${a}, ${b})` }}
-        className={`flex items-center justify-center rounded-full font-display font-extrabold text-white ${ring ? "ring-4 ring-[#0b0b0e]" : ""}`}
-      >
-        {name.trim()[0]?.toUpperCase()}
-      </span>
+      {photoId ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={`/api/images/${photoId}`} alt="" width={size} height={size} style={{ width: size, height: size }} className={`rounded-full object-cover ${ring ? "ring-4 ring-[#0b0b0e]" : ""}`} />
+      ) : (
+        <span
+          style={{ width: size, height: size, fontSize: size * 0.4, backgroundImage: `linear-gradient(135deg, ${a}, ${b})` }}
+          className={`flex items-center justify-center rounded-full font-display font-extrabold text-white ${ring ? "ring-4 ring-[#0b0b0e]" : ""}`}
+        >
+          {name.trim()[0]?.toUpperCase()}
+        </span>
+      )}
       {verified && (
         <span aria-label="Verified" title="Verified" style={{ width: size * 0.3, height: size * 0.3, fontSize: size * 0.18 }} className="absolute bottom-0 right-0 flex items-center justify-center rounded-full bg-verified font-extrabold text-black ring-2 ring-[#0b0b0e]">
           ✓
@@ -65,7 +70,7 @@ export function ArtisanCard({ a, index = 0 }: { a: Artisan; index?: number }) {
         <div className="relative h-full overflow-hidden rounded-3xl border border-line bg-surface p-5 backdrop-blur-xl transition-colors group-hover:border-white/30">
           <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-40" style={{ background: TRADE_GRADIENT[a.trade][1] }} />
           <div className="relative flex gap-4">
-            <Avatar name={a.name} size={60} trade={a.trade} verified={verified} />
+            <Avatar name={a.name} size={60} trade={a.trade} verified={verified} photoId={a.photoId} />
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-lg font-extrabold leading-tight">{a.businessName}</h3>
               <p className="truncate text-sm text-slate">
