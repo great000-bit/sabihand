@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { useStore } from "@/lib/store";
-import { LinkButton } from "./ui";
 
 /** The wordmark. On a dark page it switches to the light-on-midnight version by itself. */
 export function Logo({ dark = false, width = 150 }: { dark?: boolean; width?: number }) {
@@ -41,12 +40,12 @@ function AccountMenu({ guestView = false }: { guestView?: boolean }) {
   if (!viewer || guestView) {
     return (
       <div className="flex items-center gap-2">
-        <Link href="/auth/sign-in" className="hidden min-h-10 items-center rounded-full px-4 text-[15px] font-bold text-ink hover:bg-mist sm:inline-flex">
+        <Link href="/auth/sign-in" className="hidden min-h-10 items-center rounded-full px-4 text-[13px] font-extrabold uppercase tracking-wide text-ink hover:bg-white/10 sm:inline-flex">
           Sign in
         </Link>
-        <LinkButton href="/auth/sign-up" variant="dark" className="!min-h-10 !whitespace-nowrap !px-4 sm:!px-5">
+        <Link href="/auth/sign-up" className="inline-flex min-h-10 items-center whitespace-nowrap rounded-full bg-gold px-4 text-[13px] font-extrabold uppercase tracking-wide text-midnight transition hover:brightness-110 sm:px-6">
           Get started
-        </LinkButton>
+        </Link>
       </div>
     );
   }
@@ -87,31 +86,31 @@ export function Header() {
   const [menu, setMenu] = useState(false);
   const active = (href: string) => path === href || path.startsWith(href + "/");
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur-xl dark:bg-black/50">
-      <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto] items-center gap-4 px-4 py-3 sm:px-6 md:grid-cols-[1fr_auto_1fr]">
+    <header className="sticky top-0 z-30 px-3 pt-3 sm:px-6">
+      <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto] items-center gap-3 rounded-full border border-white/10 bg-black/60 py-2 pl-5 pr-2 shadow-[0_10px_40px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl md:grid-cols-[1fr_auto_1fr]">
         <Link href="/" aria-label="Sabihand home" className="flex-none justify-self-start">
           <Logo width={132} />
         </Link>
-        <nav className="hidden gap-1 md:flex" aria-label="Main">
+        <nav className="hidden gap-1 rounded-full border border-white/10 bg-white/5 p-1.5 md:flex" aria-label="Main">
           {items.map((i) => (
-            <Link key={i.href} href={i.href} aria-current={active(i.href) ? "page" : undefined} className={`rounded-full px-4 py-2 text-[15px] font-bold ${active(i.href) ? "bg-midnight text-white dark:bg-trust" : "text-slate hover:bg-mist"}`}>
+            <Link key={i.href} href={i.href} aria-current={active(i.href) ? "page" : undefined} className={`rounded-full px-4 py-2 text-[13px] font-extrabold uppercase tracking-wide transition ${active(i.href) ? "bg-white/15 text-white" : "text-slate hover:text-white"}`}>
               {i.label}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2 justify-self-end">
+        <div className="flex items-center gap-1 justify-self-end">
           <AccountMenu guestView={path === "/"} />
-          <button onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Menu" className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-line md:hidden">
+          <button onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Menu" className="ml-1 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 md:hidden">
             <span aria-hidden className="text-lg leading-none">{menu ? "✕" : "☰"}</span>
           </button>
         </div>
       </div>
       {menu && (
-        <nav className="border-t border-line bg-solid px-4 py-3 md:hidden" aria-label="Mobile">
+        <nav className="mx-auto mt-2 max-w-6xl rounded-3xl border border-white/10 bg-solid p-2 md:hidden" aria-label="Mobile">
           <ul className="grid gap-1">
             {items.map((i) => (
               <li key={i.href}>
-                <Link href={i.href} onClick={() => setMenu(false)} className={`block rounded-2xl px-4 py-3 text-base font-bold ${active(i.href) ? "bg-midnight text-white dark:bg-trust" : "text-slate"}`}>
+                <Link href={i.href} onClick={() => setMenu(false)} className={`block rounded-2xl px-4 py-3 text-sm font-extrabold uppercase tracking-wide ${active(i.href) ? "bg-white/15 text-white" : "text-slate"}`}>
                   {i.label}
                 </Link>
               </li>
