@@ -2,8 +2,13 @@
 export interface Slide {
   src: string;
   alt: string;
+  /** Where to anchor the crop, as an object-position value. Default centre. */
+  position?: string;
 }
 
-export const AUTH_SLIDES: Slide[] = [{ src: "/auth/mechanics.jpg", alt: "A mechanic and a colleague checking a tyre in a workshop" }];
+export const AUTH_SLIDES: Slide[] = [
+  { src: "/auth/mechanics.jpg", alt: "A mechanic and a colleague checking a tyre in a workshop" },
+  { src: "/auth/barber.jpg", alt: "A barber cutting a customer's hair in a barbershop chair", position: "top" },
+];
 
 export const SLIDE_SECONDS = 5;
