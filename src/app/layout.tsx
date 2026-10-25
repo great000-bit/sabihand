@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
 import { Header, Footer } from "@/components/chrome";
+import { AosInit } from "@/components/aos-init";
 import { getViewer } from "@/server/session";
 import { loadAll, visibleTo } from "@/server/repo";
 import { dbConfigured } from "@/server/db";
@@ -40,6 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={`${bricolage.variable} ${figtree.variable}`}>
       <body>
         <StoreProvider state={state} viewer={viewer} config={{ paymentsEnabled: paystackEnabled(), dataAvailable }}>
+          <AosInit />
           <Header />
           <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-8 sm:px-6">{children}</main>
           <Footer />

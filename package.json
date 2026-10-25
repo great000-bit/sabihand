@@ -13,12 +13,16 @@
   "dependencies": {
     "@neondatabase/auth": "^0.7.0-beta",
     "@neondatabase/serverless": "^1.2.0",
+    "aos": "^2.3.4",
+    "framer-motion": "^14.6.0",
+    "gsap": "^3.15.0",
     "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
+    "@types/aos": "^3.0.8",
     "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
