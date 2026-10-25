@@ -34,11 +34,11 @@ function Avatar({ name }: { name: string }) {
   return <span className="flex h-9 w-9 items-center justify-center rounded-full bg-midnight font-display text-sm font-extrabold text-gold">{name.trim()[0]?.toUpperCase()}</span>;
 }
 
-/** `compact` shows only the initial: the landing page keeps the person's name off the page. */
-function AccountMenu({ compact = false }: { compact?: boolean }) {
+/** `guestView` always shows the Sign in and Get started buttons: the landing page keeps the signed-in person off the page. */
+function AccountMenu({ guestView = false }: { guestView?: boolean }) {
   const { viewer } = useStore();
   const [open, setOpen] = useState(false);
-  if (!viewer) {
+  if (!viewer || guestView) {
     return (
       <div className="flex items-center gap-2">
         <Link href="/auth/sign-in" className="hidden min-h-10 items-center rounded-full px-4 text-[15px] font-bold text-ink hover:bg-mist sm:inline-flex">
@@ -54,7 +54,7 @@ function AccountMenu({ compact = false }: { compact?: boolean }) {
     <div className="relative">
       <button onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="menu" aria-label={`Account menu for ${viewer.name}`} className="flex min-h-10 items-center gap-2 rounded-full border-2 border-line py-0.5 pl-0.5 pr-3 hover:border-ink">
         <Avatar name={viewer.name} />
-        {!compact && <span className="hidden max-w-28 truncate text-sm font-bold sm:inline">{viewer.name}</span>}
+        <span className="hidden max-w-28 truncate text-sm font-bold sm:inline">{viewer.name}</span>
         <span aria-hidden className="text-xs text-muted">▾</span>
       </button>
       {open && (
@@ -92,15 +92,15 @@ export function Header() {
         <Link href="/" aria-label="Sabihand home" className="flex-none">
           <Logo width={132} />
         </Link>
-        <nav className="ml-4 hidden gap-1 md:flex" aria-label="Main">
-          {items.map((i) => (
-            <Link key={i.href} href={i.href} aria-current={active(i.href) ? "page" : undefined} className={`rounded-full px-4 py-2 text-[15px] font-bold ${active(i.href) ? "bg-midnight text-white dark:bg-trust" : "text-slate hover:bg-mist"}`}>
-              {i.label}
-            </Link>
-          ))}
-        </nav>
         <div className="ml-auto flex items-center gap-2">
-          <AccountMenu compact={path === "/"} />
+          <nav className="mr-2 hidden gap-1 md:flex" aria-label="Main">
+            {items.map((i) => (
+              <Link key={i.href} href={i.href} aria-current={active(i.href) ? "page" : undefined} className={`rounded-full px-4 py-2 text-[15px] font-bold ${active(i.href) ? "bg-midnight text-white dark:bg-trust" : "text-slate hover:bg-mist"}`}>
+                {i.label}
+              </Link>
+            ))}
+          </nav>
+          <AccountMenu guestView={path === "/"} />
           <button onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Menu" className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-line md:hidden">
             <span aria-hidden className="text-lg leading-none">{menu ? "✕" : "☰"}</span>
           </button>

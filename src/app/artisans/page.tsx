@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { searchArtisans, type SortKey } from "@/lib/search";
 import { LAUNCH_CITIES, TRADES, areaById, areaLabel, stateById } from "@/lib/catalog";
 import type { Trade } from "@/lib/types";
+import { SignedInOnly } from "@/components/gate";
 import { ArtisanCard } from "@/components/artisan-card";
 import { AreaSelect } from "@/components/location-picker";
 import { Empty, Field, LinkButton, PageHeader, inputCls } from "@/components/ui";
@@ -96,8 +97,10 @@ function Results() {
 
 export default function ArtisansPage() {
   return (
-    <Suspense fallback={<p className="py-12 text-center text-muted">Loading artisans…</p>}>
-      <Results />
-    </Suspense>
+    <SignedInOnly title="Sign in to find artisans">
+      <Suspense fallback={<p className="py-12 text-center text-muted">Loading artisans…</p>}>
+        <Results />
+      </Suspense>
+    </SignedInOnly>
   );
 }
