@@ -6,7 +6,8 @@ export type SortKey = "relevance" | "price_low" | "rating";
 
 export interface SearchParams {
   trade?: Trade | "";
-  city?: string;
+  /** Everything in one state. */
+  stateId?: string;
   areaId?: string;
   verifiedOnly?: boolean;
   sort?: SortKey;
@@ -16,9 +17,9 @@ export function isPublished(a: Artisan): boolean {
   return a.verification.status !== "rejected" && a.services.length > 0;
 }
 
-export function servesArea(a: Artisan, p: Pick<SearchParams, "city" | "areaId">): boolean {
+export function servesArea(a: Artisan, p: Pick<SearchParams, "stateId" | "areaId">): boolean {
   if (p.areaId) return a.areaIds.includes(p.areaId);
-  if (p.city) return a.areaIds.some((id) => areaById(id)?.city === p.city);
+  if (p.stateId) return a.areaIds.some((id) => areaById(id)?.stateId === p.stateId);
   return true;
 }
 

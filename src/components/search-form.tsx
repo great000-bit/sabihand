@@ -2,26 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AREAS, CITIES, CITY_STATE, TRADES } from "@/lib/catalog";
+import { TRADES } from "@/lib/catalog";
+import { AreaSelect } from "./location-picker";
 import { Button, inputCls } from "./ui";
-
-export function AreaSelect({ value, onChange, id, allLabel = "Anywhere in Lagos, Abuja and Port Harcourt" }: { value: string; onChange: (v: string) => void; id?: string; allLabel?: string }) {
-  return (
-    <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className={inputCls}>
-      <option value="">{allLabel}</option>
-      {CITIES.map((c) => (
-        <optgroup key={c} label={`${c}, ${CITY_STATE[c]}`}>
-          <option value={`city:${c}`}>All of {c}</option>
-          {AREAS.filter((a) => a.city === c).map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </optgroup>
-      ))}
-    </select>
-  );
-}
 
 export function SearchForm() {
   const router = useRouter();
@@ -29,7 +12,7 @@ export function SearchForm() {
   const [area, setArea] = useState("");
   return (
     <form
-      className="grid gap-2 rounded-[1.75rem] border-2 border-line bg-white p-2.5 text-left shadow-[0_12px_40px_-12px_rgba(11,31,75,0.25)] sm:grid-cols-[1fr_1.3fr_auto]"
+      className="grid gap-2 rounded-[1.75rem] border-2 border-line bg-white p-2.5 text-left shadow-[0_12px_40px_-12px_rgba(11,31,75,0.25)] sm:grid-cols-[1fr_2.2fr_auto] sm:items-start"
       onSubmit={(e) => {
         e.preventDefault();
         const q = new URLSearchParams({ trade });

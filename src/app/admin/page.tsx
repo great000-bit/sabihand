@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import * as actions from "@/server/actions";
-import { areaById, tradeById } from "@/lib/catalog";
+import { areaSummary, tradeById } from "@/lib/catalog";
 import { artisanPayoutKobo, formatNaira } from "@/lib/money";
 import type { VerificationCheck } from "@/lib/types";
 import { SignedInOnly } from "@/components/gate";
@@ -57,7 +57,7 @@ function VerificationCard({ id }: { id: string }) {
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-lg font-extrabold">{a.businessName}</h3>
-          <p className="text-sm text-slate">{tradeById(a.trade).label} · {a.name} · {a.areaIds.map((i) => areaById(i)?.name).join(", ")}</p>
+          <p className="text-sm text-slate">{tradeById(a.trade).label} · {a.name} · {areaSummary(a.areaIds, 4)}</p>
           <p className="text-sm text-slate">Phone: <b>{a.phone}</b></p>
         </div>
         <VerifiedBadge v={a.verification} />

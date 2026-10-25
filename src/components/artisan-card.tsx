@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Artisan } from "@/lib/types";
 import { useStore } from "@/lib/store";
-import { areaById, tradeById } from "@/lib/catalog";
+import { areaSummary, tradeById } from "@/lib/catalog";
 import { formatPriceRange } from "@/lib/money";
 import { ratingSummary } from "@/lib/reviews";
 import { Card, Chip, VerifiedBadge } from "./ui";
@@ -29,7 +29,7 @@ export function RatingLine({ artisanId }: { artisanId: string }) {
 
 export function ArtisanCard({ a }: { a: Artisan }) {
   const first = a.services[0];
-  const areas = a.areaIds.map((id) => areaById(id)?.name).filter(Boolean).slice(0, 2).join(", ");
+  const areas = areaSummary(a.areaIds, 2);
   return (
     <Link href={`/artisans/${a.id}`} className="block">
       <Card className="p-5 transition hover:border-midnight">

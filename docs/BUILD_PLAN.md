@@ -29,7 +29,7 @@ Known limits (honest list): there is no photo upload, notifications, or terms an
 
 | Decision | Default | Where |
 | --- | --- | --- |
-| Launch | Lagos, Abuja and Port Harcourt (Rivers State), city by city; first areas near universities (Akoka, Gwagwalada, Choba) | `src/lib/catalog.ts` |
+| Launch | All of Nigeria: 36 states, the FCT and 774 local governments, with GPS to find the nearest area. Lagos, Abuja and Port Harcourt stay as the first neighbourhood lists (Akoka, Gwagwalada, Choba) | `src/lib/catalog.ts`, `src/data/locations.json` |
 | Trades | Plumber, electrician, tailor, carpenter | `src/lib/catalog.ts` |
 | Commission | 10% of the job, taken from the artisan payout | `COMMISSION_BPS` in `src/lib/money.ts` |
 | Payment | Paystack (card checkout). Needs `PAYSTACK_SECRET_KEY` | `src/server/paystack.ts`, `recordPayment` in engine |

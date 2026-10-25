@@ -232,7 +232,7 @@ describe("search", () => {
     const ids = searchArtisans(s, { trade: "electrical", areaId: "lagos-yaba" }).map((a) => a.id);
     expect(ids).toEqual(["a1", "a2"]);
     expect(searchArtisans(s, { trade: "plumbing" })).toHaveLength(0);
-    expect(searchArtisans(s, { city: "Abuja" }).map((a) => a.id)).toEqual(["a3"]);
+    expect(searchArtisans(s, { stateId: "fct" }).map((a) => a.id)).toEqual(["a3"]);
   });
   it("puts verified artisans first and can filter to verified", () => {
     expect(searchArtisans(s, { trade: "electrical" })[0].id).toBe("a1");

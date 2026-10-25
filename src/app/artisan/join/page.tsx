@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { registerArtisan } from "@/server/actions";
-import { AREAS, CITIES, TRADES } from "@/lib/catalog";
+import { MAX_AREAS, STATES, TRADES, areaLabel, areasInState, stateById } from "@/lib/catalog";
+import { LocateButton } from "@/components/location-picker";
 import { SignedInOnly } from "@/components/gate";
 import type { Trade } from "@/lib/types";
 import { Button, Card, ErrorNote, Field, LinkButton, PageHeader, inputCls } from "@/components/ui";
@@ -14,6 +15,8 @@ function JoinForm() {
   const router = useRouter();
   const [f, setF] = useState({ name: viewer?.name ?? "", businessName: "", phone: "", trade: "plumbing" as Trade, bio: "", availability: "", service: "", min: "", max: "" });
   const [areas, setAreas] = useState<string[]>([]);
+  const [stateId, setStateId] = useState("");
+  const [find, setFind] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
 
@@ -54,22 +57,52 @@ function JoinForm() {
             </Field>
           </div>
           <fieldset>
-            <legend className="mb-3 text-sm font-bold">Areas you serve</legend>
-            <div className="space-y-4">
-              {CITIES.map((c) => (
-                <div key={c}>
-                  <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-muted">{c}</p>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {AREAS.filter((a) => a.city === c).map((a) => (
+            <legend className="mb-1 text-sm font-bold">Areas you serve</legend>
+            <p className="mb-3 text-sm text-slate">Sabihand covers every state and local government in Nigeria. Pick a state, tick where you work, or let your phone find the nearest area.</p>
+            <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-start">
+              <select aria-label="State" value={stateId} onChange={(e) => { setStateId(e.target.value); setFind(""); }} className={inputCls}>
+                <option value="">Choose a state</option>
+                {STATES.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+              <LocateButton onFound={(a) => { setStateId(a.stateId); setAreas((cur) => (cur.includes(a.id) || cur.length >= MAX_AREAS ? cur : [...cur, a.id])); }} />
+            </div>
+            {stateId && (() => {
+              const inState = areasInState(stateId);
+              const shown = inState.filter((a) => a.name.toLowerCase().includes(find.trim().toLowerCase()));
+              const allOn = inState.every((a) => areas.includes(a.id));
+              return (
+                <div className="mt-3 space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {inState.length > 12 && <input value={find} onChange={(e) => setFind(e.target.value)} className={`${inputCls} sm:max-w-xs`} placeholder={`Search ${stateById(stateId)?.name} areas`} aria-label="Search areas" />}
+                    <button type="button" className="min-h-10 rounded-full px-3 text-sm font-bold text-trust underline-offset-2 hover:underline" onClick={() => setAreas(allOn ? areas.filter((id) => !inState.some((a) => a.id === id)) : [...new Set([...areas, ...inState.map((a) => a.id)])].slice(0, MAX_AREAS))}>
+                      {allOn ? `Clear ${stateById(stateId)?.name}` : `Select all of ${stateById(stateId)?.name}`}
+                    </button>
+                  </div>
+                  <div className="grid max-h-72 gap-2 overflow-y-auto sm:grid-cols-2">
+                    {shown.map((a) => (
                       <label key={a.id} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-2xl border-2 border-line px-3 text-sm font-semibold has-[:checked]:border-trust has-[:checked]:bg-[#eef2fd]">
-                        <input type="checkbox" className="h-5 w-5 accent-trust" checked={areas.includes(a.id)} onChange={(e) => setAreas(e.target.checked ? [...areas, a.id] : areas.filter((x) => x !== a.id))} />
+                        <input type="checkbox" className="h-5 w-5 accent-trust" checked={areas.includes(a.id)} onChange={(e) => setAreas(e.target.checked ? (areas.length >= MAX_AREAS ? areas : [...areas, a.id]) : areas.filter((x) => x !== a.id))} />
                         {a.name}
                       </label>
                     ))}
+                    {shown.length === 0 && <p className="text-sm text-slate">No area matches “{find}”.</p>}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })()}
+            {areas.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-muted">You serve {areas.length} {areas.length === 1 ? "area" : "areas"}</p>
+                <div className="flex flex-wrap gap-2">
+                  {areas.slice(0, 12).map((id) => (
+                    <button type="button" key={id} onClick={() => setAreas(areas.filter((x) => x !== id))} className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-[#eef2fd] px-3 text-[13px] font-bold text-trust" aria-label={`Remove ${areaLabel(id)}`}>
+                      {areaLabel(id)} <span aria-hidden>×</span>
+                    </button>
+                  ))}
+                  {areas.length > 12 && <span className="inline-flex min-h-9 items-center text-[13px] font-bold text-slate">and {areas.length - 12} more</span>}
+                </div>
+              </div>
+            )}
           </fieldset>
           <Field label="About your work"><textarea value={f.bio} onChange={set("bio")} rows={3} maxLength={600} className={inputCls} placeholder="Years of experience, what you are known for" /></Field>
           <Field label="When are you available?"><input value={f.availability} onChange={set("availability")} className={inputCls} placeholder="Mon to Sat, 8am to 6pm" maxLength={120} /></Field>

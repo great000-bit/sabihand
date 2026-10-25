@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store";
 import * as actions from "@/server/actions";
 import { actorOn } from "@/lib/access";
 import { nextActions } from "@/lib/booking";
-import { areaById, tradeById } from "@/lib/catalog";
+import { areaLabel, tradeById } from "@/lib/catalog";
 import { artisanPayoutKobo, commissionKobo, formatNaira, nairaToKobo } from "@/lib/money";
 import { SignedInOnly } from "@/components/gate";
 import { Button, Card, Chip, ErrorNote, Field, StatusPill, inputCls } from "@/components/ui";
@@ -76,7 +76,7 @@ function Detail() {
               <Link href={back} className="text-sm font-bold text-trust">← Back</Link>
               <h1 className="mt-2 text-3xl font-extrabold">{b.title}</h1>
               <p className="text-slate">
-                {tradeById(b.trade).label} · {artisan?.businessName} · {areaById(b.areaId)?.name}
+                {tradeById(b.trade).label} · {artisan?.businessName} · {areaLabel(b.areaId)}
               </p>
             </div>
             <StatusPill status={b.status} />

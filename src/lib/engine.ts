@@ -3,7 +3,7 @@ import { transition } from "./booking";
 import { actorOn } from "./access";
 import { commissionKobo } from "./money";
 import { normalisePhone } from "./phone";
-import { AREAS, TRADES } from "./catalog";
+import { MAX_AREAS, TRADES, areaById } from "./catalog";
 
 /**
  * Every function takes the current state and returns the next one, or throws an Error whose
@@ -233,7 +233,8 @@ export function registerArtisan(
   const phone = normalisePhone(input.phone);
   if (!phone) throw new Error("Enter a Nigerian mobile number customers can reach you on, like 0803 123 4567.");
   if (!TRADES.some((t) => t.id === input.trade)) throw new Error("Choose your trade.");
-  if (input.areaIds.length === 0 || !input.areaIds.every((id) => AREAS.some((a) => a.id === id))) throw new Error("Choose at least one area you serve.");
+  if (input.areaIds.length === 0 || !input.areaIds.every((id) => areaById(id))) throw new Error("Choose at least one area you serve.");
+  if (new Set(input.areaIds).size > MAX_AREAS) throw new Error(`Choose at most ${MAX_AREAS} areas. You can add more later.`);
   if (!(input.service.minNaira > 0)) throw new Error("Add one service with a starting price.");
   if (!input.service.title.trim()) throw new Error("Say what your first service is.");
   if (input.service.maxNaira !== null && input.service.maxNaira < input.service.minNaira) throw new Error("The top of your price range cannot be below the starting price.");
@@ -244,7 +245,7 @@ export function registerArtisan(
     businessName: input.businessName.trim(),
     phone,
     trade: input.trade,
-    areaIds: input.areaIds,
+    areaIds: [...new Set(input.areaIds)],
     bio: input.bio.trim(),
     availability: input.availability.trim() || "Ask the artisan",
     services: [{ title: input.service.title.trim(), minKobo: Math.round(input.service.minNaira * 100), maxKobo: input.service.maxNaira ? Math.round(input.service.maxNaira * 100) : null }],
