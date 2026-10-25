@@ -6,7 +6,7 @@ import * as actions from "@/server/actions";
 import { isOpen } from "@/lib/booking";
 import { BookingRow } from "@/components/booking-row";
 import { SignedInOnly } from "@/components/gate";
-import { Button, Card, Chip, ErrorNote, Field, LinkButton, PageHeader, VerifiedBadge, inputCls } from "@/components/ui";
+import { Button, Card, Chip, ErrorNote, Field, LinkButton, PageHeader, StatCard, Tabs, VerifiedBadge, inputCls } from "@/components/ui";
 import { artisanPayoutKobo, formatNaira } from "@/lib/money";
 import { ratingSummary } from "@/lib/reviews";
 import { BANKS } from "@/lib/catalog";
@@ -129,6 +129,7 @@ function Dashboard() {
   const [err, setErr] = useState<string | null>(null);
   const [reporting, setReporting] = useState<string | null>(null);
   const [reason, setReason] = useState("");
+  const [tab, setTab] = useState<"new" | "active" | "finished" | "reviews">("new");
   if (!me) {
     return (
       <Card className="mx-auto mt-6 max-w-lg p-8 text-center sm:p-10">
@@ -151,7 +152,7 @@ function Dashboard() {
   const v = me.verification;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       <PageHeader
         title={me.businessName}
         action={<LinkButton href={`/artisans/${me.id}`} variant="ghost">View public profile</LinkButton>}
@@ -162,14 +163,14 @@ function Dashboard() {
         </span>
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Card className="p-5"><p className="text-sm font-bold text-muted">New requests</p><p className="font-display text-4xl font-extrabold">{incoming.length}</p></Card>
-        <Card className="p-5"><p className="text-sm font-bold text-muted">Active jobs</p><p className="font-display text-4xl font-extrabold">{active.length}</p></Card>
-        <Card className="p-5"><p className="text-sm font-bold text-muted">Held for you</p><p className="font-display text-3xl font-extrabold sm:text-4xl">{formatNaira(held)}</p></Card>
-        <Card className="bg-panel p-5 text-white"><p className="text-sm font-bold text-gold">Earned</p><p className="font-display text-3xl font-extrabold sm:text-4xl">{formatNaira(released)}</p></Card>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="New requests" value={incoming.length} hint={incoming.length ? "Waiting for your reply" : "Nothing waiting"} tone={incoming.length ? "glow" : "plain"} />
+        <StatCard label="Active jobs" value={active.length} />
+        <StatCard label="Held for you" value={formatNaira(held)} hint="Paid in, released when the job is confirmed" />
+        <StatCard label="Earned" value={formatNaira(released)} hint={paidOut ? `${formatNaira(paidOut)} paid to your bank` : undefined} tone="gold" />
       </div>
       {released > 0 && (
-        <p className="-mt-6 text-sm text-muted">
+        <p className="text-sm text-muted">
           Earnings are after the Sabihand commission. {formatNaira(paidOut)} has been paid to your bank so far.
           {released > paidOut && !me.bank && " Add your payout account below so the Sabihand team can pay the rest."}
         </p>
@@ -187,23 +188,34 @@ function Dashboard() {
       )}
       <ErrorNote message={err} />
 
-      <section className="space-y-3">
-        <h2 className="text-2xl font-extrabold">New requests</h2>
-        {incoming.length === 0 ? <p className="text-slate">No new requests. Share your profile link to get your first one.</p> : incoming.map((b) => <BookingRow key={b.id} b={b} artisanName={me.businessName} showCustomer />)}
-      </section>
-      <section className="space-y-3">
-        <h2 className="text-2xl font-extrabold">Active jobs</h2>
-        {active.length === 0 ? <p className="text-slate">Nothing active.</p> : active.map((b) => <BookingRow key={b.id} b={b} artisanName={me.businessName} showCustomer />)}
-      </section>
-      {done.length > 0 && (
+      <Tabs
+        tabs={[
+          { id: "new", label: "New requests", count: incoming.length, alert: true },
+          { id: "active", label: "Active", count: active.length },
+          { id: "finished", label: "Finished", count: done.length },
+          { id: "reviews", label: "Reviews", count: reviews.length },
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
+      {tab === "new" && (
         <section className="space-y-3">
-          <h2 className="text-2xl font-extrabold">Finished</h2>
-          {done.map((b) => <BookingRow key={b.id} b={b} artisanName={me.businessName} showCustomer />)}
+          {incoming.length === 0 ? <Card className="p-5 text-slate">No new requests. Share your profile link to get your first one.</Card> : incoming.map((b) => <BookingRow key={b.id} b={b} artisanName={me.businessName} showCustomer />)}
         </section>
       )}
-      {reviews.length > 0 && (
+      {tab === "active" && (
         <section className="space-y-3">
-          <h2 className="text-2xl font-extrabold">Your reviews</h2>
+          {active.length === 0 ? <Card className="p-5 text-slate">Nothing active.</Card> : active.map((b) => <BookingRow key={b.id} b={b} artisanName={me.businessName} showCustomer />)}
+        </section>
+      )}
+      {tab === "finished" && (
+        <section className="space-y-3">
+          {done.length === 0 ? <Card className="p-5 text-slate">Finished jobs appear here.</Card> : done.map((b) => <BookingRow key={b.id} b={b} artisanName={me.businessName} showCustomer />)}
+        </section>
+      )}
+      {tab === "reviews" && (
+        <section className="space-y-3">
+          {reviews.length === 0 && <Card className="p-5 text-slate">No reviews yet. They appear after a customer completes a job.</Card>}
           {reviews.map((r) => (
             <Card key={r.id} className="p-5">
               <p className="font-bold">{"★".repeat(r.rating)}<span className="text-line">{"★".repeat(5 - r.rating)}</span> <span className="ml-2 text-sm font-medium text-muted">{r.customerName}</span></p>

@@ -117,3 +117,38 @@ export function PageHeader({ title, children, action }: { title: ReactNode; chil
 export function Eyebrow({ children, tone = "gold" }: { children: ReactNode; tone?: "gold" | "blue" }) {
   return <p className={`mb-3 text-[13px] font-extrabold uppercase tracking-[0.14em] ${tone === "gold" ? "text-gold" : "text-link"}`}>{children}</p>;
 }
+
+/** A big number with a label. `gold` is the one highlighted figure; its text is fixed dark so it reads on the gold. */
+export function StatCard({ label, value, hint, tone = "plain" }: { label: string; value: ReactNode; hint?: string; tone?: "plain" | "gold" | "glow" }) {
+  const t = {
+    plain: "border-line bg-surface text-ink",
+    gold: "border-gold bg-gold text-midnight",
+    glow: "border-trust/40 bg-trust/15 text-ink",
+  }[tone];
+  return (
+    <div className={`rounded-3xl border p-5 backdrop-blur-xl ${t}`}>
+      <p className={`text-[13px] font-extrabold uppercase tracking-wide ${tone === "gold" ? "text-midnight/70" : "text-muted"}`}>{label}</p>
+      <p className="mt-1 font-display text-3xl font-extrabold leading-tight sm:text-4xl">{value}</p>
+      {hint && <p className={`mt-1 text-sm ${tone === "gold" ? "text-midnight/70" : "text-muted"}`}>{hint}</p>}
+    </div>
+  );
+}
+
+/** A row of pill tabs with optional counts. `alert` counts (things waiting on you) are drawn in gold. */
+export function Tabs<T extends string>({ tabs, value, onChange }: { tabs: { id: T; label: string; count?: number; alert?: boolean }[]; value: T; onChange: (id: T) => void }) {
+  return (
+    <div role="tablist" className="no-scrollbar flex gap-1 overflow-x-auto rounded-full border border-line bg-white/5 p-1.5">
+      {tabs.map((t) => {
+        const on = t.id === value;
+        return (
+          <button key={t.id} role="tab" aria-selected={on} onClick={() => onChange(t.id)} className={`flex flex-none items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold transition ${on ? "bg-white text-midnight" : "text-slate hover:text-ink"}`}>
+            {t.label}
+            {t.count !== undefined && (
+              <span className={`min-w-5 rounded-full px-1.5 py-0.5 text-center text-xs font-extrabold ${t.alert && t.count > 0 ? "bg-gold text-midnight" : on ? "bg-midnight/10 text-midnight" : "bg-white/10 text-slate"}`}>{t.count}</span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

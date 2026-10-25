@@ -103,3 +103,13 @@ h1, h2, h3, .font-display {
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* The browser draws a dropdown's list from the option colours. The fields are translucent, so give the list a solid dark background. */
+select option,
+select optgroup {
+  background-color: var(--c-solid);
+  color: var(--c-ink);
+}
+select option:disabled {
+  color: var(--c-muted);
+}
