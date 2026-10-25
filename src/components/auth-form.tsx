@@ -53,9 +53,6 @@ export function AuthForm({ mode, next, problem }: { mode: "sign-in" | "sign-up";
             {busy ? "Opening Google..." : up ? "Sign up with Google" : "Continue with Google"}
           </button>
           <ErrorNote message={error} />
-          <p className="text-center text-xs text-muted">
-            We only receive your name and email from Google. We never see your Google password.
-          </p>
           {up && (
             <p className="text-center text-xs text-muted">
               By creating an account you agree to our <Link href="/terms" className="font-bold text-link">Terms</Link> and <Link href="/privacy" className="font-bold text-link">Privacy policy</Link>.
