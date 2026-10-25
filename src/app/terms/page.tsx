@@ -16,7 +16,7 @@ export default function TermsPage() {
         <p>For now Sabihand is open in Port Harcourt, Rivers State. Artisans can list only areas in and around Port Harcourt, and requests can only be made for those areas. We will announce new cities in the app.</p>
       </Section>
       <Section title="Your account">
-        <p>You must be 18 or older. Give us true details and keep your password private. You are responsible for what happens under your account.</p>
+        <p>You must be 18 or older. Give us true details and keep your Google account secure. You are responsible for what happens under your account.</p>
         <p>One person can be both a customer and an artisan, with one artisan profile each.</p>
       </Section>
       <Section title="How a job works">
