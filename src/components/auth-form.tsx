@@ -33,6 +33,11 @@ export function AuthForm({ mode, action, next }: { mode: "sign-in" | "sign-up"; 
           <Button type="submit" disabled={pending} className="mt-1 w-full">
             {pending ? "One moment..." : up ? "Create account" : "Sign in"}
           </Button>
+          {up && (
+            <p className="text-center text-xs text-muted">
+              By creating an account you agree to our <Link href="/terms" className="font-bold text-link">Terms</Link> and <Link href="/privacy" className="font-bold text-link">Privacy policy</Link>.
+            </p>
+          )}
         </form>
         <p className="mt-6 text-center text-sm text-slate">
           {up ? "Already have an account? " : "New to Sabihand? "}
