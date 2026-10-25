@@ -18,7 +18,7 @@ const ENTRIES: { initial: TargetAndTransition; animate: TargetAndTransition; dur
 
 function Photo({ index }: { index: number }) {
   const s = AUTH_SLIDES[index];
-  return <Image src={s.src} alt={s.alt} fill sizes="(max-width: 768px) 0px, 560px" priority={index === 0} className="object-cover object-center" />;
+  return <Image src={s.src} alt={s.alt} fill sizes="(max-width: 768px) 0px, 560px" priority={index === 0} className="object-cover" style={{ objectPosition: s.position ?? "center" }} />;
 }
 
 /** The picture panel for the sign-in pages: the photos change every few seconds with a different animation each time. */
