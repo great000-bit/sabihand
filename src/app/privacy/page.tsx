@@ -9,7 +9,7 @@ export default function PrivacyPage() {
     <LegalPage title="Privacy policy" intro="We collect only what we need to connect customers and artisans and to make payments safe. This page says what that is and what you can ask us to do.">
       <Section title="What we collect">
         <ul className="list-disc space-y-1 pl-5">
-          <li><strong className="text-ink">Account:</strong> your name, email address and password (stored scrambled, never in plain text).</li>
+          <li><strong className="text-ink">Account:</strong> your name and email address, which we get from your Google account when you sign in. We never see or store your Google password.</li>
           <li><strong className="text-ink">Requests and jobs:</strong> what you ask for, the area, the preferred date, your phone number, quotes, notes on the job, reviews and reports.</li>
           <li><strong className="text-ink">Artisan profiles:</strong> business name, trade, areas served, prices, bio, profile and work photos, and the verification checks our team completed.</li>
           <li><strong className="text-ink">Messages:</strong> the chat between a customer and an artisan on a job.</li>
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
         <p>You can ask us to see, correct or delete your information, or to stop contacting you, by writing to the address at the top of this page. You can remove your photos from your dashboard at any time. We handle personal data in line with the Nigeria Data Protection Act 2023.</p>
       </Section>
       <Section title="Security">
-        <p>We use encrypted connections and limit who can see private information. No service can promise perfect security, so pick a password you do not use elsewhere.</p>
+        <p>We use encrypted connections and limit who can see private information. No service can promise perfect security, so protect your Google account with a strong password and 2-step verification.</p>
       </Section>
       <Section title="More">
         <p>Our <Link href="/terms" className="font-bold text-link">terms of use</Link> and <Link href="/disputes" className="font-bold text-link">dispute policy</Link> explain the rest. We will tell you in the app if this policy changes in a way that matters.</p>
