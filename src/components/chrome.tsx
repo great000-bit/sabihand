@@ -10,7 +10,7 @@ import { CITIES } from "@/lib/catalog";
 import { LinkButton } from "./ui";
 
 export function Logo({ dark = false, width = 150 }: { dark?: boolean; width?: number }) {
-  return <Image src={dark ? "/brand/wordmark-on-midnight.svg" : "/brand/wordmark-light.svg"} alt="Sabihand" width={width} height={Math.round(width * 0.131)} priority unoptimized />;
+  return <Image src={dark ? "/brand/wordmark-on-midnight.svg" : "/brand/wordmark-light.svg"} alt="Sabihand" width={width} height={Math.round(width * 0.1426)} priority unoptimized />;
 }
 
 function useNav() {
@@ -18,6 +18,7 @@ function useNav() {
   const items = [{ href: "/artisans", label: "Find artisans" }];
   if (viewer) items.push({ href: "/requests", label: "My requests" });
   items.push(me ? { href: "/artisan", label: "My jobs" } : { href: "/artisan/join", label: "For artisans" });
+  if (!viewer) items.splice(1, 0, { href: "/#how-it-works", label: "How it works" });
   if (viewer?.isAdmin) items.push({ href: "/admin", label: "Admin" });
   return items;
 }
