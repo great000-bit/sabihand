@@ -42,31 +42,35 @@ function Results() {
         {results.length} {results.length === 1 ? "artisan" : "artisans"} found. Verified artisans are shown first.
       </PageHeader>
 
-      <div className="grid gap-3 rounded-3xl border-2 border-line bg-surface p-4 sm:grid-cols-[1fr_2.2fr] lg:grid-cols-[1fr_2.2fr_1fr_auto] sm:items-start">
-        <Field label="Trade">
-          <select value={trade} onChange={(e) => set("trade", e.target.value)} className={inputCls}>
-            <option value="">All trades</option>
-            {TRADES.map((t) => (
-              <option key={t.id} value={t.id}>
+      <div className="z-20 sm:sticky sm:top-[4.75rem] -mx-1 space-y-3 rounded-3xl border border-line bg-black/55 p-3 backdrop-blur-xl sm:p-4">
+        <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Trade">
+          {[{ id: "", plural: "All trades" }, ...TRADES].map((t) => {
+            const on = trade === t.id;
+            return (
+              <button key={t.id || "all"} role="tab" aria-selected={on} onClick={() => set("trade", t.id)} className={`flex-none rounded-full px-4 py-2 text-sm font-extrabold transition ${on ? "bg-white text-midnight" : "border border-line text-slate hover:border-white/40 hover:text-ink"}`}>
                 {t.plural}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Area">
-          <AreaSelect value={area} onChange={(v) => set("area", v)} />
-        </Field>
-        <Field label="Sort by">
-          <select value={sort} onChange={(e) => set("sort", e.target.value)} className={inputCls}>
-            <option value="relevance">Verified first</option>
-            <option value="price_low">Lowest starting price</option>
-            <option value="rating">Highest rated</option>
-          </select>
-        </Field>
-        <label className="flex min-h-11 items-center gap-2 text-sm font-bold">
-          <input type="checkbox" checked={verifiedOnly} onChange={(e) => set("verified", e.target.checked ? "1" : "")} className="h-5 w-5 accent-trust" />
-          Verified only
-        </label>
+              </button>
+            );
+          })}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-[2.2fr_1fr_auto] sm:items-end">
+          <Field label="Where">
+            <AreaSelect value={area} onChange={(v) => set("area", v)} />
+          </Field>
+          <Field label="Sort by">
+            <select value={sort} onChange={(e) => set("sort", e.target.value)} className={inputCls}>
+              <option value="relevance">Verified first</option>
+              <option value="price_low">Lowest starting price</option>
+              <option value="rating">Highest rated</option>
+            </select>
+          </Field>
+          <button type="button" role="switch" aria-checked={verifiedOnly} onClick={() => set("verified", verifiedOnly ? "" : "1")} className="flex min-h-11 items-center gap-3 rounded-full border border-line px-4 text-sm font-extrabold">
+            <span className={`relative h-6 w-10 rounded-full transition ${verifiedOnly ? "bg-verified" : "bg-white/20"}`}>
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${verifiedOnly ? "left-[1.1rem]" : "left-0.5"}`} />
+            </span>
+            Verified only
+          </button>
+        </div>
       </div>
 
       {results.length === 0 ? (
@@ -86,8 +90,8 @@ function Results() {
         )
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {results.map((a) => (
-            <ArtisanCard key={a.id} a={a} />
+          {results.map((a, i) => (
+            <ArtisanCard key={a.id} a={a} index={i} />
           ))}
         </div>
       )}
