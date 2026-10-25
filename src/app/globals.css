@@ -1,30 +1,10 @@
 @import "tailwindcss";
 
-/* Dark mode is switched by data-theme on <html>, set before first paint by the script in layout.tsx. */
+/* Sabihand is dark only: black glass. The page carries data-theme="dark", which also switches on the dark: variants. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* Colours that change with the theme. Brand fills (midnight, trust, gold) stay the same in both. */
+/* Colours used through the theme tokens below. Brand fills (midnight, trust, gold) are fixed. */
 :root {
-  --c-mist: #f5f7fb;
-  --c-surface: #ffffff;
-  --c-solid: #ffffff;
-  --c-panel: #0b1f4b;
-  --c-ink: #0b1f4b;
-  --c-slate: #44516b;
-  --c-muted: #6b7794;
-  --c-line: #d8deea;
-  --c-link: #2250d6;
-  --c-verified: #0b7a4b;
-  --c-verified-soft: #e3f4ec;
-  --c-gold-soft: #fff6df;
-  --c-gold-ink: #7a5200;
-  --c-alert: #c2382c;
-  --c-alert-soft: #fdecea;
-  --c-tint-blue: #eaf0fd;
-  --c-tint-gold: #fff3d6;
-  color-scheme: light;
-}
-:root[data-theme="dark"] {
   --c-mist: #050506;
   --c-surface: rgb(255 255 255 / 0.06);
   --c-solid: #131417;
@@ -43,29 +23,6 @@
   --c-tint-blue: rgb(255 255 255 / 0.05);
   --c-tint-gold: rgb(227 169 43 / 0.1);
   color-scheme: dark;
-}
-/* Without JavaScript the theme follows the device. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --c-mist: #050506;
-    --c-surface: rgb(255 255 255 / 0.06);
-    --c-solid: #131417;
-    --c-panel: rgb(255 255 255 / 0.06);
-    --c-ink: #f5f5f7;
-    --c-slate: #babcc6;
-    --c-muted: #8d8f9b;
-    --c-line: rgb(255 255 255 / 0.13);
-    --c-link: #8fb0ff;
-    --c-verified: #52d39b;
-    --c-verified-soft: rgb(82 211 155 / 0.13);
-    --c-gold-soft: rgb(227 169 43 / 0.13);
-    --c-gold-ink: #f4d27c;
-    --c-alert: #ff8f82;
-    --c-alert-soft: rgb(255 143 130 / 0.13);
-    --c-tint-blue: rgb(255 255 255 / 0.05);
-    --c-tint-gold: rgb(227 169 43 / 0.1);
-    color-scheme: dark;
-  }
 }
 
 @theme inline {
@@ -95,7 +52,7 @@
 }
 
 /* Dark mode is black glass: a faint glow behind translucent, blurred surfaces. */
-:root[data-theme="dark"] body {
+body {
   background-image: radial-gradient(60rem 28rem at 50% -8%, rgb(255 255 255 / 0.08), transparent 70%), radial-gradient(34rem 22rem at 95% 8%, rgb(255 255 255 / 0.04), transparent 70%);
   background-repeat: no-repeat;
 }

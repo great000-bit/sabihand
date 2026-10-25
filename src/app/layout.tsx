@@ -18,17 +18,7 @@ export const metadata: Metadata = {
   description: "Find a verified plumber, electrician, tailor or carpenter near you, see the price before you book, and pay safely.",
 };
 
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F5F7FB" },
-    { media: "(prefers-color-scheme: dark)", color: "#050506" },
-  ],
-  width: "device-width",
-  initialScale: 1,
-};
-
-// Runs before the page paints so a dark-mode visitor never sees a white flash. Mirrors theme-toggle.tsx.
-const THEME_SCRIPT = `try{var t=localStorage.getItem("sabihand-theme");if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=t}catch(e){}`;
+export const viewport: Viewport = { themeColor: "#050506", colorScheme: "dark", width: "device-width", initialScale: 1 };
 
 // Every page depends on who is signed in, so nothing here can be prerendered.
 export const dynamic = "force-dynamic";
@@ -48,10 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     }
   }
   return (
-    <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-      </head>
+    <html lang="en" className={spaceGrotesk.variable} data-theme="dark">
       <body>
         <StoreProvider state={state} viewer={viewer} config={{ paymentsEnabled: paystackEnabled(), dataAvailable }}>
           <AosInit />

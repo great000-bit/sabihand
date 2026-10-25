@@ -7,7 +7,6 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { useStore } from "@/lib/store";
 import { LinkButton } from "./ui";
-import { ThemeToggle } from "./theme-toggle";
 
 /** The wordmark. On a dark page it switches to the light-on-midnight version by itself. */
 export function Logo({ dark = false, width = 150 }: { dark?: boolean; width?: number }) {
@@ -35,7 +34,8 @@ function Avatar({ name }: { name: string }) {
   return <span className="flex h-9 w-9 items-center justify-center rounded-full bg-midnight font-display text-sm font-extrabold text-gold">{name.trim()[0]?.toUpperCase()}</span>;
 }
 
-function AccountMenu() {
+/** `compact` shows only the initial: the landing page keeps the person's name off the page. */
+function AccountMenu({ compact = false }: { compact?: boolean }) {
   const { viewer } = useStore();
   const [open, setOpen] = useState(false);
   if (!viewer) {
@@ -52,9 +52,9 @@ function AccountMenu() {
   }
   return (
     <div className="relative">
-      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="menu" className="flex min-h-10 items-center gap-2 rounded-full border-2 border-line py-0.5 pl-0.5 pr-3 hover:border-ink">
+      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="menu" aria-label={`Account menu for ${viewer.name}`} className="flex min-h-10 items-center gap-2 rounded-full border-2 border-line py-0.5 pl-0.5 pr-3 hover:border-ink">
         <Avatar name={viewer.name} />
-        <span className="hidden max-w-28 truncate text-sm font-bold sm:inline">{viewer.name}</span>
+        {!compact && <span className="hidden max-w-28 truncate text-sm font-bold sm:inline">{viewer.name}</span>}
         <span aria-hidden className="text-xs text-muted">▾</span>
       </button>
       {open && (
@@ -100,8 +100,7 @@ export function Header() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <ThemeToggle />
-          <AccountMenu />
+          <AccountMenu compact={path === "/"} />
           <button onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Menu" className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-line md:hidden">
             <span aria-hidden className="text-lg leading-none">{menu ? "✕" : "☰"}</span>
           </button>
