@@ -16,7 +16,7 @@ function TileCard({ t }: { t: Tile }) {
       <span className="relative z-10 inline-block rounded-full bg-black/25 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm sm:px-3 sm:text-[13px]">{t.label}</span>
       {/* The photo area. Blank until an image is added in src/lib/tiles.ts. */}
       <span className="absolute inset-x-2.5 bottom-2.5 top-11 overflow-hidden rounded-2xl bg-white/20 sm:inset-x-3.5 sm:bottom-3.5 sm:top-14">
-        {t.image && <Image src={t.image} alt={t.alt ?? t.label} fill sizes="(max-width: 640px) 128px, 208px" className="object-cover" />}
+        {t.image && <Image src={t.image} alt={t.alt ?? t.label} fill sizes="(max-width: 640px) 128px, 208px" className="object-cover object-top" />}
       </span>
     </Link>
   );
