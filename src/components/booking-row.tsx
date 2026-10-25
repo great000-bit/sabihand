@@ -1,13 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import { areaLabel, tradeById } from "@/lib/catalog";
 import { formatNaira } from "@/lib/money";
 import type { Booking } from "@/lib/types";
+import { useUnread } from "@/lib/unread";
 import { StatusPill } from "./ui";
+import { UnreadPill } from "./chat-panel";
 import { Lift } from "./motion";
 import { TRADE_GRADIENT } from "./artisan-card";
 
 export function BookingRow({ b, artisanName, showCustomer = false }: { b: Booking; artisanName: string; showCustomer?: boolean }) {
   const [from, to] = TRADE_GRADIENT[b.trade];
+  const unread = useUnread().byBooking[b.id] ?? 0;
   return (
     <Lift>
       <Link href={`/requests/${b.id}`} className="group block">
@@ -24,6 +29,7 @@ export function BookingRow({ b, artisanName, showCustomer = false }: { b: Bookin
           <div className="ml-auto flex items-center gap-3">
             {b.quote && <span className="font-display text-lg font-extrabold">{formatNaira(b.quote.amountKobo)}</span>}
             <StatusPill status={b.status} />
+            <UnreadPill n={unread} />
             <span aria-hidden className="text-muted transition-transform group-hover:translate-x-0.5">→</span>
           </div>
         </div>

@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { useStore } from "@/lib/store";
+import { useUnread } from "@/lib/unread";
+import { UnreadPill } from "./chat-panel";
 
 /** The wordmark. On a dark page it switches to the light-on-midnight version by itself. */
 export function Logo({ dark = false, width = 150 }: { dark?: boolean; width?: number }) {
@@ -82,6 +84,15 @@ function AccountMenu({ guestView = false }: { guestView?: boolean }) {
 export function Header() {
   const path = usePathname();
   const items = useNav();
+  const { state, viewer } = useStore();
+  const unread = useUnread();
+  // Unread messages split by the side of the booking the viewer is on.
+  const badge = (href: string) => {
+    if (!viewer) return 0;
+    const asCustomer = href === "/requests";
+    if (!asCustomer && href !== "/artisan") return 0;
+    return state.bookings.filter((b) => (b.customerId === viewer.id) === asCustomer).reduce((n, b) => n + (unread.byBooking[b.id] ?? 0), 0);
+  };
   const [menu, setMenu] = useState(false);
   const active = (href: string) => path === href || path.startsWith(href + "/");
   return (
@@ -94,6 +105,7 @@ export function Header() {
           {items.map((i) => (
             <Link key={i.href} href={i.href} aria-current={active(i.href) ? "page" : undefined} className={`rounded-full px-4 py-2 text-[13px] font-extrabold uppercase tracking-wide transition ${active(i.href) ? "bg-white/15 text-white" : "text-slate hover:text-white"}`}>
               {i.label}
+              <UnreadPill n={badge(i.href)} />
             </Link>
           ))}
         </nav>
@@ -111,6 +123,7 @@ export function Header() {
               <li key={i.href}>
                 <Link href={i.href} onClick={() => setMenu(false)} className={`block rounded-2xl px-4 py-3 text-sm font-extrabold uppercase tracking-wide ${active(i.href) ? "bg-white/15 text-white" : "text-slate"}`}>
                   {i.label}
+                  <UnreadPill n={badge(i.href)} />
                 </Link>
               </li>
             ))}

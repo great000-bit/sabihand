@@ -10,6 +10,7 @@ import { nextActions } from "@/lib/booking";
 import { areaLabel, tradeById } from "@/lib/catalog";
 import { artisanPayoutKobo, commissionKobo, formatNaira, nairaToKobo } from "@/lib/money";
 import { SignedInOnly } from "@/components/gate";
+import { ChatPanel } from "@/components/chat-panel";
 import { Button, Card, Chip, ErrorNote, Field, StatusPill, inputCls } from "@/components/ui";
 import type { Booking } from "@/lib/types";
 
@@ -114,6 +115,15 @@ function Detail() {
               {payment.status === "refunded" && "Returned to the customer."}
             </p>
           </Panel>
+        )}
+
+        {viewer && actor && (
+          <ChatPanel
+            bookingId={b.id}
+            viewerId={viewer.id}
+            otherName={actor === "customer" ? artisan?.businessName ?? "the artisan" : b.customerName}
+            readOnlyReason={actor === "admin" ? "You are viewing this chat as Sabihand admin." : undefined}
+          />
         )}
 
         <Panel title="Timeline">
