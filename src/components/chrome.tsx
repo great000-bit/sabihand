@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { useStore } from "@/lib/store";
-import { CITIES } from "@/lib/catalog";
 import { LinkButton } from "./ui";
 
 export function Logo({ dark = false, width = 150 }: { dark?: boolean; width?: number }) {
@@ -139,7 +138,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-line px-4 py-5 text-center text-[13px] text-muted">
-        © 2026 Sabihand · Serving {CITIES.join(", ")}
+        © 2026 Sabihand · Serving all 36 states and the FCT
       </div>
     </footer>
   );

@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
-import { areaById, tradeById } from "@/lib/catalog";
+import { areaLabel, areaSummary, tradeById } from "@/lib/catalog";
 import { formatPriceRange } from "@/lib/money";
 import { createRequest } from "@/server/actions";
 import { normalisePhone } from "@/lib/phone";
@@ -68,7 +68,7 @@ export default function ArtisanProfile() {
           <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
             <div>
               <dt className="font-bold text-muted">Serves</dt>
-              <dd>{a.areaIds.map((i) => areaById(i)?.name).join(", ")}</dd>
+              <dd>{areaSummary(a.areaIds, 6)}</dd>
             </div>
             <div>
               <dt className="font-bold text-muted">Availability</dt>
@@ -150,7 +150,7 @@ export default function ArtisanProfile() {
                   <select value={selectedArea} onChange={(e) => setAreaId(e.target.value)} className={inputCls}>
                     {a.areaIds.map((i) => (
                       <option key={i} value={i}>
-                        {areaById(i)?.name}
+                        {areaLabel(i)}
                       </option>
                     ))}
                   </select>

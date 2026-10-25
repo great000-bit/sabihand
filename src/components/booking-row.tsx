@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { areaById, tradeById } from "@/lib/catalog";
+import { areaLabel, tradeById } from "@/lib/catalog";
 import { formatNaira } from "@/lib/money";
 import type { Booking } from "@/lib/types";
 import { Card, StatusPill } from "./ui";
@@ -12,7 +12,7 @@ export function BookingRow({ b, artisanName, showCustomer = false }: { b: Bookin
           <div className="min-w-0">
             <h3 className="text-lg font-extrabold">{b.title}</h3>
             <p className="text-sm text-slate">
-              {tradeById(b.trade).label} · {showCustomer ? b.customerName : artisanName} · {areaById(b.areaId)?.name}
+              {tradeById(b.trade).label} · {showCustomer ? b.customerName : artisanName} · {areaLabel(b.areaId)}
             </p>
           </div>
           <div className="flex items-center gap-3">

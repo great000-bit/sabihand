@@ -1,13 +1,17 @@
 // Core domain types. Money is always an integer number of kobo (₦1 = 100 kobo).
 
 export type Trade = "plumbing" | "electrical" | "tailoring" | "carpentry";
-export type City = "Lagos" | "Abuja" | "Port Harcourt";
 export type Role = "customer" | "artisan" | "admin";
 
+/** A place an artisan can serve and a customer can book in: a local government area, or a named neighbourhood inside one. */
 export interface Area {
   id: string;
-  city: City;
+  /** Id of the state (or "fct") the area is in, see STATES in catalog.ts. */
+  stateId: string;
   name: string;
+  /** Centre point, used by the GPS button to find the nearest area. */
+  lat: number;
+  lng: number;
 }
 
 export type VerificationCheck = "phone" | "id" | "address" | "guarantor";

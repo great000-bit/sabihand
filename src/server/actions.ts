@@ -70,7 +70,7 @@ export async function registerArtisan(i: { name: string; businessName: string; p
         businessName: str(i.businessName, 80),
         phone: str(i.phone, 30),
         trade: i.trade,
-        areaIds: Array.isArray(i.areaIds) ? i.areaIds.map((a) => str(a, 40)) : [],
+        areaIds: Array.isArray(i.areaIds) ? i.areaIds.slice(0, 200).map((a) => str(a, 64)) : [],
         bio: str(i.bio, 600),
         availability: str(i.availability, 120),
         service: { title: str(i.service, 100), minNaira: Number.isFinite(min) ? min : 0, maxNaira: max !== null && Number.isFinite(max) ? max : null },

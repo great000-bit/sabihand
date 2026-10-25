@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
 import { Header, Footer } from "@/components/chrome";
@@ -10,8 +10,8 @@ import { dbConfigured } from "@/server/db";
 import { paystackEnabled } from "@/server/paystack";
 import type { AppState } from "@/lib/types";
 
-const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", weight: ["500", "700", "800"] });
-const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
+// One typeface for the whole site, the same as the logo.
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
 
 export const metadata: Metadata = {
   title: { default: "Sabihand: trusted artisans near you", template: "%s | Sabihand" },
@@ -38,7 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     }
   }
   return (
-    <html lang="en" className={`${bricolage.variable} ${figtree.variable}`}>
+    <html lang="en" className={spaceGrotesk.variable}>
       <body>
         <StoreProvider state={state} viewer={viewer} config={{ paymentsEnabled: paystackEnabled(), dataAvailable }}>
           <AosInit />

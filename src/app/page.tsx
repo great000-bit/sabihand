@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Hero } from "@/components/hero";
 import { Marquee } from "@/components/marquee";
 import { FeatureRow, Ticks, ICONS } from "@/components/feature-row";
-import { CITIES, CITY_STATE } from "@/lib/catalog";
+import { LAUNCH_CITIES, STATES } from "@/lib/catalog";
 import { Eyebrow, LinkButton } from "@/components/ui";
 
 const STEPS = [
@@ -19,7 +19,7 @@ export default function Home() {
         <Hero />
         <div data-aos="fade-up" data-aos-delay="150" className="relative mt-10 overflow-hidden rounded-[2rem] bg-gradient-to-br from-midnight via-[#16388a] to-trust px-0 pb-8 pt-6 sm:mt-14 sm:rounded-[2.5rem] sm:pb-12 sm:pt-10">
           <Marquee />
-          <p className="mt-5 px-4 text-center text-[13px] font-semibold text-white/70 sm:mt-7 sm:text-sm">Plumbers, electricians, tailors and carpenters in {CITIES.join(", ")}</p>
+          <p className="mt-5 px-4 text-center text-[13px] font-semibold text-white/70 sm:mt-7 sm:text-sm">Plumbers, electricians, tailors and carpenters in every state across Nigeria</p>
         </div>
       </section>
 
@@ -77,15 +77,20 @@ export default function Home() {
       <section>
         <div data-aos="fade-up" className="mb-8 text-center">
           <Eyebrow tone="blue">Where we work</Eyebrow>
-          <h2 className="text-3xl font-extrabold sm:text-5xl">Three cities, then all of Nigeria.</h2>
+          <h2 className="text-3xl font-extrabold sm:text-5xl">All of Nigeria, from your own area.</h2>
+          <p className="mx-auto mt-3 max-w-xl text-slate">Sabihand covers all {STATES.length - 1} states and the FCT, down to your local government area. Tap the pin on the search to let your phone find yours.</p>
         </div>
         <div className="flex flex-wrap justify-center gap-3">
-          {CITIES.map((c, i) => (
-            <Link key={c} href={`/artisans?area=city:${encodeURIComponent(c)}`} data-aos="fade-up" data-aos-delay={i * 80} className="rounded-full bg-white px-7 py-4 text-center shadow-[0_10px_30px_-14px_rgba(11,31,75,0.18)] transition hover:-translate-y-1 hover:shadow-lg">
-              <span className="block font-display text-xl font-extrabold sm:text-2xl">{c}</span>
-              <span className="block text-sm text-slate">{CITY_STATE[c]}</span>
+          {LAUNCH_CITIES.map((c, i) => (
+            <Link key={c.stateId} href={`/artisans?area=state:${c.stateId}`} data-aos="fade-up" data-aos-delay={i * 80} className="rounded-full bg-white px-7 py-4 text-center shadow-[0_10px_30px_-14px_rgba(11,31,75,0.18)] transition hover:-translate-y-1 hover:shadow-lg">
+              <span className="block font-display text-xl font-extrabold sm:text-2xl">{c.name}</span>
+              <span className="block text-sm text-slate">First artisans signing up</span>
             </Link>
           ))}
+          <Link href="/artisans" data-aos="fade-up" data-aos-delay={240} className="rounded-full bg-midnight px-7 py-4 text-center text-white shadow-[0_10px_30px_-14px_rgba(11,31,75,0.4)] transition hover:-translate-y-1 hover:shadow-lg">
+            <span className="block font-display text-xl font-extrabold sm:text-2xl">Anywhere else</span>
+            <span className="block text-sm text-white/70">Search by state or GPS</span>
+          </Link>
         </div>
       </section>
 
