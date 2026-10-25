@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import * as eng from "@/lib/engine";
+import { LAUNCH_NAME, isLaunchArea } from "@/lib/catalog";
 import { actorOn } from "@/lib/access";
 import { nairaToKobo } from "@/lib/money";
 import type { AppState, Trade, VerificationCheck } from "@/lib/types";
@@ -62,8 +63,11 @@ async function mutate(fn: (s: AppState, ctx: eng.Ctx) => AppState): Promise<Resu
   return { error: "That request changed while you were acting. Refresh and try again." };
 }
 
+const OUTSIDE = `Sabihand is only in ${LAUNCH_NAME} for now. Choose areas in and around ${LAUNCH_NAME}.`;
+
 export async function registerArtisan(i: { name: string; businessName: string; phone: string; trade: Trade; areaIds: string[]; bio: string; availability: string; service: string; minNaira: number; maxNaira: number | null }) {
   return mutate((s, c) => {
+    if (!Array.isArray(i.areaIds) || !i.areaIds.every((a) => typeof a === "string" && isLaunchArea(a))) throw new Error(OUTSIDE);
     const min = Number(i.minNaira);
     const max = i.maxNaira === null || i.maxNaira === undefined ? null : Number(i.maxNaira);
     return eng.registerArtisan(
@@ -84,9 +88,10 @@ export async function registerArtisan(i: { name: string; businessName: string; p
 }
 
 export async function createRequest(i: { artisanId: string; areaId: string; title: string; description: string; preferredDate: string; phone: string }) {
-  return mutate((s, c) =>
-    eng.createRequest(s, { artisanId: str(i.artisanId, 60), areaId: str(i.areaId, 40), title: str(i.title, 120), description: str(i.description, 2000), preferredDate: str(i.preferredDate, 40) || "Flexible", phone: str(i.phone, 30) }, c),
-  );
+  return mutate((s, c) => {
+    if (!isLaunchArea(str(i.areaId, 40))) throw new Error(OUTSIDE);
+    return eng.createRequest(s, { artisanId: str(i.artisanId, 60), areaId: str(i.areaId, 40), title: str(i.title, 120), description: str(i.description, 2000), preferredDate: str(i.preferredDate, 40) || "Flexible", phone: str(i.phone, 30) }, c);
+  });
 }
 
 export async function sendQuote(bookingId: string, i: { naira: number; description: string; proposedDate: string }) {

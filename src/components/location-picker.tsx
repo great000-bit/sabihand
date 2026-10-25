@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { STATES, areaById, areaLabel, areasInState, stateById } from "@/lib/catalog";
+import { LAUNCH_AREAS, LAUNCH_NAME, LAUNCH_RADIUS_KM, areaLabel, isLaunchArea } from "@/lib/catalog";
 import { inNigeria, nearestArea } from "@/lib/geo";
 import type { Area } from "@/lib/types";
 import { Button, inputCls } from "./ui";
@@ -20,25 +20,26 @@ export function LocateButton({ onFound, className = "" }: { onFound: (area: Area
 
   function locate() {
     setError(null);
-    if (!("geolocation" in navigator)) return setError("This browser cannot share your location. Choose your state and area instead.");
+    if (!("geolocation" in navigator)) return setError("This browser cannot share your location. Choose your area from the list instead.");
     setStatus("locating");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setStatus("idle");
         const { latitude, longitude } = pos.coords;
-        if (!inNigeria(latitude, longitude)) return setError("Your location looks to be outside Nigeria. Choose your state and area instead.");
-        const hit = nearestArea(latitude, longitude);
+        if (!inNigeria(latitude, longitude)) return setError("Your location looks to be outside Nigeria. Choose your area from the list instead.");
+        const hit = nearestArea(latitude, longitude, LAUNCH_AREAS);
         if (!hit) return setError("We could not match your location to an area. Choose it from the list.");
+        if (hit.km > LAUNCH_RADIUS_KM) return setError(`Sabihand is only in ${LAUNCH_NAME} for now. Choose an area from the list, and we will tell you when we reach your city.`);
         onFound(hit.area);
       },
       (e) => {
         setStatus("idle");
         setError(
           e.code === e.PERMISSION_DENIED
-            ? "Location is switched off for this site. Allow it in your browser settings, or choose your state and area."
+            ? "Location is switched off for this site. Allow it in your browser settings, or choose your area from the list."
             : e.code === e.TIMEOUT
-              ? "Finding you took too long. Try again, or choose your state and area."
-              : "We could not work out where you are. Choose your state and area instead.",
+              ? "Finding you took too long. Try again, or choose your area from the list."
+              : "We could not work out where you are. Choose your area from the list instead.",
         );
       },
       { enableHighAccuracy: false, timeout: 12000, maximumAge: 5 * 60 * 1000 },
@@ -60,37 +61,25 @@ export function LocateButton({ onFound, className = "" }: { onFound: (area: Area
 }
 
 /**
- * Pick where: a state, then optionally one local government area in it, or let GPS choose.
- * The value is "" (all of Nigeria), "state:<id>" (a whole state) or an area id.
+ * Pick where inside the launch city, or let GPS choose.
+ * The value is "" (all of Port Harcourt) or an area id.
  */
-export function AreaSelect({ value, onChange, id, allLabel = "All of Nigeria" }: { value: string; onChange: (v: string) => void; id?: string; allLabel?: string }) {
+export function AreaSelect({ value, onChange, id, allLabel = `All of ${LAUNCH_NAME}` }: { value: string; onChange: (v: string) => void; id?: string; allLabel?: string }) {
   const [gps, setGps] = useState<string | null>(null);
-  const stateId = value.startsWith("state:") ? value.slice(6) : value ? (areaById(value)?.stateId ?? "") : "";
-  const areas = stateId ? areasInState(stateId) : [];
   const set = (v: string) => {
     setGps(null);
     onChange(v);
   };
   return (
     <div className="space-y-2">
-      <div className="grid gap-2 sm:grid-cols-2">
-        <select id={id} aria-label="State" value={stateId} onChange={(e) => set(e.target.value ? `state:${e.target.value}` : "")} className={inputCls}>
-          <option value="">{allLabel}</option>
-          {STATES.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-        <select aria-label="Local government area" value={value.startsWith("state:") ? "" : value} disabled={!stateId} onChange={(e) => set(e.target.value || `state:${stateId}`)} className={`${inputCls} disabled:opacity-60`}>
-          <option value="">{stateId ? `All of ${stateById(stateId)?.name}` : "Choose a state first"}</option>
-          {areas.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <select id={id} aria-label="Area" value={isLaunchArea(value) ? value : ""} onChange={(e) => set(e.target.value)} className={inputCls}>
+        <option value="">{allLabel}</option>
+        {LAUNCH_AREAS.map((a) => (
+          <option key={a.id} value={a.id}>
+            {a.name}
+          </option>
+        ))}
+      </select>
       <LocateButton
         onFound={(a) => {
           onChange(a.id);

@@ -1,5 +1,5 @@
 import type { AppState, Artisan, Trade } from "./types";
-import { areaById } from "./catalog";
+import { areaById, isLaunchArea } from "./catalog";
 import { ratingSummary } from "./reviews";
 
 export type SortKey = "relevance" | "price_low" | "rating";
@@ -9,6 +9,8 @@ export interface SearchParams {
   /** Everything in one state. */
   stateId?: string;
   areaId?: string;
+  /** Anywhere in the launch city. Used when no single area is chosen. */
+  launchOnly?: boolean;
   verifiedOnly?: boolean;
   sort?: SortKey;
 }
@@ -17,8 +19,9 @@ export function isPublished(a: Artisan): boolean {
   return a.verification.status !== "rejected" && a.services.length > 0;
 }
 
-export function servesArea(a: Artisan, p: Pick<SearchParams, "stateId" | "areaId">): boolean {
+export function servesArea(a: Artisan, p: Pick<SearchParams, "stateId" | "areaId" | "launchOnly">): boolean {
   if (p.areaId) return a.areaIds.includes(p.areaId);
+  if (p.launchOnly) return a.areaIds.some(isLaunchArea);
   if (p.stateId) return a.areaIds.some((id) => areaById(id)?.stateId === p.stateId);
   return true;
 }

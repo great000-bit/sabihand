@@ -163,7 +163,7 @@ export function JoinGraphic() {
         <rect x="146" y="140" width="106" height="26" rx="13" fill={GOLD} />
         <text x="199" y="157" textAnchor="middle" fontSize="12" fontWeight="800" fill={NAVY}>From ₦3,000</text>
       </motion.g>
-      <motion.text x="62" y="206" fontSize="12" fill={WHITE} fillOpacity="0.8" {...loop({ opacity: [0, 1, 1, 0] }, { dur: D, times: [0.3, 0.4, 0.92, 1] })}>Serves Ikeja, Lagos</motion.text>
+      <motion.text x="62" y="206" fontSize="12" fill={WHITE} fillOpacity="0.8" {...loop({ opacity: [0, 1, 1, 0] }, { dur: D, times: [0.3, 0.4, 0.92, 1] })}>Serves Old GRA, Port Harcourt</motion.text>
       <motion.g {...loop({ opacity: [0, 1, 1, 0], y: [34, 0, 0, 0] }, { dur: D, times: [0.5, 0.6, 0.92, 1] })}>
         <rect x="40" y="274" width="240" height="70" rx="20" fill={GOLD} />
         <motion.circle cx="72" cy="309" r="9" fill={NAVY} style={center} {...loop({ scale: [1, 1.35, 1] }, { dur: 1.2 })} />

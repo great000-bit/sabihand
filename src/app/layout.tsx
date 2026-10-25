@@ -15,7 +15,7 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space
 
 export const metadata: Metadata = {
   title: { default: "Sabihand: trusted artisans near you", template: "%s | Sabihand" },
-  description: "Find a verified plumber, electrician, tailor or carpenter near you, see the price before you book, and pay safely.",
+  description: "Find a verified artisan in Port Harcourt, see the price before you book, and pay safely.",
 };
 
 export const viewport: Viewport = { themeColor: "#050506", colorScheme: "dark", width: "device-width", initialScale: 1 };

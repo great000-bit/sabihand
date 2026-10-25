@@ -145,7 +145,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-line px-4 py-5 text-center text-[13px] text-muted">
-        <p>© 2026 Sabihand · Serving all 36 states and the FCT</p>
+        <p>© 2026 Sabihand · Serving Port Harcourt, Rivers State</p>
         <p className="mt-2 flex justify-center gap-4 font-semibold">
           <Link href="/terms" className="hover:text-link">Terms</Link>
           <Link href="/privacy" className="hover:text-link">Privacy</Link>

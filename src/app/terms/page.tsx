@@ -8,9 +8,12 @@ export const metadata: Metadata = { title: "Terms of use | Sabihand" };
 export default function TermsPage() {
   const pct = COMMISSION_BPS / 100;
   return (
-    <LegalPage title="Terms of use" intro="Sabihand helps people in Nigeria find a verified artisan, agree a price, and pay safely. By creating an account you agree to these terms.">
+    <LegalPage title="Terms of use" intro="Sabihand helps people in Port Harcourt find a verified artisan, agree a price, and pay safely. By creating an account you agree to these terms.">
       <Section title="What Sabihand is">
         <p>Sabihand is a marketplace. We introduce customers to independent artisans (plumbers, electricians, tailors, carpenters and more) and hold the payment until the job is done. The artisan is not our employee and does the work on their own account.</p>
+      </Section>
+      <Section title="Where Sabihand works">
+        <p>For now Sabihand is open in Port Harcourt, Rivers State. Artisans can list only areas in and around Port Harcourt, and requests can only be made for those areas. We will announce new cities in the app.</p>
       </Section>
       <Section title="Your account">
         <p>You must be 18 or older. Give us true details and keep your password private. You are responsible for what happens under your account.</p>

@@ -3,14 +3,21 @@ import { Hero } from "@/components/hero";
 import { FindGraphic, JoinGraphic, ProtectGraphic, QuoteGraphic } from "@/components/motion-graphics";
 import { Marquee } from "@/components/marquee";
 import { FeatureRow, Ticks } from "@/components/feature-row";
-import { LAUNCH_CITIES, STATES } from "@/lib/catalog";
+import { LAUNCH_NAME } from "@/lib/catalog";
 import { Eyebrow, LinkButton } from "@/components/ui";
 
 const STEPS = [
-  ["Find", "Choose a trade and your area. See artisans who work near you, with their price range and verification."],
+  ["Find", "Choose a trade and your part of Port Harcourt. See artisans who work near you, with their price range and verification."],
   ["Request", "Describe the job. The artisan replies with a written quote you can accept or ignore."],
   ["Pay into a hold", "Your payment is held by Sabihand. The artisan sees it is secured and starts work."],
   ["Confirm", "When the job is done, you confirm and the payment is released. Not happy? Report a problem first."],
+];
+
+const PH_SPOTS: [string, string][] = [
+  ["ph-gra", "Old GRA"],
+  ["ph-rumuokoro", "Rumuokoro"],
+  ["ph-choba", "Choba"],
+  ["ph-transamadi", "Trans-Amadi"],
 ];
 
 export default function Home() {
@@ -20,7 +27,7 @@ export default function Home() {
         <Hero />
         <div data-aos="fade-up" data-aos-delay="150" className="relative mt-8 sm:mt-12">
           <Marquee />
-          <p className="mt-4 px-4 text-center text-[13px] font-semibold text-muted sm:mt-6 sm:text-sm">Plumbers, electricians, tailors and carpenters in every state across Nigeria</p>
+          <p className="mt-4 px-4 text-center text-[13px] font-semibold text-muted sm:mt-6 sm:text-sm">Plumbers, electricians, tailors, mechanics, hair stylists, painters and welders in Port Harcourt</p>
         </div>
       </section>
 
@@ -78,19 +85,19 @@ export default function Home() {
       <section>
         <div data-aos="fade-up" className="mb-8 text-center">
           <Eyebrow tone="blue">Where we work</Eyebrow>
-          <h2 className="text-3xl font-extrabold sm:text-5xl">All of Nigeria, from your own area.</h2>
-          <p className="mx-auto mt-3 max-w-xl text-slate">Sabihand covers all {STATES.length - 1} states and the FCT, down to your local government area. Sign in, then tap the pin on the search to let your phone find your area.</p>
+          <h2 className="text-3xl font-extrabold sm:text-5xl">Port Harcourt first.</h2>
+          <p className="mx-auto mt-3 max-w-xl text-slate">We are starting in one city so every artisan is close and every job gets proper attention. Sign in, then tap the pin on the search to let your phone find your area. More cities come next.</p>
         </div>
         <div className="flex flex-wrap justify-center gap-3">
-          {LAUNCH_CITIES.map((c, i) => (
-            <Link key={c.stateId} href={`/artisans?area=state:${c.stateId}`} data-aos="fade-up" data-aos-delay={i * 80} className="rounded-full bg-surface px-7 py-4 text-center shadow-[0_10px_30px_-14px_rgba(11,31,75,0.18)] transition hover:-translate-y-1 hover:shadow-lg">
-              <span className="block font-display text-xl font-extrabold sm:text-2xl">{c.name}</span>
-              <span className="block text-sm text-slate">First artisans signing up</span>
+          {PH_SPOTS.map(([id, name], i) => (
+            <Link key={id} href={`/artisans?area=${id}`} data-aos="fade-up" data-aos-delay={i * 80} className="rounded-full bg-surface px-7 py-4 text-center shadow-[0_10px_30px_-14px_rgba(11,31,75,0.18)] transition hover:-translate-y-1 hover:shadow-lg">
+              <span className="block font-display text-xl font-extrabold sm:text-2xl">{name}</span>
+              <span className="block text-sm text-slate">{LAUNCH_NAME}</span>
             </Link>
           ))}
-          <Link href="/artisans" data-aos="fade-up" data-aos-delay={240} className="rounded-full bg-midnight px-7 py-4 text-center text-white dark:border dark:border-line dark:bg-white/10 dark:backdrop-blur-xl shadow-[0_10px_30px_-14px_rgba(11,31,75,0.4)] transition hover:-translate-y-1 hover:shadow-lg">
-            <span className="block font-display text-xl font-extrabold sm:text-2xl">Anywhere else</span>
-            <span className="block text-sm text-white/70">Search by state or GPS</span>
+          <Link href="/artisans" data-aos="fade-up" data-aos-delay={400} className="rounded-full bg-midnight px-7 py-4 text-center text-white dark:border dark:border-line dark:bg-white/10 dark:backdrop-blur-xl shadow-[0_10px_30px_-14px_rgba(11,31,75,0.4)] transition hover:-translate-y-1 hover:shadow-lg">
+            <span className="block font-display text-xl font-extrabold sm:text-2xl">All of {LAUNCH_NAME}</span>
+            <span className="block text-sm text-white/70">Search every area</span>
           </Link>
         </div>
       </section>
@@ -102,10 +109,10 @@ export default function Home() {
         small
         flip
         eyebrow="For artisans"
-        title="Plumber, electrician, tailor or carpenter?"
+        title="Do you work with your hands in Port Harcourt?"
         action={<LinkButton href="/artisan/join" variant="gold" className="!min-h-12 !px-8 !text-base">Create your free profile</LinkButton>}
       >
-        <p>Show your prices and get requests from people near you. You pay a commission only when a job is completed.</p>
+        <p>Plumber, electrician, tailor, mechanic, stylist, painter, welder or carpenter: show your prices and get requests from people near you. You pay a commission only when a job is completed.</p>
       </FeatureRow>
     </div>
   );
