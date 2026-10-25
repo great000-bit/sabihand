@@ -6,6 +6,10 @@ export const TRADES: { id: Trade; label: string; plural: string; blurb: string }
   { id: "electrical", label: "Electrician", plural: "Electricians", blurb: "Wiring, sockets, fans, inverters" },
   { id: "tailoring", label: "Tailor", plural: "Tailors", blurb: "Alterations, native wear, uniforms" },
   { id: "carpentry", label: "Carpenter", plural: "Carpenters", blurb: "Doors, wardrobes, repairs, furniture" },
+  { id: "mechanic", label: "Mechanic", plural: "Mechanics", blurb: "Car servicing, brakes, engine and AC repair" },
+  { id: "hairdressing", label: "Hair stylist", plural: "Hair stylists", blurb: "Braids, cuts, styling, home service" },
+  { id: "painting", label: "Painter", plural: "Painters", blurb: "Interior, exterior, POP and finishing" },
+  { id: "welding", label: "Welder", plural: "Welders", blurb: "Gates, burglary proof, railings, frames" },
 ];
 
 export interface State {

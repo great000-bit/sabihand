@@ -15,6 +15,10 @@ export const TRADE_GRADIENT: Record<Trade, [string, string]> = {
   electrical: ["#b45309", "#f59e0b"],
   tailoring: ["#86198f", "#f472b6"],
   carpentry: ["#7c2d12", "#d97706"],
+  mechanic: ["#334155", "#94a3b8"],
+  hairdressing: ["#9d174d", "#fb7185"],
+  painting: ["#0f766e", "#5eead4"],
+  welding: ["#9a3412", "#fb923c"],
 };
 
 export function PinIcon({ className = "h-3.5 w-3.5 flex-none" }: { className?: string }) {
@@ -73,6 +77,7 @@ export function ArtisanCard({ a, index = 0 }: { a: Artisan; index?: number }) {
             <Avatar name={a.name} size={60} trade={a.trade} verified={verified} photoId={a.photoId} />
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-lg font-extrabold leading-tight">{a.businessName}</h3>
+              {a.sample && <span className="mt-0.5 inline-block rounded-full border border-gold/40 px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wide text-gold">Sample profile</span>}
               <p className="truncate text-sm text-slate">
                 {tradeById(a.trade).label} · {a.name}
               </p>

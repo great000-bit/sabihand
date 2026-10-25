@@ -47,6 +47,7 @@ export function createRequest(
   ctx: Ctx,
 ): AppState {
   const a = mustFind(state.artisans, input.artisanId, "Artisan");
+  if (a.sample) throw new Error("This is a sample profile for demonstration, so it cannot be booked yet.");
   if (a.ownerId === ctx.user.id) throw new Error("You cannot book your own profile.");
   if (a.verification.status === "rejected") throw new Error("This artisan is not taking requests.");
   const phone = normalisePhone(input.phone);
