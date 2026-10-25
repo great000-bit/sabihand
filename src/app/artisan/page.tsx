@@ -95,7 +95,7 @@ function Dashboard() {
         <Card className="p-5"><p className="text-sm font-bold text-muted">New requests</p><p className="font-display text-4xl font-extrabold">{incoming.length}</p></Card>
         <Card className="p-5"><p className="text-sm font-bold text-muted">Active jobs</p><p className="font-display text-4xl font-extrabold">{active.length}</p></Card>
         <Card className="p-5"><p className="text-sm font-bold text-muted">Held for you</p><p className="font-display text-3xl font-extrabold sm:text-4xl">{formatNaira(held)}</p></Card>
-        <Card className="bg-midnight p-5 text-white"><p className="text-sm font-bold text-gold">Earned</p><p className="font-display text-3xl font-extrabold sm:text-4xl">{formatNaira(released)}</p></Card>
+        <Card className="bg-panel p-5 text-white"><p className="text-sm font-bold text-gold">Earned</p><p className="font-display text-3xl font-extrabold sm:text-4xl">{formatNaira(released)}</p></Card>
       </div>
       {released > 0 && (
         <p className="-mt-6 text-sm text-muted">

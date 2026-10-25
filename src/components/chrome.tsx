@@ -44,7 +44,7 @@ function AccountMenu() {
         <Link href="/auth/sign-in" className="hidden min-h-10 items-center rounded-full px-4 text-[15px] font-bold text-ink hover:bg-mist sm:inline-flex">
           Sign in
         </Link>
-        <LinkButton href="/auth/sign-up" variant="dark" className="!min-h-10 !px-5">
+        <LinkButton href="/auth/sign-up" variant="dark" className="!min-h-10 !whitespace-nowrap !px-4 sm:!px-5">
           Get started
         </LinkButton>
       </div>
@@ -58,7 +58,7 @@ function AccountMenu() {
         <span aria-hidden className="text-xs text-muted">▾</span>
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 top-12 z-40 w-64 rounded-2xl border border-line bg-surface p-2 shadow-xl" onMouseLeave={() => setOpen(false)}>
+        <div role="menu" className="absolute right-0 top-12 z-40 w-64 rounded-2xl border border-line bg-solid p-2 shadow-xl" onMouseLeave={() => setOpen(false)}>
           <div className="border-b border-line px-3 py-2">
             <p className="truncate font-bold">{viewer.name}</p>
             <p className="truncate text-sm text-muted">{viewer.email}</p>
@@ -87,7 +87,7 @@ export function Header() {
   const [menu, setMenu] = useState(false);
   const active = (href: string) => path === href || path.startsWith(href + "/");
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur-xl dark:bg-black/50">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
         <Link href="/" aria-label="Sabihand home" className="flex-none">
           <Logo width={132} />
@@ -108,7 +108,7 @@ export function Header() {
         </div>
       </div>
       {menu && (
-        <nav className="border-t border-line bg-surface px-4 py-3 md:hidden" aria-label="Mobile">
+        <nav className="border-t border-line bg-solid px-4 py-3 md:hidden" aria-label="Mobile">
           <ul className="grid gap-1">
             {items.map((i) => (
               <li key={i.href}>

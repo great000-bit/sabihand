@@ -17,7 +17,7 @@ export default function Home() {
     <div className="space-y-20 sm:space-y-28">
       <section className="pt-4 sm:pt-10">
         <Hero />
-        <div data-aos="fade-up" data-aos-delay="150" className="relative mt-10 overflow-hidden rounded-[2rem] bg-midnight grain px-0 pb-8 pt-6 sm:mt-14 sm:rounded-[2.5rem] sm:pb-12 sm:pt-10">
+        <div data-aos="fade-up" data-aos-delay="150" className="relative mt-10 overflow-hidden rounded-[2rem] bg-midnight px-0 pb-8 pt-4 sm:mt-14 sm:rounded-[2.5rem] sm:pb-12 sm:pt-6 dark:bg-black dark:ring-1 dark:ring-white/10">
           <Marquee />
           <p className="mt-5 px-4 text-center text-[13px] font-semibold text-white/70 sm:mt-7 sm:text-sm">Plumbers, electricians, tailors and carpenters in every state across Nigeria</p>
         </div>
@@ -45,7 +45,7 @@ export default function Home() {
       </FeatureRow>
 
       <FeatureRow
-        tone="bg-midnight"
+        tone="bg-panel"
         dark
         eyebrow="Protected"
         title="Your money waits until the job is done"
@@ -84,7 +84,7 @@ export default function Home() {
               <span className="block text-sm text-slate">First artisans signing up</span>
             </Link>
           ))}
-          <Link href="/artisans" data-aos="fade-up" data-aos-delay={240} className="rounded-full bg-midnight px-7 py-4 text-center text-white shadow-[0_10px_30px_-14px_rgba(11,31,75,0.4)] transition hover:-translate-y-1 hover:shadow-lg">
+          <Link href="/artisans" data-aos="fade-up" data-aos-delay={240} className="rounded-full bg-midnight px-7 py-4 text-center text-white dark:border dark:border-line dark:bg-white/10 dark:backdrop-blur-xl shadow-[0_10px_30px_-14px_rgba(11,31,75,0.4)] transition hover:-translate-y-1 hover:shadow-lg">
             <span className="block font-display text-xl font-extrabold sm:text-2xl">Anywhere else</span>
             <span className="block text-sm text-white/70">Search by state or GPS</span>
           </Link>
@@ -92,7 +92,7 @@ export default function Home() {
       </section>
 
       <FeatureRow
-        tone="bg-midnight"
+        tone="bg-panel"
         dark
         small
         flip

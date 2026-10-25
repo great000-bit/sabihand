@@ -7,6 +7,8 @@
 :root {
   --c-mist: #f5f7fb;
   --c-surface: #ffffff;
+  --c-solid: #ffffff;
+  --c-panel: #0b1f4b;
   --c-ink: #0b1f4b;
   --c-slate: #44516b;
   --c-muted: #6b7794;
@@ -23,41 +25,45 @@
   color-scheme: light;
 }
 :root[data-theme="dark"] {
-  --c-mist: #080f22;
-  --c-surface: #111b37;
-  --c-ink: #e8eeff;
-  --c-slate: #b4c0dc;
-  --c-muted: #8f9dbf;
-  --c-line: #27355c;
-  --c-link: #8aaaff;
+  --c-mist: #050506;
+  --c-surface: rgb(255 255 255 / 0.06);
+  --c-solid: #131417;
+  --c-panel: rgb(255 255 255 / 0.06);
+  --c-ink: #f5f5f7;
+  --c-slate: #babcc6;
+  --c-muted: #8d8f9b;
+  --c-line: rgb(255 255 255 / 0.13);
+  --c-link: #8fb0ff;
   --c-verified: #52d39b;
-  --c-verified-soft: #0f2f28;
-  --c-gold-soft: #33280d;
+  --c-verified-soft: rgb(82 211 155 / 0.13);
+  --c-gold-soft: rgb(227 169 43 / 0.13);
   --c-gold-ink: #f4d27c;
   --c-alert: #ff8f82;
-  --c-alert-soft: #3a1815;
-  --c-tint-blue: #14234d;
-  --c-tint-gold: #2c2410;
+  --c-alert-soft: rgb(255 143 130 / 0.13);
+  --c-tint-blue: rgb(255 255 255 / 0.05);
+  --c-tint-gold: rgb(227 169 43 / 0.1);
   color-scheme: dark;
 }
 /* Without JavaScript the theme follows the device. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --c-mist: #080f22;
-    --c-surface: #111b37;
-    --c-ink: #e8eeff;
-    --c-slate: #b4c0dc;
-    --c-muted: #8f9dbf;
-    --c-line: #27355c;
-    --c-link: #8aaaff;
+    --c-mist: #050506;
+    --c-surface: rgb(255 255 255 / 0.06);
+    --c-solid: #131417;
+    --c-panel: rgb(255 255 255 / 0.06);
+    --c-ink: #f5f5f7;
+    --c-slate: #babcc6;
+    --c-muted: #8d8f9b;
+    --c-line: rgb(255 255 255 / 0.13);
+    --c-link: #8fb0ff;
     --c-verified: #52d39b;
-    --c-verified-soft: #0f2f28;
-    --c-gold-soft: #33280d;
+    --c-verified-soft: rgb(82 211 155 / 0.13);
+    --c-gold-soft: rgb(227 169 43 / 0.13);
     --c-gold-ink: #f4d27c;
     --c-alert: #ff8f82;
-    --c-alert-soft: #3a1815;
-    --c-tint-blue: #14234d;
-    --c-tint-gold: #2c2410;
+    --c-alert-soft: rgb(255 143 130 / 0.13);
+    --c-tint-blue: rgb(255 255 255 / 0.05);
+    --c-tint-gold: rgb(227 169 43 / 0.1);
     color-scheme: dark;
   }
 }
@@ -69,6 +75,8 @@
   --color-gold: #e3a92b;
   --color-mist: var(--c-mist);
   --color-surface: var(--c-surface);
+  --color-solid: var(--c-solid);
+  --color-panel: var(--c-panel);
   --color-ink: var(--c-ink);
   --color-slate: var(--c-slate);
   --color-muted: var(--c-muted);
@@ -84,6 +92,12 @@
   --color-tint-gold: var(--c-tint-gold);
   --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Dark mode is black glass: a faint glow behind translucent, blurred surfaces. */
+:root[data-theme="dark"] body {
+  background-image: radial-gradient(60rem 28rem at 50% -8%, rgb(255 255 255 / 0.08), transparent 70%), radial-gradient(34rem 22rem at 95% 8%, rgb(255 255 255 / 0.04), transparent 70%);
+  background-repeat: no-repeat;
 }
 
 /* A fine film grain behind a card's content: add the class to any rounded card. */
