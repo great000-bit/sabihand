@@ -76,7 +76,7 @@ export default function ArtisanProfile() {
             </div>
           </dl>
           {a.phone && !own && (
-            <p className="mt-4 rounded-2xl bg-midnight p-4 text-white">
+            <p className="mt-4 rounded-2xl bg-panel p-4 text-white">
               <span className="text-sm font-bold text-gold">Contact</span>
               <br />
               <a href={`tel:${a.phone}`} className="font-display text-xl font-extrabold">{a.phone}</a>

@@ -121,7 +121,7 @@ function Admin() {
         ))}
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
-        <Card className="bg-midnight p-5 text-white"><p className="text-sm font-bold text-gold">Value of completed jobs</p><p className="font-display text-3xl font-extrabold">{formatNaira(gmv)}</p></Card>
+        <Card className="bg-panel p-5 text-white"><p className="text-sm font-bold text-gold">Value of completed jobs</p><p className="font-display text-3xl font-extrabold">{formatNaira(gmv)}</p></Card>
         <Card className="bg-gold p-5"><p className="text-sm font-bold">Commission earned</p><p className="font-display text-3xl font-extrabold">{formatNaira(commission)}</p></Card>
         <Card className="p-5"><p className="text-sm font-bold text-muted">Held for jobs in progress</p><p className="font-display text-3xl font-extrabold">{formatNaira(held)}</p></Card>
       </div>

@@ -18,7 +18,7 @@ function fmtDate(iso: string) {
 }
 
 function Panel({ title, children, tone = "white" }: { title: string; children: React.ReactNode; tone?: "white" | "gold" | "dark" }) {
-  const c = { white: "bg-surface", gold: "bg-gold-soft border-gold/40", dark: "bg-midnight text-white border-midnight" }[tone];
+  const c = { white: "bg-surface", gold: "bg-gold-soft border-gold/40", dark: "bg-panel text-white border-line" }[tone];
   return (
     <Card className={`p-6 ${c}`}>
       <h2 className="mb-3 text-xl font-extrabold">{title}</h2>
