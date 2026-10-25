@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Hero } from "@/components/hero";
+import { FindGraphic, JoinGraphic, ProtectGraphic, QuoteGraphic } from "@/components/motion-graphics";
 import { Marquee } from "@/components/marquee";
 import { FeatureRow, Ticks } from "@/components/feature-row";
 import { LAUNCH_CITIES, STATES } from "@/lib/catalog";
@@ -17,14 +18,15 @@ export default function Home() {
     <div className="space-y-20 sm:space-y-28">
       <section className="pt-4 sm:pt-10">
         <Hero />
-        <div data-aos="fade-up" data-aos-delay="150" className="relative mt-10 overflow-hidden rounded-[2rem] bg-midnight px-0 pb-8 pt-4 sm:mt-14 sm:rounded-[2.5rem] sm:pb-12 sm:pt-6 dark:bg-black dark:ring-1 dark:ring-white/10">
+        <div data-aos="fade-up" data-aos-delay="150" className="relative mt-8 sm:mt-12">
           <Marquee />
-          <p className="mt-5 px-4 text-center text-[13px] font-semibold text-white/70 sm:mt-7 sm:text-sm">Plumbers, electricians, tailors and carpenters in every state across Nigeria</p>
+          <p className="mt-4 px-4 text-center text-[13px] font-semibold text-muted sm:mt-6 sm:text-sm">Plumbers, electricians, tailors and carpenters in every state across Nigeria</p>
         </div>
       </section>
 
       <FeatureRow
         tone="bg-tint-blue"
+        graphic={<FindGraphic />}
         eyebrow="Find"
         title="Find a verified artisan near you"
         action={<LinkButton href="/artisans" variant="dark">Find an artisan</LinkButton>}
@@ -35,6 +37,7 @@ export default function Home() {
 
       <FeatureRow
         tone="bg-tint-gold"
+        graphic={<QuoteGraphic />}
         flip
         eyebrow="Quote"
         title="Know the price before the work starts"
@@ -46,6 +49,7 @@ export default function Home() {
 
       <FeatureRow
         tone="bg-panel"
+        graphic={<ProtectGraphic />}
         dark
         eyebrow="Protected"
         title="Your money waits until the job is done"
@@ -93,6 +97,7 @@ export default function Home() {
 
       <FeatureRow
         tone="bg-panel"
+        graphic={<JoinGraphic />}
         dark
         small
         flip
