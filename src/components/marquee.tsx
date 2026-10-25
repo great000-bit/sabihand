@@ -67,7 +67,9 @@ export function Marquee({ speed = 55 }: { speed?: number }) {
         const left = c.offsetLeft + x;
         const cw = c.offsetWidth;
         const norm = Math.max(-1.3, Math.min(1.3, (left + cw / 2 - half) / half));
-        gsap.set(c, { transformPerspective: 900, rotationY: -norm * 32, z: -Math.abs(norm) * 70, scale: 1 - Math.abs(norm) * 0.06 });
+        const d = Math.abs(norm);
+        // Biggest in the middle, shrinking and fading towards both ends.
+        gsap.set(c, { transformPerspective: 900, rotationY: -norm * 28, z: -d * 60, scale: 1.12 - d * 0.5, opacity: 1 - d * 0.35 });
         const passed = Math.max(0, Math.min(1, (half - left) / cw));
         monos[i].style.clipPath = passed <= 0 ? "inset(0 100% 0 0)" : `inset(0 ${(1 - passed) * 100}% 0 0)`;
       });
@@ -86,7 +88,7 @@ export function Marquee({ speed = 55 }: { speed?: number }) {
       st.removeEventListener("pointerleave", fast);
       tween?.kill();
       gsap.set(tr, { clearProps: "transform" });
-      cards.forEach((c) => gsap.set(c, { clearProps: "transform" }));
+      cards.forEach((c) => gsap.set(c, { clearProps: "transform,opacity" }));
       monos.forEach((m) => {
         m.style.clipPath = "";
         m.classList.add("hidden");
@@ -95,7 +97,7 @@ export function Marquee({ speed = 55 }: { speed?: number }) {
   }, [speed]);
 
   return (
-    <div ref={stage} className="relative mx-auto max-w-[1040px] overflow-hidden py-6 motion-reduce:overflow-x-auto sm:py-10 [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]" aria-label="Trades on Sabihand" role="region">
+    <div ref={stage} className="relative mx-auto max-w-[1040px] overflow-hidden py-10 motion-reduce:overflow-x-auto sm:py-14 [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]" aria-label="Trades on Sabihand" role="region">
       <div ref={track} className="flex w-max items-center gap-3 sm:gap-4">
         {Array.from({ length: COPIES }, (_, c) => TILES.map((t) => <Card key={`${c}-${t.image}`} t={t} hidden={c > 0} />)).flat()}
       </div>

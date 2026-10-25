@@ -14,7 +14,7 @@ export function Hero() {
         What do you need <span className="bg-gradient-to-r from-link to-[#17a2c4] bg-clip-text text-transparent">fixed</span> today?
       </motion.h1>
       <motion.p variants={item} className="mx-auto mt-5 max-w-xl text-base text-slate sm:text-lg">
-        Find a verified plumber, electrician, tailor or carpenter near you. See the price first, and pay into a hold that is released only when you confirm the job.
+        Find a verified artisan near you. See the price first, and pay into a hold that is released only when you confirm the job.
       </motion.p>
       <motion.div variants={item} className="mx-auto mt-8 max-w-2xl">
         <div className="flex flex-wrap justify-center gap-3">
