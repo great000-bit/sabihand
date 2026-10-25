@@ -11,11 +11,11 @@ function TileCard({ t }: { t: Tile }) {
     <Link
       href={`/artisans?trade=${t.trade}`}
       draggable={false}
-      className={`group relative block h-44 w-32 flex-none overflow-hidden rounded-3xl bg-gradient-to-br p-2.5 transition-transform duration-300 hover:-translate-y-1.5 sm:h-72 sm:w-52 sm:p-3.5 ${t.tone}`}
+      className={`grain group relative block h-44 w-32 flex-none overflow-hidden rounded-3xl bg-gradient-to-br p-2.5 transition-transform duration-300 hover:-translate-y-1.5 sm:h-72 sm:w-52 sm:p-3.5 ${t.tone}`}
     >
       <span className="relative z-10 inline-block rounded-full bg-black/25 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm sm:px-3 sm:text-[13px]">{t.label}</span>
       {/* The photo area. Blank until an image is added in src/lib/tiles.ts. */}
-      <span className="absolute inset-x-2.5 bottom-2.5 top-11 overflow-hidden rounded-2xl bg-white/20 sm:inset-x-3.5 sm:bottom-3.5 sm:top-14">
+      <span className="absolute inset-x-2.5 bottom-2.5 top-11 overflow-hidden rounded-2xl bg-white/15 sm:inset-x-3.5 sm:bottom-3.5 sm:top-14">
         {t.image && <Image src={t.image} alt={t.alt ?? t.label} fill sizes="(max-width: 640px) 128px, 208px" className="object-cover object-top" />}
       </span>
     </Link>

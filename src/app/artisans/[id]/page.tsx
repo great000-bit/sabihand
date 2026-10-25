@@ -27,7 +27,7 @@ export default function ArtisanProfile() {
     return (
       <Card className="p-10 text-center">
         <h1 className="text-2xl font-extrabold">Artisan not found</h1>
-        <Link href="/artisans" className="mt-3 inline-block font-bold text-trust">Back to search</Link>
+        <Link href="/artisans" className="mt-3 inline-block font-bold text-link">Back to search</Link>
       </Card>
     );
   }

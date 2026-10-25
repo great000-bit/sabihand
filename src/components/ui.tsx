@@ -6,10 +6,10 @@ import { STATUS_LABEL } from "@/lib/booking";
 type Variant = "primary" | "dark" | "gold" | "ghost" | "danger";
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-trust text-white hover:bg-[#1c43b8]",
-  dark: "bg-midnight text-white hover:bg-midnight-2",
+  dark: "bg-midnight text-white hover:bg-midnight-2 dark:bg-white dark:text-midnight dark:hover:bg-[#dbe5ff]",
   gold: "bg-gold text-midnight hover:brightness-95",
-  ghost: "bg-white text-midnight border-2 border-line hover:border-midnight",
-  danger: "bg-white text-alert border-2 border-alert/40 hover:bg-alert-soft",
+  ghost: "bg-surface text-ink border-2 border-line hover:border-ink",
+  danger: "bg-surface text-alert border-2 border-alert/40 hover:bg-alert-soft",
 };
 const BASE = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[15px] font-bold transition disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -26,17 +26,17 @@ export function LinkButton({ href, variant = "primary", children, className = ""
 }
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-3xl border border-line/70 bg-white shadow-[0_1px_2px_rgba(11,31,75,0.04),0_10px_30px_-14px_rgba(11,31,75,0.14)] ${className}`}>{children}</div>;
+  return <div className={`rounded-3xl border border-line/70 bg-surface shadow-[0_1px_2px_rgba(11,31,75,0.04),0_10px_30px_-14px_rgba(11,31,75,0.14)] ${className}`}>{children}</div>;
 }
 
 export function Chip({ children, tone = "plain" }: { children: ReactNode; tone?: "plain" | "dark" | "gold" | "green" | "alert" | "blue" }) {
   const t = {
-    plain: "bg-white border-line text-slate",
+    plain: "bg-surface border-line text-slate",
     dark: "bg-midnight border-midnight text-white",
-    gold: "bg-gold-soft border-gold/50 text-[#7a5200]",
+    gold: "bg-gold-soft border-gold/50 text-gold-ink",
     green: "bg-verified-soft border-verified/20 text-verified",
     alert: "bg-alert-soft border-alert/20 text-alert",
-    blue: "bg-[#eef2fd] border-trust/20 text-trust",
+    blue: "bg-tint-blue border-trust/20 text-link",
   }[tone];
   return <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] font-bold ${t}`}>{children}</span>;
 }
@@ -82,7 +82,7 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
   );
 }
 
-export const inputCls = "w-full min-h-11 rounded-2xl border-2 border-line bg-white px-4 py-2.5 text-[16px] text-ink placeholder:text-muted focus:border-trust";
+export const inputCls = "w-full min-h-11 rounded-2xl border-2 border-line bg-surface px-4 py-2.5 text-[16px] text-ink placeholder:text-muted focus:border-trust";
 
 export function ErrorNote({ message }: { message: string | null }) {
   if (!message) return null;
@@ -115,5 +115,5 @@ export function PageHeader({ title, children, action }: { title: ReactNode; chil
 }
 
 export function Eyebrow({ children, tone = "gold" }: { children: ReactNode; tone?: "gold" | "blue" }) {
-  return <p className={`mb-3 text-[13px] font-extrabold uppercase tracking-[0.14em] ${tone === "gold" ? "text-gold" : "text-trust"}`}>{children}</p>;
+  return <p className={`mb-3 text-[13px] font-extrabold uppercase tracking-[0.14em] ${tone === "gold" ? "text-gold" : "text-link"}`}>{children}</p>;
 }
