@@ -263,3 +263,9 @@ describe("search", () => {
     expect(searchArtisans(s, { trade: "electrical", verifiedOnly: true }).map((a) => a.id)).toEqual(["a1"]);
   });
 });
+
+describe("sample profiles", () => {
+  it("cannot be booked", () => {
+    expect(() => e.createRequest(empty([artisan({ sample: true })]), request, as(customer))).toThrow(/sample profile/);
+  });
+});

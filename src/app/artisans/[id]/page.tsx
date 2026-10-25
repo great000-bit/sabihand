@@ -115,6 +115,7 @@ export default function ArtisanProfile() {
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <VerifiedBadge v={v} detailed />
+                {a.sample && <span className="rounded-full border border-gold/40 px-3 py-1 text-[13px] font-extrabold uppercase tracking-wide text-gold">Sample profile</span>}
               </div>
               <div className="mt-5 grid grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-white/5 text-center">
                 <div className="p-3"><p className="font-display text-2xl font-extrabold">{average === null ? "New" : <><span className="text-gold">★</span> {average.toFixed(1)}</>}</p><p className="text-xs font-semibold uppercase tracking-wide text-muted">Rating</p></div>
@@ -240,6 +241,8 @@ export default function ArtisanProfile() {
           <h2 id="request" className="scroll-mt-28 text-2xl font-extrabold">Request a quote</h2>
           {own ? (
             <p className="mt-3 text-slate">This is your own profile. Customers will see this page and can send you requests.</p>
+          ) : a.sample ? (
+            <p className="mt-3 text-slate">This is a sample profile that shows how an artisan page will look. It is not a real business and cannot be booked yet.</p>
           ) : !viewer ? (
             <>
               <p className="mb-5 mt-1 text-slate">Create a free account to send {a.name.split(" ")[0]} your request. You pay nothing until you accept a quote.</p>
