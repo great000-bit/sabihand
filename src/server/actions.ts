@@ -9,6 +9,7 @@ import type { AppState, Trade, VerificationCheck } from "@/lib/types";
 import { getViewer } from "./session";
 import { ConflictError, loadAll, persist, type Snapshot } from "./repo";
 import { newId } from "./ids";
+import { notifyChanges } from "./email";
 import { ownsImage, pruneImages } from "./images";
 import { initializeTransaction, listBanks as paystackBanks, paystackEnabled, resolveAccount, type Bank } from "./paystack";
 
@@ -55,6 +56,7 @@ async function mutate(fn: (s: AppState, ctx: eng.Ctx) => AppState): Promise<Resu
       return { error: SAVE_FAILED };
     }
     revalidatePath("/", "layout");
+    await notifyChanges(before.state, after);
     return ok;
   }
   return { error: "That request changed while you were acting. Refresh and try again." };

@@ -16,6 +16,7 @@ Live product: real accounts, real database, no sample data. Artisans sign up the
 | `DATABASE_URL` | Neon Postgres (pooled connection string) |
 | `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET` | Email sign-in (Neon Auth) |
 | `PAYSTACK_SECRET_KEY` | Checkout. Without it the Pay button explains payment is not on yet. Set the webhook URL in Paystack to `/api/paystack/webhook` |
+| `RESEND_API_KEY`, `EMAIL_FROM`, `SITE_URL` | Email notifications (new request, quote, payment, job done, dispute, verification). Off until both the key and a sender on a verified domain (for example `Sabihand <hello@yourdomain.com>`) are set. `SITE_URL` is used for the links in the emails |
 | `ADMIN_USER_IDS` | Comma-separated Neon Auth user ids that may use `/admin` (or `ADMIN_EMAILS`, which also requires a verified email) |
 
 ```
