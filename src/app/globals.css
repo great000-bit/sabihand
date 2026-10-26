@@ -83,6 +83,16 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
+  /* Nothing may push the page wider than the screen: no sideways scrolling on a phone. */
+  overflow-x: clip;
+}
+
+/* Long unbroken words (names, bios, emails, links) wrap instead of stretching their grid column past the screen edge. */
+main {
+  overflow-wrap: anywhere;
+}
+main .grid > * {
+  min-width: 0;
 }
 
 h1, h2, h3, .font-display {
