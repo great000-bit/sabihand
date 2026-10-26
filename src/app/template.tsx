@@ -1,15 +1,12 @@
 "use client";
 
-import { MotionConfig, motion } from "framer-motion";
+import { MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
 
-/** Every page slides up a little as it opens. Only a vertical shift, so the content is visible before scripts run. */
+/**
+ * Pages open in place, with no slide or fade. A page that moves as it opens reads as a glitch, and a CSS transform on
+ * the page would also stop fixed screens (like the sign-in screen) from covering the whole window.
+ */
 export default function Template({ children }: { children: ReactNode }) {
-  return (
-    <MotionConfig reducedMotion="user">
-      <motion.div initial={{ y: 14 }} animate={{ y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
-        {children}
-      </motion.div>
-    </MotionConfig>
-  );
+  return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
 }

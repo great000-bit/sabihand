@@ -135,7 +135,6 @@ select option:disabled {
   justify-content: center;
   gap: clamp(20px, 4vw, 34px);
   background: var(--color-mist);
-  animation: splash-life var(--splash-ms, 2.9s) ease-in-out both;
 }
 .splash-logo {
   width: min(82vw, 600px);
@@ -187,11 +186,6 @@ select option:disabled {
 @keyframes splash-fill {
   to { fill: var(--fill); stroke: var(--fill); filter: drop-shadow(0 0 0 transparent); }
 }
-@keyframes splash-life {
-  0%, 90% { opacity: 1; }
-  100% { opacity: 0; }
-}
 @media (prefers-reduced-motion: reduce) {
   .splash-glyph { animation: none; stroke-dashoffset: 0; fill: var(--fill); stroke: var(--fill); filter: none; }
-  .splash { animation: none; }
 }
