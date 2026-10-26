@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { GLYPHS } from "./splash-glyphs";
 
 /** How long the sign-in screen stays up before the person is taken on. */
@@ -14,13 +13,11 @@ const FILL_MS = 2500;
  * Google colour, then fills in solid, while a percentage counts up beneath it. Then it moves on to `to`.
  */
 export function SignInSplash({ to }: { to: string }) {
-  const router = useRouter();
   const pct = useRef<HTMLSpanElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
   const first = useRef<SVGPathElement>(null);
 
   useEffect(() => {
-    router.prefetch(to);
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const t0 = performance.now();
     let raf = 0;
@@ -37,13 +34,15 @@ export function SignInSplash({ to }: { to: string }) {
       if (bar.current) bar.current.style.transform = `scaleX(${eased})`;
       if (elapsed >= SPLASH_MS && !left) {
         left = true;
-        router.replace(to);
+        // A full page load, not an in-app navigation: the browser keeps this screen up until the next page is ready to
+        // paint, so nothing half-built (a footer with no content, a loading note) can show in between.
+        window.location.replace(to);
       }
       if (!left) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [router, to]);
+  }, [to]);
 
   // Drawn with the page itself (not after scripts load), so the page behind is never seen. It stays fully opaque
   // until the next page has replaced this one.
