@@ -2,6 +2,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import type { Viewer } from "@/lib/types";
 import { authConfigured, getAuth } from "@/lib/auth/server";
+import { AUTH_WAIT_MS, TimeoutError, authPaused, pauseAuth, resumeAuth, withTimeout } from "@/lib/auth/timeout";
 import { dbConfigured, sql } from "./db";
 
 const list = (v: string | undefined) => (v ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
@@ -36,19 +37,33 @@ async function readSessionUser(): Promise<SessionUser | null> {
   if (!cookie.includes("session_token")) return null;
   const base = process.env.NEON_AUTH_BASE_URL!.replace(/\/$/, "");
   const origin = h.get("origin") || `https://${h.get("x-forwarded-host") ?? h.get("host") ?? ""}`;
-  const r = await fetch(`${base}/get-session`, { headers: { Cookie: cookie, Origin: origin }, cache: "no-store" });
+  const r = await fetch(`${base}/get-session`, { headers: { Cookie: cookie, Origin: origin }, cache: "no-store", signal: AbortSignal.timeout(AUTH_WAIT_MS) });
   if (!r.ok) return null;
   const body = (await r.json().catch(() => null)) as { user?: SessionUser } | null;
   return body?.user ?? null;
 }
 
 async function sessionUser() {
+  if (authPaused()) return null; // the auth service just timed out; do not make every page wait again
   try {
-    const { data } = await getAuth().getSession();
+    const { data } = await withTimeout(getAuth().getSession(), AUTH_WAIT_MS, "getSession");
+    resumeAuth();
     return data?.user ?? null;
   } catch (e) {
+    if (e instanceof TimeoutError) {
+      console.error("auth service too slow, carrying on signed out", e);
+      pauseAuth();
+      return null;
+    }
+    // Usually the library trying to renew cookies where pages may not: read the session directly instead.
     console.error("getSession failed, reading the session directly", e);
-    return readSessionUser();
+    try {
+      return await readSessionUser();
+    } catch (e2) {
+      console.error("direct session read failed too", e2);
+      pauseAuth();
+      return null;
+    }
   }
 }
 

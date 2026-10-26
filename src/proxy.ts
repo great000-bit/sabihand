@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { authConfigured, getAuth } from "@/lib/auth/server";
+import { AUTH_WAIT_MS, authPaused, pauseAuth, resumeAuth, withTimeout } from "@/lib/auth/timeout";
 
 const middleware = () => getAuth().middleware({ loginUrl: "/auth/sign-in" });
 
@@ -27,15 +28,25 @@ export default async function proxy(req: NextRequest) {
       to.search = `?error=expired${back !== "/" && !back.startsWith("/auth") && !back.startsWith("/continue") ? `&next=${encodeURIComponent(back)}` : ""}`;
       return NextResponse.redirect(to);
     }
-    return middleware()(req);
+    try {
+      return await withTimeout(Promise.resolve(middleware()(req)), AUTH_WAIT_MS * 2, "sign-in exchange");
+    } catch (e) {
+      console.error("sign-in exchange failed", e);
+      pauseAuth();
+      const to = req.nextUrl.clone();
+      to.pathname = "/auth/sign-in";
+      to.search = "?error=unavailable";
+      return NextResponse.redirect(to);
+    }
   }
 
   const hasToken = names.some((n) => n.endsWith("session_token"));
   const hasCache = names.some((n) => n.endsWith("session_data"));
-  if (!hasToken || hasCache) return NextResponse.next();
+  if (!hasToken || hasCache || authPaused()) return NextResponse.next();
 
   try {
-    const res = await middleware()(req);
+    const res = await withTimeout(Promise.resolve(middleware()(req)), AUTH_WAIT_MS, "session refresh");
+    resumeAuth();
     const to = res.headers.get("location");
     if (!to) return res;
     // The middleware would send a signed-out person to the sign-in page. This site is public, so keep going,
@@ -45,6 +56,7 @@ export default async function proxy(req: NextRequest) {
     return pass;
   } catch (e) {
     console.error("session refresh failed", e);
+    pauseAuth();
     return NextResponse.next();
   }
 }

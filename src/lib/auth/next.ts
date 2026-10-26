@@ -17,3 +17,20 @@ export function continueUrl(asked: string, artisan: boolean): string {
   const s = q.toString();
   return s ? `/continue?${s}` : "/continue";
 }
+
+/** The message shown on the sign-in and sign-up pages when the person arrives from a sign-in that did not finish. */
+export function signInProblem(error: string | undefined, verifier: string | undefined): string | null {
+  switch (error) {
+    case "expired":
+      return "That sign-in took too long. Please try again.";
+    case "nosession":
+      return "We could not complete your sign-in. Please try again.";
+    case "unavailable":
+      return "Sign-in is not responding right now. Please try again in a moment.";
+    case undefined:
+    case "":
+      return verifier ? "Google sign-in did not finish. Please try again." : null;
+    default:
+      return "Google sign-in did not finish. Please try again.";
+  }
+}

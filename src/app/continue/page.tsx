@@ -23,7 +23,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ n
   const { next, as } = await searchParams;
   const want = askedFor(next);
   const viewer = await getViewer();
-  if (!viewer) redirect(`/auth/sign-in${want ? `?next=${encodeURIComponent(want)}` : ""}`);
+  // Reaching here without a session means the sign-in did not complete: say so, rather than showing a silent sign-in page.
+  if (!viewer) redirect(`/auth/sign-in?error=nosession${want ? `&next=${encodeURIComponent(want)}` : ""}`);
   if (want) redirect(want);
   if (await hasArtisanProfile(viewer.id)) redirect("/artisan");
   if (as === "artisan") redirect("/artisan/join");
