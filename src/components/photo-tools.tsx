@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { uploadPhoto } from "@/lib/resize-image";
 import { MAX_PORTFOLIO } from "@/lib/engine";
 import type { Artisan } from "@/lib/types";
+import { imageSrc } from "@/lib/image-src";
 import { Avatar } from "./artisan-card";
 import { Button, Card, ErrorNote, Field, inputCls } from "./ui";
 
@@ -60,7 +61,7 @@ export function ProfilePhotos({ me }: { me: Artisan }) {
         {me.portfolio.map((p) => (
           <figure key={p.id} className="group relative overflow-hidden rounded-2xl border border-line">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/api/images/${p.imageId}`} alt={p.caption || "Photo of past work"} className="aspect-square w-full object-cover" loading="lazy" />
+            <img src={imageSrc(p.imageId)} alt={p.caption || "Photo of past work"} className="aspect-square w-full object-cover" loading="lazy" />
             {p.caption && <figcaption className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/80 to-transparent px-3 pb-2 pt-6 text-xs font-semibold text-white">{p.caption}</figcaption>}
             <button aria-label="Remove this photo" disabled={locked} onClick={() => void run(() => act(() => actions.removePortfolioPhoto(me.id, p.id)))} className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-sm font-extrabold text-white hover:bg-alert/80">
               ✕

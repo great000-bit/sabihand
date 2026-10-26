@@ -7,6 +7,7 @@ import { areaSummary, tradeById } from "@/lib/catalog";
 import { formatPriceRange } from "@/lib/money";
 import { ratingSummary } from "@/lib/reviews";
 import { Chip } from "./ui";
+import { imageSrc } from "@/lib/image-src";
 import { Lift } from "./motion";
 
 /** One colour pair per trade, used for avatars and profile covers so each trade reads at a glance. */
@@ -19,6 +20,13 @@ export const TRADE_GRADIENT: Record<Trade, [string, string]> = {
   hairdressing: ["#9d174d", "#fb7185"],
   painting: ["#0f766e", "#5eead4"],
   welding: ["#9a3412", "#fb923c"],
+  tiling: ["#475569", "#a5b4fc"],
+  bricklaying: ["#78350f", "#fbbf24"],
+  refrigeration: ["#0e7490", "#67e8f9"],
+  phonerepair: ["#4338ca", "#a78bfa"],
+  makeup: ["#a21caf", "#f9a8d4"],
+  baking: ["#b45309", "#fcd34d"],
+  cleaning: ["#047857", "#6ee7b7"],
 };
 
 export function PinIcon({ className = "h-3.5 w-3.5 flex-none" }: { className?: string }) {
@@ -36,7 +44,7 @@ export function Avatar({ name, size = 52, trade, ring = false, verified = false,
     <span className="relative flex-none" style={{ width: size, height: size }}>
       {photoId ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={`/api/images/${photoId}`} alt="" width={size} height={size} style={{ width: size, height: size }} className={`rounded-full object-cover ${ring ? "ring-4 ring-[#0b0b0e]" : ""}`} />
+        <img src={imageSrc(photoId)} alt="" width={size} height={size} style={{ width: size, height: size }} className={`rounded-full object-cover ${ring ? "ring-4 ring-[#0b0b0e]" : ""}`} />
       ) : (
         <span
           style={{ width: size, height: size, fontSize: size * 0.4, backgroundImage: `linear-gradient(135deg, ${a}, ${b})` }}

@@ -110,7 +110,7 @@ export default function Home() {
         title="Do you work with your hands in Port Harcourt?"
         action={<LinkButton href="/artisan/join" variant="gold" className="!min-h-12 !px-8 !text-base">Create your free profile</LinkButton>}
       >
-        <p>Plumber, electrician, tailor, mechanic, stylist, painter, welder or carpenter: show your prices and get requests from people near you. You pay a commission only when a job is completed.</p>
+        <p>Plumber, electrician, tailor, mechanic, stylist, painter, welder, carpenter, tiler, cleaner or any of our other trades: show your prices and get requests from people near you. You pay a commission only when a job is completed.</p>
       </FeatureRow>
     </div>
   );
