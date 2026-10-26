@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { useStore } from "@/lib/store";
 import { registerArtisan } from "@/server/actions";
 import { LAUNCH_AREAS, LAUNCH_NAME, MAX_AREAS, TRADES, areaLabel } from "@/lib/catalog";
@@ -22,6 +23,20 @@ function JoinForm() {
   const [areas, setAreas] = useState<string[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const head = useRef<HTMLHeadingElement>(null);
+  // The page slides in with a transform, which would trap a fixed dialog inside it; the dialog lives on <body> instead.
+  const host = useSyncExternalStore(
+    () => () => {},
+    () => document.body,
+    () => null,
+  );
+  useEffect(() => {
+    if (me) return;
+    const was = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = was;
+    };
+  }, [me]);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
 
   // Move focus to the step title so screen readers and keyboards follow along.
@@ -70,6 +85,7 @@ function JoinForm() {
   return (
     <div className="mx-auto max-w-2xl space-y-6 text-center">
       <PageHeader title="Join Sabihand as an artisan">Create your profile in a few minutes. It is free; Sabihand takes a commission only when a job is completed. Verification comes next.</PageHeader>
+      {host && createPortal(
       <div role="dialog" aria-modal="true" aria-labelledby="join-step" className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-6">
         <form onSubmit={next} className="flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-[2rem] border-2 border-line bg-solid text-left sm:rounded-[2rem]">
           <div className="border-b border-line px-6 pb-4 pt-5 sm:px-8">
@@ -159,7 +175,9 @@ function JoinForm() {
             <Button type="submit" className="flex-1" disabled={busy}>{last ? (busy ? "Creating..." : "Create my profile") : "Continue"}</Button>
           </div>
         </form>
-      </div>
+      </div>,
+      host,
+      )}
     </div>
   );
 }

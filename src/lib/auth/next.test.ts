@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askedFor, safeNext } from "./next";
+import { askedFor, continueUrl, safeNext } from "./next";
 
 describe("askedFor", () => {
   it("keeps a page on this site", () => expect(askedFor("/artisan/join")).toBe("/artisan/join"));
@@ -13,4 +13,9 @@ describe("askedFor", () => {
     expect(askedFor("/\\evil")).toBe("");
   });
   it("safeNext still falls back to the artisans page", () => expect(safeNext("https://evil.example")).toBe("/artisans"));
+});
+
+describe("continueUrl", () => {
+  it("is plain when nothing is asked", () => expect(continueUrl("", false)).toBe("/continue"));
+  it("carries the artisan choice and the page asked for", () => expect(continueUrl("/requests", true)).toBe("/continue?as=artisan&next=%2Frequests"));
 });

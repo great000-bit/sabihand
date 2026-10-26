@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { headers } from "next/headers";
 import type { Viewer } from "@/lib/types";
 import { authConfigured, getAuth } from "@/lib/auth/server";
 import { dbConfigured, sql } from "./db";
@@ -20,11 +21,41 @@ async function addedAsAdmin(id: string): Promise<boolean> {
   }
 }
 
+type SessionUser = { id: string; name?: string | null; email?: string | null; image?: string | null; emailVerified?: boolean };
+
+/**
+ * Reads the session straight from the auth service without trying to set cookies. The library's own getSession
+ * renews cookies as a side effect, which pages are not allowed to do; when that fails this still gives the answer.
+ */
+async function readSessionUser(): Promise<SessionUser | null> {
+  const h = await headers();
+  const cookie = (h.get("cookie") ?? "")
+    .split(/;\s*/)
+    .filter((c) => c.startsWith("__Secure-neon-auth."))
+    .join("; ");
+  if (!cookie.includes("session_token")) return null;
+  const base = process.env.NEON_AUTH_BASE_URL!.replace(/\/$/, "");
+  const origin = h.get("origin") || `https://${h.get("x-forwarded-host") ?? h.get("host") ?? ""}`;
+  const r = await fetch(`${base}/get-session`, { headers: { Cookie: cookie, Origin: origin }, cache: "no-store" });
+  if (!r.ok) return null;
+  const body = (await r.json().catch(() => null)) as { user?: SessionUser } | null;
+  return body?.user ?? null;
+}
+
+async function sessionUser() {
+  try {
+    const { data } = await getAuth().getSession();
+    return data?.user ?? null;
+  } catch (e) {
+    console.error("getSession failed, reading the session directly", e);
+    return readSessionUser();
+  }
+}
+
 export const getViewer = cache(async (): Promise<Viewer | null> => {
   if (!authConfigured) return null;
   try {
-    const { data } = await getAuth().getSession();
-    const u = data?.user;
+    const u = await sessionUser();
     if (!u) return null;
     const email = String(u.email ?? "");
     const id = String(u.id);
@@ -32,7 +63,8 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
     const isAdmin = isSuperAdmin || list(process.env.ADMIN_USER_IDS).includes(id.toLowerCase()) || (u.emailVerified === true && list(process.env.ADMIN_EMAILS).includes(email.toLowerCase())) || (await addedAsAdmin(id));
     const image = typeof u.image === "string" && /^https:\/\//.test(u.image) ? u.image : undefined;
     return { id, name: String(u.name || email.split("@")[0] || "Customer"), email, image, isAdmin, isSuperAdmin };
-  } catch {
+  } catch (e) {
+    console.error("could not read the signed-in person", e);
     return null;
   }
 });
