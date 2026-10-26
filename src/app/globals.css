@@ -123,3 +123,65 @@ select optgroup {
 select option:disabled {
   color: var(--c-muted);
 }
+
+/* Sign-in screen: the logo, centred, with Google-coloured light flowing through it from right to left. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--color-mist);
+  animation: splash-life var(--splash-ms, 2.9s) ease-in-out both;
+}
+.splash-logo {
+  position: relative;
+  width: min(86vw, 640px);
+  aspect-ratio: 5751 / 820;
+}
+.splash-layer {
+  position: absolute;
+  inset: 0;
+  -webkit-mask: url(/brand/wordmark-on-midnight.svg) center / contain no-repeat;
+  mask: url(/brand/wordmark-on-midnight.svg) center / contain no-repeat;
+}
+.splash-base {
+  background: rgb(255 255 255 / 0.12);
+}
+.splash-water {
+  background: linear-gradient(100deg, #4285f4, #ea4335, #fbbc05, #34a853, #4285f4, #ea4335, #fbbc05, #34a853, #4285f4);
+  background-size: 200% 100%;
+  animation: splash-flow 1.3s linear infinite;
+}
+/* Soft ripples of light travelling the same way, a little slower, so the colour reads as moving water. */
+.splash-water-2 {
+  background: linear-gradient(105deg, transparent 0%, rgb(255 255 255 / 0.38) 12%, transparent 25%, transparent 50%, rgb(255 255 255 / 0.38) 62%, transparent 75%, transparent 100%);
+  background-size: 200% 100%;
+  animation-duration: 2.2s;
+}
+/* The blur sits on a wrapper: a filter on the masked layer itself would be cut back to the letters and show no glow. */
+.splash-glowwrap {
+  position: absolute;
+  inset: 0;
+  filter: blur(clamp(10px, 2.4vw, 22px));
+  opacity: 0.9;
+}
+.splash-glow {
+  background: linear-gradient(100deg, #4285f4, #ea4335, #fbbc05, #34a853, #4285f4, #ea4335, #fbbc05, #34a853, #4285f4);
+  background-size: 200% 100%;
+  animation: splash-flow 1.3s linear infinite;
+}
+/* Moving the background left to right in percent shifts the picture right to left: the colours travel to the left. */
+@keyframes splash-flow {
+  from { background-position: 0% 0; }
+  to { background-position: 100% 0; }
+}
+@keyframes splash-life {
+  0% { opacity: 0; }
+  14% { opacity: 1; }
+  86% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-water, .splash-glow { animation: none; }
+}
