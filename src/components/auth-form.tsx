@@ -1,17 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { AuthSlides } from "./auth-slides";
 import { ErrorNote } from "./ui";
 
 /** Google is the only way in. Sign-in and sign-up are the same step: a new Google account becomes a new Sabihand account. */
-export function AuthForm({ mode, next, as, problem }: { mode: "sign-in" | "sign-up"; next: string; as: "customer" | "artisan"; problem?: string | null }) {
+export function AuthForm({ mode, next, as, problem, disabled }: { mode: "sign-in" | "sign-up"; next: string; as: "customer" | "artisan"; problem?: string | null; disabled?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(problem ?? null);
   const [role, setRole] = useState<"customer" | "artisan">(as);
   const up = mode === "sign-up";
+  const unlock = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Never leave the button locked: if the browser has not left for Google after a while, let the person try again.
+  useEffect(() => () => { if (unlock.current) clearTimeout(unlock.current); }, []);
+  // Coming back with the browser's Back button restores this page from cache with the button still locked.
+  useEffect(() => {
+    const show = (e: PageTransitionEvent) => { if (e.persisted) setBusy(false); };
+    window.addEventListener("pageshow", show);
+    return () => window.removeEventListener("pageshow", show);
+  }, []);
   // The return trip lands on /continue, outside /auth, which finishes the session and sends each person to the right page.
   const asked = next.startsWith("/auth") ? "" : next;
   const landing = `/continue?as=${up ? role : as}${asked ? `&next=${encodeURIComponent(asked)}` : ""}`;
@@ -19,6 +28,10 @@ export function AuthForm({ mode, next, as, problem }: { mode: "sign-in" | "sign-
   async function go() {
     setBusy(true);
     setError(null);
+    unlock.current = setTimeout(() => {
+      setBusy(false);
+      setError("Google is taking too long to open. Please try again.");
+    }, 15000);
     try {
       const r = await authClient.signIn.social({
         provider: "google",
@@ -28,6 +41,7 @@ export function AuthForm({ mode, next, as, problem }: { mode: "sign-in" | "sign-
       if (r?.error) throw new Error(r.error.message);
       // On success the browser is already on its way to Google; keep the button locked until it leaves.
     } catch {
+      if (unlock.current) clearTimeout(unlock.current);
       setError("We could not start Google sign-in. Check your connection and try again.");
       setBusy(false);
     }
@@ -56,7 +70,7 @@ export function AuthForm({ mode, next, as, problem }: { mode: "sign-in" | "sign-
           <button
             type="button"
             onClick={go}
-            disabled={busy}
+            disabled={busy || disabled}
             className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full border-2 border-line bg-white px-6 text-base font-bold text-[#1f1f1f] transition hover:brightness-95 disabled:opacity-60"
           >
             <svg aria-hidden width="20" height="20" viewBox="0 0 48 48">
