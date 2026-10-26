@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { GLYPHS } from "./splash-glyphs";
 
@@ -18,8 +17,6 @@ export function SignInSplash({ to }: { to: string }) {
   const router = useRouter();
   const pct = useRef<HTMLSpanElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
-  // Pages slide in with a CSS transform, which would trap a fixed screen inside the page: draw it on the body instead.
-  const host = useSyncExternalStore(() => () => {}, () => document.body, () => null);
 
   useEffect(() => {
     router.prefetch(to);
@@ -41,9 +38,10 @@ export function SignInSplash({ to }: { to: string }) {
     };
   }, [router, to]);
 
-  if (!host) return null;
-  return createPortal(
-    <div className="splash" role="status" aria-live="polite" style={{ ["--splash-ms" as string]: `${SPLASH_MS}ms` }}>
+  // Drawn with the page itself (not after scripts load), so the page behind is never seen. It stays fully opaque
+  // until the next page has replaced this one.
+  return (
+    <div className="splash" role="status" aria-live="polite">
       <svg className="splash-logo" viewBox="-10 -810 5751.3 820" aria-hidden>
         {GLYPHS.map((g, i) => (
           <path
@@ -66,7 +64,6 @@ export function SignInSplash({ to }: { to: string }) {
         </span>
       </div>
       <span className="sr-only">Signing you in</span>
-    </div>,
-    host,
+    </div>
   );
 }
