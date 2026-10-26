@@ -17,25 +17,32 @@ export function SignInSplash({ to }: { to: string }) {
   const router = useRouter();
   const pct = useRef<HTMLSpanElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
+  const first = useRef<SVGPathElement>(null);
 
   useEffect(() => {
     router.prefetch(to);
-    const go = setTimeout(() => router.replace(to), SPLASH_MS);
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const t0 = performance.now();
     let raf = 0;
+    let left = false;
     const tick = (now: number) => {
-      const p = still ? 1 : Math.min(1, (now - t0) / FILL_MS);
+      // The letters are drawn by CSS from the first paint, which can be well before this script has loaded on a slow
+      // phone. Read the time from that animation so the counter and the hand-over always agree with what is on screen.
+      const anim = first.current?.getAnimations()[0];
+      const started = anim?.startTime;
+      const elapsed = still ? SPLASH_MS : started != null ? Number(document.timeline.currentTime ?? now) - Number(started) : now - t0;
+      const p = Math.min(1, elapsed / FILL_MS);
       const eased = 1 - Math.pow(1 - p, 2.2); // quick at first, slowing near the end, like a real load
       if (pct.current) pct.current.textContent = String(Math.round(eased * 100));
       if (bar.current) bar.current.style.transform = `scaleX(${eased})`;
-      if (p < 1) raf = requestAnimationFrame(tick);
+      if (elapsed >= SPLASH_MS && !left) {
+        left = true;
+        router.replace(to);
+      }
+      if (!left) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => {
-      clearTimeout(go);
-      cancelAnimationFrame(raf);
-    };
+    return () => cancelAnimationFrame(raf);
   }, [router, to]);
 
   // Drawn with the page itself (not after scripts load), so the page behind is never seen. It stays fully opaque
@@ -46,6 +53,7 @@ export function SignInSplash({ to }: { to: string }) {
         {GLYPHS.map((g, i) => (
           <path
             key={g.n}
+            ref={i === 0 ? first : undefined}
             className="splash-glyph"
             d={g.d}
             transform={g.transform}
