@@ -1,7 +1,6 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { LiveStrip } from "./live-strip";
 import { LinkButton } from "./ui";
 
 const item = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } } };
@@ -22,7 +21,6 @@ export function Hero() {
           <LinkButton href="/auth/sign-in" variant="ghost" className="!min-h-12 !px-8 !text-base">Sign in</LinkButton>
         </div>
         <p className="mt-3 text-sm text-muted">Sign in to search for artisans in Port Harcourt.</p>
-        <LiveStrip />
       </motion.div>
     </motion.div>
   );

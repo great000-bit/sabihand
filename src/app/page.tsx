@@ -1,23 +1,14 @@
-import Link from "next/link";
 import { Hero } from "@/components/hero";
 import { FindGraphic, JoinGraphic, ProtectGraphic, QuoteGraphic } from "@/components/motion-graphics";
 import { Marquee } from "@/components/marquee";
 import { FeatureRow, Ticks } from "@/components/feature-row";
-import { LAUNCH_NAME } from "@/lib/catalog";
 import { Eyebrow, LinkButton } from "@/components/ui";
 
 const STEPS = [
-  ["Find", "Choose a trade and your part of Port Harcourt. See artisans who work near you, with their price range and verification."],
-  ["Request", "Describe the job. The artisan replies with a written quote you can accept or ignore."],
-  ["Pay into a hold", "Your payment is held by Sabihand. The artisan sees it is secured and starts work."],
-  ["Confirm", "When the job is done, you confirm and the payment is released. Not happy? Report a problem first."],
-];
-
-const PH_SPOTS: [string, string][] = [
-  ["ph-gra", "Old GRA"],
-  ["ph-rumuokoro", "Rumuokoro"],
-  ["ph-choba", "Choba"],
-  ["ph-transamadi", "Trans-Amadi"],
+  ["Find", "You", "Choose a trade and your part of Port Harcourt. See artisans who work near you, with their price range and verification."],
+  ["Request", "Together", "Describe the job. The artisan replies with a written quote you can accept or ignore."],
+  ["Pay into a hold", "Sabihand", "Your payment is held by Sabihand. The artisan sees it is secured and starts work."],
+  ["Confirm", "You", "When the job is done, you confirm and the payment is released. Not happy? Report a problem first."],
 ];
 
 export default function Home() {
@@ -27,7 +18,6 @@ export default function Home() {
         <Hero />
         <div data-aos="fade-up" data-aos-delay="150" className="relative mt-8 sm:mt-12">
           <Marquee />
-          <p className="mt-4 px-4 text-center text-[13px] font-semibold text-muted sm:mt-6 sm:text-sm">Plumbers, electricians, tailors, mechanics, hair stylists, painters and welders in Port Harcourt</p>
         </div>
       </section>
 
@@ -71,34 +61,42 @@ export default function Home() {
           <Eyebrow tone="blue">How it works</Eyebrow>
           <h2 className="mx-auto max-w-2xl text-3xl font-extrabold sm:text-5xl">The price is agreed before the work, and the money waits for you.</h2>
         </div>
-        <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map(([t, d], i) => (
-            <li key={t} data-aos="fade-up" data-aos-delay={i * 100}>
-              <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-trust font-display text-lg font-extrabold text-white">{i + 1}</span>
-              <h3 className="text-xl font-extrabold">{t}</h3>
-              <p className="mt-1.5 text-slate">{d}</p>
+        <ol className="mx-auto mt-12 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map(([t, who, d], i) => (
+            <li key={t} data-aos="fade-up" data-aos-delay={i * 100} className="grain group relative overflow-hidden rounded-[2rem] border border-line bg-panel p-6 transition duration-300 hover:-translate-y-1 hover:border-gold/50 sm:p-7">
+              <div className="relative flex items-start justify-between">
+                <span className="font-display text-6xl font-extrabold leading-none text-transparent bg-gradient-to-b from-gold to-gold/10 bg-clip-text">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mt-1 whitespace-nowrap rounded-full border border-line px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-muted">{who}</span>
+              </div>
+              <h3 className="relative mt-8 text-xl font-extrabold">{t}</h3>
+              <p className="relative mt-2 text-sm leading-relaxed text-slate sm:text-[15px]">{d}</p>
             </li>
           ))}
         </ol>
       </section>
 
       <section>
-        <div data-aos="fade-up" className="mb-8 text-center">
-          <Eyebrow tone="blue">Where we work</Eyebrow>
-          <h2 className="text-3xl font-extrabold sm:text-5xl">Port Harcourt first.</h2>
-          <p className="mx-auto mt-3 max-w-xl text-slate">We are starting in one city so every artisan is close and every job gets proper attention. Sign in, then tap the pin on the search to let your phone find your area. More cities come next.</p>
-        </div>
-        <div className="flex flex-wrap justify-center gap-3">
-          {PH_SPOTS.map(([id, name], i) => (
-            <Link key={id} href={`/artisans?area=${id}`} data-aos="fade-up" data-aos-delay={i * 80} className="rounded-full bg-surface px-7 py-4 text-center shadow-[0_10px_30px_-14px_rgba(11,31,75,0.18)] transition hover:-translate-y-1 hover:shadow-lg">
-              <span className="block font-display text-xl font-extrabold sm:text-2xl">{name}</span>
-              <span className="block text-sm text-slate">{LAUNCH_NAME}</span>
-            </Link>
-          ))}
-          <Link href="/artisans" data-aos="fade-up" data-aos-delay={400} className="rounded-full bg-midnight px-7 py-4 text-center text-white dark:border dark:border-line dark:bg-white/10 dark:backdrop-blur-xl shadow-[0_10px_30px_-14px_rgba(11,31,75,0.4)] transition hover:-translate-y-1 hover:shadow-lg">
-            <span className="block font-display text-xl font-extrabold sm:text-2xl">All of {LAUNCH_NAME}</span>
-            <span className="block text-sm text-white/70">Search every area</span>
-          </Link>
+        <div data-aos="fade-up" className="grain relative mx-auto grid max-w-6xl gap-8 overflow-hidden rounded-[2.5rem] border border-line bg-panel p-8 sm:p-12 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-14">
+          <div className="relative">
+            <Eyebrow tone="blue">Where we work</Eyebrow>
+            <h2 className="text-3xl font-extrabold sm:text-5xl">Built for Port Harcourt.</h2>
+            <p className="mt-4 max-w-md text-slate">Sabihand is launching in Port Harcourt, Rivers State. Every artisan on the platform works in the city, so help is close and every job gets proper attention.</p>
+            <div className="mt-7">
+              <LinkButton href="/artisans" variant="gold">Find an artisan</LinkButton>
+            </div>
+          </div>
+          <ul className="relative grid gap-3">
+            {[
+              ["Rivers State", "Our launch home, and our only focus for now."],
+              ["Near you", "Search by your part of the city, or let your phone find it."],
+              ["Properly checked", "Each profile lists the checks the Sabihand team actually did."],
+            ].map(([t, d]) => (
+              <li key={t} className="rounded-3xl border border-line bg-white/[0.03] px-5 py-4">
+                <p className="font-display text-lg font-extrabold">{t}</p>
+                <p className="mt-0.5 text-sm text-slate">{d}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
