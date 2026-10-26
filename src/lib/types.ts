@@ -158,6 +158,8 @@ export interface Viewer {
   id: string;
   name: string;
   email: string;
+  /** Profile picture from the Google account, when Google shares one. https only. */
+  image?: string;
   isAdmin: boolean;
   /** Can make other people admins. Named in SUPER_ADMIN_USER_IDS; always also an admin. */
   isSuperAdmin?: boolean;
