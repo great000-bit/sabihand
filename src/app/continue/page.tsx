@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getViewer } from "@/server/session";
 import { dbConfigured, sql } from "@/server/db";
 import { askedFor } from "@/lib/auth/next";
+import { SignInSplash } from "@/components/splash";
 
 export const metadata = { title: "Signing you in" };
 
@@ -25,8 +26,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ n
   const viewer = await getViewer();
   // Reaching here without a session means the sign-in did not complete: say so, rather than showing a silent sign-in page.
   if (!viewer) redirect(`/auth/sign-in?error=nosession${want ? `&next=${encodeURIComponent(want)}` : ""}`);
-  if (want) redirect(want);
-  if (await hasArtisanProfile(viewer.id)) redirect("/artisan");
-  if (as === "artisan") redirect("/artisan/join");
-  redirect("/artisans");
+  let to = "/artisans";
+  if (want) to = want;
+  else if (await hasArtisanProfile(viewer.id)) to = "/artisan";
+  else if (as === "artisan") to = "/artisan/join";
+  return <SignInSplash to={to} />;
 }

@@ -123,3 +123,75 @@ select optgroup {
 select option:disabled {
   color: var(--c-muted);
 }
+
+/* Sign-in screen: the logo is drawn in stroke by stroke in Google colours, then fills in, with a percentage counting up. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 4vw, 34px);
+  background: var(--color-mist);
+  animation: splash-life var(--splash-ms, 2.9s) ease-in-out both;
+}
+.splash-logo {
+  width: min(82vw, 600px);
+  height: auto;
+  overflow: visible;
+}
+.splash-glyph {
+  fill: transparent;
+  stroke: var(--stroke);
+  stroke-width: 26;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 clamp(3px, 1vw, 8px) var(--stroke));
+  /* Each letter starts a little after the one before it: drawn first, then filled in. */
+  animation:
+    splash-draw 0.95s cubic-bezier(0.5, 0, 0.2, 1) calc(var(--i) * 0.2s) forwards,
+    splash-fill 0.45s ease-out calc(var(--i) * 0.2s + 0.7s) forwards;
+}
+.splash-count {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+.splash-num {
+  font-size: clamp(15px, 3.4vw, 20px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.splash-track {
+  width: clamp(72px, 16vw, 110px);
+  height: 2px;
+  background: rgb(255 255 255 / 0.16);
+  overflow: hidden;
+}
+.splash-bar {
+  display: block;
+  height: 100%;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+@keyframes splash-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes splash-fill {
+  to { fill: var(--fill); stroke: var(--fill); filter: drop-shadow(0 0 0 transparent); }
+}
+@keyframes splash-life {
+  0%, 90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-glyph { animation: none; stroke-dashoffset: 0; fill: var(--fill); stroke: var(--fill); filter: none; }
+  .splash { animation: none; }
+}
