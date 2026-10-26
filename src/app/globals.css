@@ -124,64 +124,74 @@ select option:disabled {
   color: var(--c-muted);
 }
 
-/* Sign-in screen: the logo, centred, with Google-coloured light flowing through it from right to left. */
+/* Sign-in screen: the logo is drawn in stroke by stroke in Google colours, then fills in, with a percentage counting up. */
 .splash {
   position: fixed;
   inset: 0;
   z-index: 100;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 4vw, 34px);
   background: var(--color-mist);
   animation: splash-life var(--splash-ms, 2.9s) ease-in-out both;
 }
 .splash-logo {
-  position: relative;
-  width: min(86vw, 640px);
-  aspect-ratio: 5751 / 820;
+  width: min(82vw, 600px);
+  height: auto;
+  overflow: visible;
 }
-.splash-layer {
-  position: absolute;
-  inset: 0;
-  -webkit-mask: url(/brand/wordmark-on-midnight.svg) center / contain no-repeat;
-  mask: url(/brand/wordmark-on-midnight.svg) center / contain no-repeat;
+.splash-glyph {
+  fill: transparent;
+  stroke: var(--stroke);
+  stroke-width: 26;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 clamp(3px, 1vw, 8px) var(--stroke));
+  /* Each letter starts a little after the one before it: drawn first, then filled in. */
+  animation:
+    splash-draw 0.95s cubic-bezier(0.5, 0, 0.2, 1) calc(var(--i) * 0.2s) forwards,
+    splash-fill 0.45s ease-out calc(var(--i) * 0.2s + 0.7s) forwards;
 }
-.splash-base {
-  background: rgb(255 255 255 / 0.12);
+.splash-count {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
 }
-.splash-water {
-  background: linear-gradient(100deg, #4285f4, #ea4335, #fbbc05, #34a853, #4285f4, #ea4335, #fbbc05, #34a853, #4285f4);
-  background-size: 200% 100%;
-  animation: splash-flow 1.3s linear infinite;
+.splash-num {
+  font-size: clamp(15px, 3.4vw, 20px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
-/* Soft ripples of light travelling the same way, a little slower, so the colour reads as moving water. */
-.splash-water-2 {
-  background: linear-gradient(105deg, transparent 0%, rgb(255 255 255 / 0.38) 12%, transparent 25%, transparent 50%, rgb(255 255 255 / 0.38) 62%, transparent 75%, transparent 100%);
-  background-size: 200% 100%;
-  animation-duration: 2.2s;
+.splash-track {
+  width: clamp(72px, 16vw, 110px);
+  height: 2px;
+  background: rgb(255 255 255 / 0.16);
+  overflow: hidden;
 }
-/* The blur sits on a wrapper: a filter on the masked layer itself would be cut back to the letters and show no glow. */
-.splash-glowwrap {
-  position: absolute;
-  inset: 0;
-  filter: blur(clamp(10px, 2.4vw, 22px));
-  opacity: 0.9;
+.splash-bar {
+  display: block;
+  height: 100%;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left;
 }
-.splash-glow {
-  background: linear-gradient(100deg, #4285f4, #ea4335, #fbbc05, #34a853, #4285f4, #ea4335, #fbbc05, #34a853, #4285f4);
-  background-size: 200% 100%;
-  animation: splash-flow 1.3s linear infinite;
+@keyframes splash-draw {
+  to { stroke-dashoffset: 0; }
 }
-/* Moving the background left to right in percent shifts the picture right to left: the colours travel to the left. */
-@keyframes splash-flow {
-  from { background-position: 0% 0; }
-  to { background-position: 100% 0; }
+@keyframes splash-fill {
+  to { fill: var(--fill); stroke: var(--fill); filter: drop-shadow(0 0 0 transparent); }
 }
 @keyframes splash-life {
-  0% { opacity: 0; }
-  14% { opacity: 1; }
-  86% { opacity: 1; }
+  0%, 90% { opacity: 1; }
   100% { opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .splash-water, .splash-glow { animation: none; }
+  .splash-glyph { animation: none; stroke-dashoffset: 0; fill: var(--fill); stroke: var(--fill); filter: none; }
+  .splash { animation: none; }
 }
