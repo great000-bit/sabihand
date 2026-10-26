@@ -10,6 +10,13 @@ export const TRADES: { id: Trade; label: string; plural: string; blurb: string }
   { id: "hairdressing", label: "Hair stylist", plural: "Hair stylists", blurb: "Braids, cuts, styling, home service" },
   { id: "painting", label: "Painter", plural: "Painters", blurb: "Interior, exterior, POP and finishing" },
   { id: "welding", label: "Welder", plural: "Welders", blurb: "Gates, burglary proof, railings, frames" },
+  { id: "tiling", label: "Tiler", plural: "Tilers", blurb: "Floor and wall tiles, screeding, grouting" },
+  { id: "bricklaying", label: "Bricklayer", plural: "Bricklayers", blurb: "Block work, fences, plastering, foundations" },
+  { id: "refrigeration", label: "AC and fridge technician", plural: "AC and fridge technicians", blurb: "Air conditioners, fridges, freezers, gas refills" },
+  { id: "phonerepair", label: "Phone repairer", plural: "Phone repairers", blurb: "Screens, batteries, charging ports, software" },
+  { id: "makeup", label: "Makeup artist", plural: "Makeup artists", blurb: "Bridal, events, photoshoots, home service" },
+  { id: "baking", label: "Baker or caterer", plural: "Bakers and caterers", blurb: "Cakes, small chops, party food, orders" },
+  { id: "cleaning", label: "Cleaner", plural: "Cleaners", blurb: "Home, office and post-construction cleaning" },
 ];
 
 export interface State {

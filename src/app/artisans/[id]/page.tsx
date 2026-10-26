@@ -11,6 +11,7 @@ import { normalisePhone } from "@/lib/phone";
 import { Avatar, PinIcon, RatingLine, TRADE_GRADIENT } from "@/components/artisan-card";
 import { Rise } from "@/components/motion";
 import { ratingSummary } from "@/lib/reviews";
+import { imageSrc } from "@/lib/image-src";
 import { searchArtisans } from "@/lib/search";
 import { Button, Card, ErrorNote, Field, LinkButton, VerifiedBadge, inputCls } from "@/components/ui";
 
@@ -154,7 +155,7 @@ export default function ArtisanProfile() {
                 {a.portfolio.map((p) => (
                   <button key={p.id} type="button" onClick={() => setLightbox(p.id)} className="group relative overflow-hidden rounded-2xl border border-line text-left">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/api/images/${p.imageId}`} alt={p.caption || "Photo of past work"} loading="lazy" className="aspect-square w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <img src={imageSrc(p.imageId)} alt={p.caption || "Photo of past work"} loading="lazy" className="aspect-square w-full object-cover transition duration-500 group-hover:scale-105" />
                     {p.caption && <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/80 to-transparent px-3 pb-2 pt-6 text-xs font-semibold text-white">{p.caption}</span>}
                   </button>
                 ))}
@@ -311,7 +312,7 @@ export default function ArtisanProfile() {
           <div role="dialog" aria-modal="true" aria-label="Photo" onClick={() => setLightbox(null)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4">
             <figure className="max-h-full max-w-3xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/api/images/${item.imageId}`} alt={item.caption || "Photo of past work"} className="max-h-[80vh] w-auto rounded-2xl" />
+              <img src={imageSrc(item.imageId)} alt={item.caption || "Photo of past work"} className="max-h-[80vh] w-auto rounded-2xl" />
               {item.caption && <figcaption className="mt-3 text-center text-white">{item.caption}</figcaption>}
             </figure>
             <button aria-label="Close" className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-lg font-extrabold text-white">✕</button>
