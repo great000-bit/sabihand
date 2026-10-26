@@ -30,7 +30,8 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
     const id = String(u.id);
     const isSuperAdmin = list(process.env.SUPER_ADMIN_USER_IDS).includes(id.toLowerCase());
     const isAdmin = isSuperAdmin || list(process.env.ADMIN_USER_IDS).includes(id.toLowerCase()) || (u.emailVerified === true && list(process.env.ADMIN_EMAILS).includes(email.toLowerCase())) || (await addedAsAdmin(id));
-    return { id, name: String(u.name || email.split("@")[0] || "Customer"), email, isAdmin, isSuperAdmin };
+    const image = typeof u.image === "string" && /^https:\/\//.test(u.image) ? u.image : undefined;
+    return { id, name: String(u.name || email.split("@")[0] || "Customer"), email, image, isAdmin, isSuperAdmin };
   } catch {
     return null;
   }

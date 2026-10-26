@@ -7,12 +7,14 @@ import { AuthSlides } from "./auth-slides";
 import { ErrorNote } from "./ui";
 
 /** Google is the only way in. Sign-in and sign-up are the same step: a new Google account becomes a new Sabihand account. */
-export function AuthForm({ mode, next, problem }: { mode: "sign-in" | "sign-up"; next: string; problem?: string | null }) {
+export function AuthForm({ mode, next, as, problem }: { mode: "sign-in" | "sign-up"; next: string; as: "customer" | "artisan"; problem?: string | null }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(problem ?? null);
+  const [role, setRole] = useState<"customer" | "artisan">(as);
   const up = mode === "sign-up";
-  // The return trip must land outside /auth so the session can be completed on the way back.
-  const landing = next.startsWith("/auth") ? "/artisans" : next;
+  // The return trip lands on /continue, outside /auth, which finishes the session and sends each person to the right page.
+  const asked = next.startsWith("/auth") ? "" : next;
+  const landing = `/continue?as=${up ? role : as}${asked ? `&next=${encodeURIComponent(asked)}` : ""}`;
 
   async function go() {
     setBusy(true);
@@ -21,7 +23,7 @@ export function AuthForm({ mode, next, problem }: { mode: "sign-in" | "sign-up";
       const r = await authClient.signIn.social({
         provider: "google",
         callbackURL: landing,
-        errorCallbackURL: `/auth/sign-in?error=google&next=${encodeURIComponent(landing)}`,
+        errorCallbackURL: `/auth/sign-in?error=google${asked ? `&next=${encodeURIComponent(asked)}` : ""}`,
       });
       if (r?.error) throw new Error(r.error.message);
       // On success the browser is already on its way to Google; keep the button locked until it leaves.
@@ -31,13 +33,26 @@ export function AuthForm({ mode, next, problem }: { mode: "sign-in" | "sign-up";
     }
   }
 
-  const other = `${up ? "/auth/sign-in" : "/auth/sign-up"}${next !== "/artisans" ? `?next=${encodeURIComponent(next)}` : ""}`;
+  const other = `${up ? "/auth/sign-in" : "/auth/sign-up"}${next ? `?next=${encodeURIComponent(next)}` : ""}`;
   return (
     <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border-2 border-line bg-surface md:grid-cols-[1.05fr_1fr]">
       <div className="flex flex-col justify-center p-7 sm:p-10">
         <h1 className="font-display text-3xl font-extrabold text-ink">{up ? "Create your account" : "Welcome back"}</h1>
         <p className="mt-2 text-slate">{up ? "One account to book artisans or to offer your services." : "Sign in to see your requests and jobs."}</p>
         <div className="mt-8 grid gap-4">
+          {up && (
+            <fieldset>
+              <legend className="mb-2 text-sm font-bold text-ink">I am joining as</legend>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {([["customer", "Someone who needs an artisan"], ["artisan", "An artisan offering my services"]] as const).map(([id, label]) => (
+                  <label key={id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border-2 border-line px-4 text-sm font-bold has-[:checked]:border-gold has-[:checked]:bg-white/5">
+                    <input type="radio" name="role" className="h-4 w-4 accent-[#E3A92B]" checked={role === id} onChange={() => setRole(id)} />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
           <button
             type="button"
             onClick={go}

@@ -30,7 +30,12 @@ function useNav() {
   return items;
 }
 
-function Avatar({ name }: { name: string }) {
+function Avatar({ name, image }: { name: string; image?: string }) {
+  if (image) {
+    // Google's picture; its host blocks hotlinks that send a referrer.
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={image} alt="" width={36} height={36} referrerPolicy="no-referrer" className="h-9 w-9 rounded-full object-cover" />;
+  }
   return <span className="flex h-9 w-9 items-center justify-center rounded-full bg-midnight font-display text-sm font-extrabold text-gold">{name.trim()[0]?.toUpperCase()}</span>;
 }
 
@@ -53,7 +58,7 @@ function AccountMenu({ guestView = false }: { guestView?: boolean }) {
   return (
     <div className="relative">
       <button onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="menu" aria-label={`Account menu for ${viewer.name}`} className="flex min-h-10 items-center gap-2 rounded-full border-2 border-line py-0.5 pl-0.5 pr-3 hover:border-ink">
-        <Avatar name={viewer.name} />
+        <Avatar name={viewer.name} image={viewer.image} />
         <span className="hidden max-w-28 truncate text-sm font-bold sm:inline">{viewer.name}</span>
         <span aria-hidden className="text-xs text-muted">▾</span>
       </button>
