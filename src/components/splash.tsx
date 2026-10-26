@@ -10,9 +10,10 @@ const FILL_MS = 2500;
 
 /**
  * The screen shown for a moment right after signing in. The logo is drawn in stroke by stroke, each letter in a
- * Google colour, then fills in solid, while a percentage counts up beneath it. Then it moves on to `to`.
+ * Google colour, then fills in solid, while a percentage counts up beneath it. Then it moves on to the place `lookup`
+ * (an address that answers `{ ok, to }`) says this person goes next.
  */
-export function SignInSplash({ to }: { to: string }) {
+export function SignInSplash({ lookup }: { lookup: string }) {
   const pct = useRef<HTMLSpanElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
   const first = useRef<SVGPathElement>(null);
@@ -22,6 +23,25 @@ export function SignInSplash({ to }: { to: string }) {
     const t0 = performance.now();
     let raf = 0;
     let left = false;
+    // Ask where to go while the logo plays. If the answer cannot be had, the artisans list checks the session itself.
+    let to: string | null = null;
+    const go = () => {
+      if (left || to == null) return;
+      left = true;
+      // A full page load, not an in-app navigation: the browser keeps this screen up until the next page is ready to
+      // paint, so nothing half-built (a footer with no content, a loading note) can show in between.
+      window.location.replace(to);
+    };
+    const ask = (retry: boolean): Promise<void> =>
+      fetch(lookup, { cache: "no-store", credentials: "same-origin" })
+        .then((r) => (r.ok ? (r.json() as Promise<{ ok: boolean; to: string }>) : Promise.reject(new Error(String(r.status)))))
+        .then((r) => {
+          to = r.to;
+          // No session means the sign-in did not finish: there is nothing to wait for, say so now.
+          if (!r.ok) go();
+        })
+        .catch(() => (retry ? ask(false) : void (to = "/artisans")));
+    void ask(true);
     const tick = (now: number) => {
       // The letters are drawn by CSS from the first paint, which can be well before this script has loaded on a slow
       // phone. Read the time from that animation so the counter and the hand-over always agree with what is on screen.
@@ -32,17 +52,12 @@ export function SignInSplash({ to }: { to: string }) {
       const eased = 1 - Math.pow(1 - p, 2.2); // quick at first, slowing near the end, like a real load
       if (pct.current) pct.current.textContent = String(Math.round(eased * 100));
       if (bar.current) bar.current.style.transform = `scaleX(${eased})`;
-      if (elapsed >= SPLASH_MS && !left) {
-        left = true;
-        // A full page load, not an in-app navigation: the browser keeps this screen up until the next page is ready to
-        // paint, so nothing half-built (a footer with no content, a loading note) can show in between.
-        window.location.replace(to);
-      }
+      if (elapsed >= SPLASH_MS) go();
       if (!left) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [to]);
+  }, [lookup]);
 
   // Drawn with the page itself (not after scripts load), so the page behind is never seen. It stays fully opaque
   // until the next page has replaced this one.
