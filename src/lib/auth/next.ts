@@ -8,3 +8,12 @@ export function askedFor(v: unknown): string {
   const p = safeNext(v);
   return typeof v === "string" && p === v ? p : "";
 }
+
+/** Where a signed-in person is sent to be routed on: the page they asked for, or the right home for who they are. */
+export function continueUrl(asked: string, artisan: boolean): string {
+  const q = new URLSearchParams();
+  if (artisan) q.set("as", "artisan");
+  if (asked) q.set("next", asked);
+  const s = q.toString();
+  return s ? `/continue?${s}` : "/continue";
+}
