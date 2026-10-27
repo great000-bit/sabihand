@@ -10,12 +10,14 @@ describe("site offline switch", () => {
     expect(siteOffline({ SITE_OFFLINE: "true" })).toBe(true);
   });
 
-  it("answers with a plain, unbranded 404 page", async () => {
+  it("answers with the 404 page and a way back home", async () => {
     const res = notFoundResponse();
     expect(res.status).toBe(404);
     expect(res.headers.get("content-type")).toContain("text/html");
     const html = await res.text();
-    expect(html).toContain("This page could not be found.");
-    expect(html.toLowerCase()).not.toContain("sabihand");
+    expect(html).toContain("Oops! I think we\u2019re lost");
+    expect(html).toContain('href="/"');
+    // Assets must come from paths the proxy lets through while the site is offline.
+    expect(html).toContain('src="/brand/hand-gold.svg"');
   });
 });

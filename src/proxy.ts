@@ -15,7 +15,7 @@ const middleware = () => getAuth().middleware({ loginUrl: "/auth/sign-in" });
  *    minutes. Pages are not allowed to set cookies, so this is the one place the cache can be renewed. Without it
  *    a person looks signed out five minutes after signing in.
  *
- * While the site is switched off (SITE_OFFLINE, see lib/offline.ts) every page gets a plain 404 instead.
+ * While the site is switched off (SITE_OFFLINE, see lib/offline.ts) every page gets the 404 page instead.
  */
 export default async function proxy(req: NextRequest) {
   if (siteOffline()) return notFoundResponse();
