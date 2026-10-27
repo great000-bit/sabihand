@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { authConfigured, getAuth } from "@/lib/auth/server";
 import { AUTH_WAIT_MS, authPaused, pauseAuth, resumeAuth, withTimeout } from "@/lib/auth/timeout";
+import { notFoundResponse, siteOffline } from "@/lib/offline";
 
 const middleware = () => getAuth().middleware({ loginUrl: "/auth/sign-in" });
 
@@ -13,8 +14,11 @@ const middleware = () => getAuth().middleware({ loginUrl: "/auth/sign-in" });
  * 2. Refreshing the short-lived session cache. The signed-in cookie lasts a week, but its cached copy lasts five
  *    minutes. Pages are not allowed to set cookies, so this is the one place the cache can be renewed. Without it
  *    a person looks signed out five minutes after signing in.
+ *
+ * While the site is switched off (SITE_OFFLINE, see lib/offline.ts) every page gets a plain 404 instead.
  */
 export default async function proxy(req: NextRequest) {
+  if (siteOffline()) return notFoundResponse();
   if (!authConfigured) return NextResponse.next();
   const names = req.cookies.getAll().map((c) => c.name);
 
