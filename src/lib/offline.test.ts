@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { notFoundResponse, siteOffline } from "./offline";
+
+// The proxy is imported only for its matcher; keep the real sign-in library out of unit tests.
+vi.mock("@/lib/auth/server", () => ({ authConfigured: false, getAuth: () => { throw new Error("no auth in unit tests"); } }));
 
 describe("site offline switch", () => {
   it("is off unless SITE_OFFLINE is 1 or true", () => {
@@ -19,5 +22,16 @@ describe("site offline switch", () => {
     expect(html).toContain('href="/"');
     // Assets must come from paths the proxy lets through while the site is offline.
     expect(html).toContain('src="/brand/hand-gold.svg"');
+  });
+
+  it("keeps the Sabihand tab icon on the 404 page", async () => {
+    const html = await notFoundResponse().text();
+    const icons = ["/favicon.ico", "/icon.svg", "/apple-icon.png"];
+    for (const href of icons) expect(html).toContain(`href="${href}"`);
+    // The proxy must let the icon files through, or they would come back as the 404 page too.
+    const { config } = await import("../proxy");
+    const matches = new RegExp(`^${config.matcher[0]}$`);
+    for (const href of icons) expect(matches.test(href)).toBe(false);
+    expect(matches.test("/artisans")).toBe(true);
   });
 });
