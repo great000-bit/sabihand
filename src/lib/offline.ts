@@ -8,10 +8,12 @@ export const siteOffline = (env: Record<string, string | undefined> = process.en
 
 // A night sky in the brand colours: midnight fading to the site's black, drifting clouds, a huge 404 and the gold
 // hand from the logo waving where the 0 is. Self-contained (no app layout), so it costs no database or auth call.
-// The logo and hand load from /brand, which the proxy never touches.
+// The logo and hand load from /brand, and the tab icons from the app's icon files; the proxy never touches either.
 const NOT_FOUND_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
 <meta name="theme-color" content="#0B1F4B"><title>Page not found | Sabihand</title>
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
