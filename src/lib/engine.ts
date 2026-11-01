@@ -189,6 +189,16 @@ export function moderateReview(state: AppState, reportId: string, hide: boolean,
   };
 }
 
+/** Closes a report that needs no money decision: a reported artisan, or a job problem whose job is no longer in dispute. */
+export function closeReport(state: AppState, reportId: string, resolution: string, ctx: Ctx): AppState {
+  if (!ctx.user.isAdmin) throw new Error(DENIED);
+  const r = mustFind(state.reports, reportId, "Report");
+  if (r.resolvedAt) throw new Error("This report is already closed.");
+  if (r.kind === "review") throw new Error("Hide or keep the review to close this report.");
+  if (r.kind === "booking" && state.bookings.find((b) => b.id === r.targetId)?.status === "disputed") throw new Error("Release the payment or refund the customer to close this report.");
+  return { ...state, reports: state.reports.map((x) => (x.id === reportId ? { ...x, resolvedAt: ctx.now, resolution: resolution.trim() || "Closed by the Sabihand team" } : x)) };
+}
+
 export function submitVerification(state: AppState, artisanId: string, ctx: Ctx): AppState {
   const a = mustFind(state.artisans, artisanId, "Artisan");
   if (a.ownerId !== ctx.user.id) throw new Error(DENIED);

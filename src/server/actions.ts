@@ -104,6 +104,7 @@ export const resolveDispute = async (bookingId: string, outcome: "release" | "re
 export const submitReview = async (bookingId: string, rating: number, text: string) => mutate((s, c) => eng.submitReview(s, str(bookingId, 60), Number(rating), str(text, 1000), c));
 export const reportReview = async (reviewId: string, reason: string) => mutate((s, c) => eng.reportReview(s, str(reviewId, 60), str(reason, 1000), c));
 export const moderateReview = async (reportId: string, hide: boolean) => mutate((s, c) => eng.moderateReview(s, str(reportId, 60), hide === true, c));
+export const closeReport = async (reportId: string, note: string) => mutate((s, c) => eng.closeReport(s, str(reportId, 60), str(note, 1000), c));
 /** The banks to choose from, with codes. Empty when live lookup is not switched on: the form then falls back to typing. */
 export async function listBanks(): Promise<{ error: string | null; banks: Bank[] }> {
   if (!(await getViewer())) return { error: SIGN_IN, banks: [] };

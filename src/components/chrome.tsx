@@ -100,6 +100,8 @@ export function Header() {
   };
   const [menu, setMenu] = useState(false);
   const active = (href: string) => path === href || path.startsWith(href + "/");
+  // The admin area has its own sidebar layout.
+  if (path.startsWith("/admin")) return null;
   return (
     <header className="sticky top-0 z-30 px-3 pt-3 sm:px-6">
       <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto] items-center gap-3 rounded-full border border-white/10 bg-black/60 py-2 pl-5 pr-2 shadow-[0_10px_40px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl md:grid-cols-[1fr_auto_1fr]">
@@ -140,6 +142,8 @@ export function Header() {
 }
 
 export function Footer() {
+  const path = usePathname();
+  if (path.startsWith("/admin")) return null;
   return (
     <footer className="border-t border-line bg-surface">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-[1.4fr_1fr_1fr] sm:px-6">
