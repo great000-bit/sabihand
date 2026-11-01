@@ -2,6 +2,7 @@ import { recordPayment } from "@/lib/engine";
 import { ConflictError, loadAll, persist } from "./repo";
 import { newId } from "./ids";
 import { notifyChanges } from "./email";
+import { wakeAutopilot } from "./autopilot";
 import { verifyTransaction } from "./paystack";
 
 export type Settled = { ok: true; bookingId: string } | { ok: false; error: string };
@@ -25,6 +26,7 @@ export async function settleReference(reference: string): Promise<Settled> {
       const after = recordPayment(before.state, bookingId, { providerRef: tx.reference, amountKobo: tx.amount }, { now: new Date().toISOString(), id: newId });
       await persist(before, after);
       await notifyChanges(before.state, after);
+      wakeAutopilot("payment");
       return { ok: true, bookingId };
     } catch (e) {
       if (e instanceof ConflictError) continue;

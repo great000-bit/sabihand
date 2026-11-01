@@ -200,11 +200,11 @@ export default function ArtisanProfile() {
                   {v.checks.map((c) => (
                     <li key={c} className="flex items-center gap-3 rounded-2xl bg-verified-soft px-4 py-3 font-semibold text-verified">
                       <span aria-hidden className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-verified text-sm font-extrabold text-black">✓</span>
-                      {{ phone: "Phone number confirmed", id: "Government ID seen", address: "Address confirmed", guarantor: "Guarantor contacted" }[c]}
+                      {{ phone: "Phone number confirmed", id: "Government ID seen", address: "Address confirmed", guarantor: "Guarantor contacted", bank: "Bank account name matched by the bank" }[c]}
                     </li>
                   ))}
                 </ul>
-                <p className="mt-3 text-sm text-muted">These are the checks the Sabihand team did. Verified does not guarantee the quality of any job.</p>
+                <p className="mt-3 text-sm text-muted">{v.by === "autopilot" ? "These checks were done automatically by Sabihand." : "These are the checks the Sabihand team did."} Verified does not guarantee the quality of any job.</p>
               </>
             ) : (
               <p className="text-slate">{first} has not completed Sabihand verification yet. You can still request a quote.</p>

@@ -41,7 +41,7 @@ export function Chip({ children, tone = "plain" }: { children: ReactNode; tone?:
   return <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] font-bold ${t}`}>{children}</span>;
 }
 
-const CHECK_LABEL = { phone: "Phone", id: "ID", address: "Address", guarantor: "Guarantor" } as const;
+const CHECK_LABEL = { phone: "Phone", id: "ID", address: "Address", guarantor: "Guarantor", bank: "Bank account" } as const;
 
 export function VerifiedBadge({ v, detailed = false }: { v: Verification; detailed?: boolean }) {
   if (v.status === "verified") {

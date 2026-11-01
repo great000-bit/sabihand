@@ -18,9 +18,10 @@ export const CHECKS: { id: VerificationCheck; label: string }[] = [
   { id: "id", label: "Government ID seen" },
   { id: "address", label: "Address confirmed" },
   { id: "guarantor", label: "Guarantor contacted" },
+  { id: "bank", label: "Bank account name matched by the bank" },
 ];
 
-export type Section = "overview" | "disputes" | "payouts" | "verification" | "requests" | "artisans" | "team";
+export type Section = "overview" | "disputes" | "payouts" | "verification" | "requests" | "artisans" | "autopilot" | "team";
 
 /** Small line icons, drawn on a 24px grid. */
 export const ICONS = {
@@ -31,6 +32,7 @@ export const ICONS = {
   requests: <path d="M8 4h8l1 2h3v15H4V6h3zM8 11h8M8 15h5" />,
   artisans: <path d="M14.5 6.5a4 4 0 0 1-5.6 5.6L4 17l3 3 4.9-4.9a4 4 0 0 1 5.6-5.6l-2.6 2.6-2.4-.6-.6-2.4zM14 4.2" />,
   back: <path d="M15 6l-6 6 6 6" />,
+  autopilot: <><rect x="4.5" y="8" width="15" height="11" rx="3" /><path d="M12 8V4.5M9 13h.01M15 13h.01M9.5 16.5h5M2.5 12.5v2M21.5 12.5v2" /></>,
   team: <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.6-3.4 3.3-5.5 6.5-5.5s5.9 2.1 6.5 5.5M16 4.3a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.7 2.7 3 5.2" />,
   site: <path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" />,
   help: <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17v.01" />,
