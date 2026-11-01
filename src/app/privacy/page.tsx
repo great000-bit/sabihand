@@ -19,7 +19,7 @@ export default function PrivacyPage() {
       </Section>
       <Section title="Who sees what">
         <p>Artisans see a customer&apos;s name and area for the request that customer sent them, and the customer&apos;s phone number only once the job is paid for. Customers see an artisan&apos;s public profile and get the artisan&apos;s phone number once they have paid. Bank details are private to the artisan and our admin team, and are used only to pay out.</p>
-        <p>Job chats are private to the customer and the artisan. Our team reads a chat only when a problem is reported on that job or to stop fraud or abuse.</p>
+        <p>Job chats are private to the customer and the artisan. New messages are checked automatically for signs of fraud, abuse, paying outside Sabihand or a problem with the job; when one is found, our team is alerted and may read that chat. Our team also reads a chat when a problem is reported on that job.</p>
         <p>Profile photos and work photos are public, so anyone with the link can see them.</p>
       </Section>
       <Section title="How we use it">

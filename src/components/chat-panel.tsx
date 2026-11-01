@@ -144,7 +144,7 @@ export function ChatPanel({ bookingId, viewerId, otherName, readOnlyReason }: { 
       <header className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
         <div className="min-w-0">
           <h2 className="truncate text-lg font-extrabold">Chat with {otherName}</h2>
-          <p className="text-xs text-muted">Keep chats and payments on Sabihand so you stay protected.</p>
+          <p className="text-xs text-muted">Keep chats and payments on Sabihand so you stay protected. Messages are checked automatically for safety.</p>
         </div>
         <span className="inline-flex flex-none items-center gap-1.5 text-xs font-bold text-verified">
           <span aria-hidden className="h-2 w-2 rounded-full bg-verified" /> Live

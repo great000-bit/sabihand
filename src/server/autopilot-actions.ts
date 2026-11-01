@@ -51,7 +51,7 @@ export async function setAutopilot(input: unknown): Promise<{ error: string | nu
       "settings",
       null,
       "info",
-      `${v.name} set Autopilot ${rules.enabled ? "ON" : "OFF"}. Payouts ${p.on ? `on (up to ₦${p.maxNaira.toLocaleString("en-NG")}, after ${p.waitHours} h)` : "off"}. Verification ${q.on ? `on (bank name match${q.requirePhoto ? ", photo" : ""}${q.minWorkPhotos ? `, ${q.minWorkPhotos}+ work photos` : ""}${q.requireBio ? ", about text" : ""})` : "off"}.`,
+      `${v.name} set Autopilot ${rules.enabled ? "ON" : "OFF"}. Payouts ${p.on ? `on (${p.noLimit ? "any amount" : `up to ₦${p.maxNaira.toLocaleString("en-NG")}`}, after ${p.waitHours} h)` : "off"}. Verification ${q.on ? `on (bank name match${q.requirePhoto ? ", photo" : ""}${q.minWorkPhotos ? `, ${q.minWorkPhotos}+ work photos` : ""}${q.requireBio ? ", about text" : ""})` : "off"}. Chat watch ${rules.chatWatch.on ? "on" : "off"}.`,
     );
     if (rules.enabled) await runAutopilot("settings changed");
     return { error: null };

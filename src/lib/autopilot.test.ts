@@ -15,7 +15,7 @@ const artisan: Artisan = {
   bio: "Wiring, sockets and inverters for homes and shops since 2015.", availability: "", services: [{ title: "Fix", minKobo: 100, maxKobo: null }],
   portfolio: [{ id: "w1", caption: "", imageId: "img1" }], photoId: "img0", verification: { status: "pending", checks: [] }, joinedAt: base.now, bank,
 };
-const on: AutopilotRules = { ...DEFAULT_RULES, enabled: true, payouts: { on: true, maxNaira: 50000, waitHours: 24 }, verification: { ...DEFAULT_RULES.verification, on: true } };
+const on: AutopilotRules = { ...DEFAULT_RULES, enabled: true, payouts: { on: true, noLimit: false, maxNaira: 50000, waitHours: 24 }, verification: { ...DEFAULT_RULES.verification, on: true } };
 
 /** A job that the customer has confirmed, so its payment is released. */
 function released(amount = 20000): AppState {
@@ -42,6 +42,7 @@ describe("autopilot", () => {
   });
   it("leaves big payouts, unconfirmed bank accounts and jobs with an open problem for a person", () => {
     expect(planAutopilot(released(90000), on, later).waiting[0].reason).toMatch(/limit/);
+    expect(planAutopilot(released(900000), { ...on, payouts: { ...on.payouts, noLimit: true } }, later).actions).toContainEqual(expect.objectContaining({ kind: "payout" }));
     const noBank = released();
     noBank.artisans = [{ ...artisan, bank: { ...bank, verified: false } }];
     expect(planAutopilot(noBank, on, later).waiting[0].reason).toMatch(/not confirmed/);

@@ -66,6 +66,16 @@ export async function notifyChanges(before: AppState, after: AppState): Promise<
   later(() => deliver(notices).catch((e) => console.error("notify failed", e)));
 }
 
+/** Emails every admin now (awaited). Used by Autopilot for alerts. Never throws. */
+export async function emailAdmins(n: Omit<Notice, "toUserId">): Promise<void> {
+  if (!emailEnabled()) return;
+  try {
+    await deliver([{ ...n, toUserId: ADMINS }]);
+  } catch (e) {
+    console.error("admin email failed", e);
+  }
+}
+
 /**
  * Welcome email, once per account. app.welcomed remembers who already got it (accounts that existed before this
  * email was added are marked as welcomed by migration 0007). Called after every sign-in; does nothing the second time.

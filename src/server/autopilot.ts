@@ -6,7 +6,8 @@ import type { Viewer } from "@/lib/types";
 import { sql } from "./db";
 import { ConflictError, loadAll, persist } from "./repo";
 import { newId } from "./ids";
-import { notifyChanges } from "./email";
+import { emailAdmins, notifyChanges } from "./email";
+import { ISSUE_LABEL, scanMessage } from "@/lib/chat-watch";
 import { paystackEnabled, sendTransfer } from "./paystack";
 
 /** The bot acts with admin rights, but only through the two engine calls below. */
@@ -30,6 +31,10 @@ export async function log(kind: string, target: string | null, outcome: string, 
     await sql()`insert into app.autopilot_log (kind, target, outcome, detail) values (${kind}, ${target}, ${outcome}, ${detail.slice(0, 1000)})`;
   } catch (e) {
     console.error("autopilot log failed", e);
+  }
+  // A payout the bot could not finish is money someone is waiting for: tell the team at once.
+  if (kind === "payout" && outcome === "failed") {
+    await emailAdmins({ subject: "Autopilot could not send a payout", lines: [detail, "Open Autopilot to see the log, or pay it by hand from Payouts."], path: "/admin/autopilot", cta: "Open Autopilot" });
   }
 }
 
@@ -161,5 +166,36 @@ export function wakeAutopilot(reason: string): void {
     after(work);
   } catch {
     void work();
+  }
+}
+
+/**
+ * Reads one new chat message and, when it looks like trouble, logs it and emails the admins. Runs after the
+ * message is saved, so chatting is never slowed or blocked. At most one alert per job and issue every 6 hours.
+ */
+export async function watchChat(bookingId: string, sender: Viewer, body: string): Promise<void> {
+  try {
+    const issues = scanMessage(body);
+    if (issues.length === 0) return;
+    const rules = await readRules();
+    if (!rules.enabled || !rules.chatWatch.on) return;
+    const recent = (await sql()`select detail from app.autopilot_log where kind = 'chat' and target = ${bookingId} and at > now() - interval '6 hours'`) as { detail: string }[];
+    const fresh = issues.filter((i) => !recent.some((r) => r.detail.includes(ISSUE_LABEL[i])));
+    if (fresh.length === 0) return;
+    const { state } = await loadAll();
+    const b = state.bookings.find((x) => x.id === bookingId);
+    const a = b && state.artisans.find((x) => x.id === b.artisanId);
+    const side = b?.customerId === sender.id ? `customer ${b?.customerName}` : `artisan ${a?.businessName ?? sender.name}`;
+    const what = fresh.map((i) => ISSUE_LABEL[i]).join(", ");
+    const quote = body.length > 300 ? `${body.slice(0, 300)}…` : body;
+    await log("chat", bookingId, "info", `Chat alert on "${b?.title ?? bookingId}": ${what}. The ${side} wrote: "${quote}"`);
+    await emailAdmins({
+      subject: `Chat alert: ${b?.title ?? "a job"}`,
+      lines: [`Autopilot spotted: ${what}.`, `The ${side} wrote: "${quote}"`, "Nothing was blocked. Open the job to read the whole chat and decide."],
+      path: `/admin/requests/${bookingId}`,
+      cta: "Open the job",
+    });
+  } catch (e) {
+    console.error("chat watch failed", e);
   }
 }
