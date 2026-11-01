@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
+import { LaunchSplash } from "@/components/launch-splash";
 import { Header, Footer } from "@/components/chrome";
 import { Suspense } from "react";
 import { AosInit } from "@/components/aos-init";
@@ -42,6 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={spaceGrotesk.variable} data-theme="dark">
       <body>
+        <LaunchSplash />
         <StoreProvider state={state} viewer={viewer} config={{ paymentsEnabled: paystackEnabled(), dataAvailable }}>
           <AosInit />
           <Suspense fallback={null}>

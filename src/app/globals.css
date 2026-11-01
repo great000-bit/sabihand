@@ -152,8 +152,20 @@ select option:disabled {
   filter: drop-shadow(0 0 clamp(3px, 1vw, 8px) var(--stroke));
   /* Each letter starts a little after the one before it: drawn first, then filled in. */
   animation:
-    splash-draw 0.95s cubic-bezier(0.5, 0, 0.2, 1) calc(var(--i) * 0.2s) forwards,
-    splash-fill 0.45s ease-out calc(var(--i) * 0.2s + 0.7s) forwards;
+    splash-draw 0.95s cubic-bezier(0.5, 0, 0.2, 1) calc(var(--i) * var(--step, 0.2s)) forwards,
+    splash-fill 0.45s ease-out calc(var(--i) * var(--step, 0.2s) + 0.7s) forwards;
+}
+/* Opening screen (src/components/launch-splash.tsx): the same logo, a little quicker, then it fades away on its own. */
+.launch {
+  --step: 0.11s;
+  z-index: 200;
+  animation: launch-out 0.45s ease-in 2.15s forwards;
+}
+.launch[hidden] {
+  display: none;
+}
+@keyframes launch-out {
+  to { opacity: 0; visibility: hidden; }
 }
 .splash-count {
   display: grid;
