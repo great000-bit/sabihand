@@ -13,7 +13,9 @@ export interface AutopilotRules {
   enabled: boolean;
   payouts: {
     on: boolean;
-    /** Largest single payout the bot may send, in naira. Bigger ones wait for a person. */
+    /** Pay any amount. When false, payouts above maxNaira wait for a person. */
+    noLimit: boolean;
+    /** Largest single payout the bot may send, in naira, when noLimit is off. */
     maxNaira: number;
     /** Hours to wait after a job is released before paying, so a late problem can still stop it. */
     waitHours: number;
@@ -26,12 +28,15 @@ export interface AutopilotRules {
     /** An "about" text of at least 30 characters. */
     requireBio: boolean;
   };
+  /** Read new chat messages and email the admins when one looks like trouble (see src/lib/chat-watch.ts). */
+  chatWatch: { on: boolean };
 }
 
 export const DEFAULT_RULES: AutopilotRules = {
   enabled: false,
-  payouts: { on: false, maxNaira: 50000, waitHours: 24 },
+  payouts: { on: false, noLimit: false, maxNaira: 50000, waitHours: 24 },
   verification: { on: false, requirePhoto: true, minWorkPhotos: 1, requireBio: true },
+  chatWatch: { on: true },
 };
 
 const num = (v: unknown, min: number, max: number, fallback: number) => {
@@ -45,16 +50,18 @@ export function cleanRules(input: unknown): AutopilotRules {
   const i = (input && typeof input === "object" ? input : {}) as Record<string, Record<string, unknown> | unknown>;
   const p = (i.payouts && typeof i.payouts === "object" ? i.payouts : {}) as Record<string, unknown>;
   const v = (i.verification && typeof i.verification === "object" ? i.verification : {}) as Record<string, unknown>;
+  const c = (i.chatWatch && typeof i.chatWatch === "object" ? i.chatWatch : {}) as Record<string, unknown>;
   const d = DEFAULT_RULES;
   return {
     enabled: bool(i.enabled, d.enabled),
-    payouts: { on: bool(p.on, d.payouts.on), maxNaira: num(p.maxNaira, 0, 5_000_000, d.payouts.maxNaira), waitHours: num(p.waitHours, 0, 720, d.payouts.waitHours) },
+    payouts: { on: bool(p.on, d.payouts.on), noLimit: bool(p.noLimit, d.payouts.noLimit), maxNaira: num(p.maxNaira, 0, 100_000_000, d.payouts.maxNaira), waitHours: num(p.waitHours, 0, 720, d.payouts.waitHours) },
     verification: {
       on: bool(v.on, d.verification.on),
       requirePhoto: bool(v.requirePhoto, d.verification.requirePhoto),
       minWorkPhotos: num(v.minWorkPhotos, 0, 8, d.verification.minWorkPhotos),
       requireBio: bool(v.requireBio, d.verification.requireBio),
     },
+    chatWatch: { on: bool(c.on, d.chatWatch.on) },
   };
 }
 
@@ -110,7 +117,7 @@ export function payoutBlock(state: AppState, p: Payment, r: AutopilotRules["payo
   if (!a.bank) return "no bank account";
   if (!a.bank.verified || !a.bank.bankCode) return "bank account not confirmed by the bank";
   const amount = artisanPayoutKobo(p.amountKobo);
-  if (amount > r.maxNaira * 100) return `above the ₦${r.maxNaira.toLocaleString("en-NG")} limit`;
+  if (!r.noLimit && amount > r.maxNaira * 100) return `above the ₦${r.maxNaira.toLocaleString("en-NG")} limit`;
   const ready = new Date(p.settledAt ?? p.createdAt).getTime() + r.waitHours * 3600_000;
   if (ready > new Date(now).getTime()) return `waiting until ${new Date(ready).toISOString()}`;
   return null;

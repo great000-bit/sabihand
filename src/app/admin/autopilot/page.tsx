@@ -85,6 +85,7 @@ export default function AutopilotPage() {
       const a = state.artisans.find((x) => x.id === id);
       return a ? <Link href={`/admin/artisans/${a.id}`} className="font-semibold text-link hover:underline">{a.businessName}</Link> : null;
     }
+    if (kind === "chat") return <Link href={`/admin/requests/${id}`} className="font-semibold text-link hover:underline">Open job</Link>;
     const p = state.payments.find((x) => x.id === id);
     return p ? <Link href={`/admin/requests/${p.bookingId}`} className="font-semibold text-link hover:underline">Open job</Link> : null;
   };
@@ -117,9 +118,14 @@ export default function AutopilotPage() {
           </div>
           <Switch label="Payouts" on={draft.payouts.on} disabled={ro} onChange={(v) => set((r) => ({ ...r, payouts: { ...r.payouts, on: v } }))} />
         </div>
-        <Rule hint="Bigger payouts wait for you.">
+        <Rule hint="Pays every amount, however big.">
+          <label className="flex items-center justify-between gap-3">No limit
+            <Switch label="No payout limit" on={draft.payouts.noLimit} disabled={ro} onChange={(v) => set((r) => ({ ...r, payouts: { ...r.payouts, noLimit: v } }))} />
+          </label>
+        </Rule>
+        <Rule hint={draft.payouts.noLimit ? "Not used while No limit is on." : "Bigger payouts wait for you."}>
           <label className="flex items-center justify-between gap-3">Largest payout the bot may send (₦)
-            <input type="number" min={0} step={1000} className={numCls} disabled={ro} value={draft.payouts.maxNaira} onChange={(e) => set((r) => ({ ...r, payouts: { ...r.payouts, maxNaira: Number(e.target.value) } }))} />
+            <input type="number" min={0} step={1000} className={numCls} disabled={ro || draft.payouts.noLimit} value={draft.payouts.maxNaira} onChange={(e) => set((r) => ({ ...r, payouts: { ...r.payouts, maxNaira: Number(e.target.value) } }))} />
           </label>
         </Rule>
         <Rule hint="Gives time for a late problem to stop the payout.">
@@ -153,6 +159,14 @@ export default function AutopilotPage() {
           </label>
         </Rule>
 
+        <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] px-5 py-4">
+          <div>
+            <p className="font-bold">Watch chats</p>
+            <p className="text-xs text-muted">Reads every new message between customers and artisans. If it spots paying outside Sabihand, threats or insults, a complaint, or a push for more money, it emails the admins. It never blocks or edits a message.</p>
+          </div>
+          <Switch label="Watch chats" on={draft.chatWatch.on} disabled={ro} onChange={(v) => set((r) => ({ ...r, chatWatch: { on: v } }))} />
+        </div>
+
         {view.canEdit && (
           <div className="flex flex-wrap items-center gap-2 border-t border-white/[0.06] px-5 py-4">
             <Button variant="gold" disabled={busy || !changed} onClick={() => save(draft)}>{busy ? "Saving…" : "Save instructions"}</Button>
@@ -167,7 +181,7 @@ export default function AutopilotPage() {
           <p className="font-bold">Always yours</p>
           <p className="mt-1 text-sm text-slate">The bot never touches these. They need a person.</p>
           <ul className="mt-3 grid gap-2 text-sm">
-            {["Disputes and refunds", "Reported reviews and artisans", "Rejecting a verification", "Adding or removing admins"].map((t) => (
+            {["Disputes and refunds", "Deciding what to do about a chat alert", "Reported reviews and artisans", "Rejecting a verification", "Adding or removing admins"].map((t) => (
               <li key={t} className="flex items-center gap-2 rounded-xl bg-white/[0.03] px-3 py-2"><Icon name="disputes" className="h-4 w-4 text-gold" />{t}</li>
             ))}
           </ul>
@@ -205,7 +219,7 @@ export default function AutopilotPage() {
             </Button>
             {note && <span className="text-sm text-verified">{note}</span>}
           </div>
-          <p className="mt-2 text-xs text-muted">The bot also runs by itself after every payment and change on the site, and once a day.</p>
+          <p className="mt-2 text-xs text-muted">There is no machine to keep running or that can go down: the bot wakes up with every payment, change and chat message on the site, and once a day on its own, for as long as the site is online.</p>
         </Box>
       </div>
 

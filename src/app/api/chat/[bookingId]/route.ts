@@ -1,3 +1,5 @@
+import { after } from "next/server";
+import { watchChat } from "@/server/autopilot";
 import { getViewer } from "@/server/session";
 import { chatAccess, markRead, messagesAfter, otherSeenSeq, saveMessage } from "@/server/chat";
 
@@ -58,6 +60,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ bookingId: str
     const r = await saveMessage(bookingId, viewer.id, payload.body, payload.clientId);
     if ("error" in r) return Response.json({ error: r.error }, { status: 400 });
     await markRead(bookingId, viewer.id);
+    after(() => watchChat(bookingId, viewer, r.message.body));
     return Response.json({ message: r.message });
   } catch (e) {
     console.error("chat send failed", e);
