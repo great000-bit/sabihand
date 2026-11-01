@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askedFor, continueUrl, safeNext, signInProblem } from "./next";
+import { askedFor, continueUrl, safeNext, signInErrorCodes, signInProblem } from "./next";
 
 describe("askedFor", () => {
   it("keeps a page on this site", () => expect(askedFor("/artisan/join")).toBe("/artisan/join"));
@@ -29,5 +29,18 @@ describe("signInProblem", () => {
     expect(signInProblem("google", undefined)).toMatch(/did not finish/);
     expect(signInProblem("account_not_linked", undefined)).toMatch(/did not finish/);
   });
+  it("says when the person cancelled on Google's page", () => {
+    expect(signInProblem(["google", "access_denied"], undefined)).toMatch(/cancelled/);
+    expect(signInProblem("access_denied", undefined)).toMatch(/cancelled/);
+  });
+  it("uses the last, most specific code", () => expect(signInProblem(["google", "expired"], undefined)).toMatch(/too long/));
   it("treats a leftover one-time code as a failed sign-in", () => expect(signInProblem(undefined, "abc")).toMatch(/did not finish/));
+});
+
+describe("signInErrorCodes", () => {
+  it("reads one code or several", () => {
+    expect(signInErrorCodes(undefined)).toEqual([]);
+    expect(signInErrorCodes("google")).toEqual(["google"]);
+    expect(signInErrorCodes(["google", "access_denied"])).toEqual(["google", "access_denied"]);
+  });
 });

@@ -18,17 +18,28 @@ export function continueUrl(asked: string, artisan: boolean): string {
   return s ? `/continue?${s}` : "/continue";
 }
 
+/**
+ * The error codes a failed sign-in came back with. Google's own reason is added after ours, so a cancelled
+ * Google sign-in arrives as `?error=google&error=access_denied`: a list, with the most specific code last.
+ */
+export function signInErrorCodes(error: string | string[] | undefined): string[] {
+  return (Array.isArray(error) ? error : error ? [error] : []).filter(Boolean);
+}
+
 /** The message shown on the sign-in and sign-up pages when the person arrives from a sign-in that did not finish. */
-export function signInProblem(error: string | undefined, verifier: string | undefined): string | null {
-  switch (error) {
+export function signInProblem(error: string | string[] | undefined, verifier: string | string[] | undefined): string | null {
+  const codes = signInErrorCodes(error);
+  switch (codes[codes.length - 1]) {
     case "expired":
       return "That sign-in took too long. Please try again.";
     case "nosession":
       return "We could not complete your sign-in. Please try again.";
     case "unavailable":
       return "Sign-in is not responding right now. Please try again in a moment.";
+    case "access_denied":
+      // The person pressed Cancel or Back on Google's page. Nothing is broken.
+      return "Google sign-in was cancelled. Tap Continue with Google and choose your account to sign in.";
     case undefined:
-    case "":
       return verifier ? "Google sign-in did not finish. Please try again." : null;
     default:
       return "Google sign-in did not finish. Please try again.";
