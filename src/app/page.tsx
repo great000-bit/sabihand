@@ -2,10 +2,12 @@ import { Hero } from "@/components/hero";
 import { FindGraphic, JoinGraphic, ProtectGraphic, QuoteGraphic } from "@/components/motion-graphics";
 import { Marquee } from "@/components/marquee";
 import { FeatureRow, Ticks } from "@/components/feature-row";
+import Link from "next/link";
+import { LAUNCH_CITIES, STATES } from "@/lib/catalog";
 import { Eyebrow, LinkButton } from "@/components/ui";
 
 const STEPS = [
-  ["Find", "You", "Choose a trade and your part of Port Harcourt. See artisans who work near you, with their price range and verification."],
+  ["Find", "You", "Choose a trade and your area. See artisans who work near you, with their price range and verification."],
   ["Request", "Together", "Describe the job. The artisan replies with a written quote you can accept or ignore."],
   ["Pay into a hold", "Sabihand", "Your payment is held by Sabihand. The artisan sees it is secured and starts work."],
   ["Confirm", "You", "When the job is done, you confirm and the payment is released. Not happy? Report a problem first."],
@@ -79,23 +81,23 @@ export default function Home() {
         <div data-aos="fade-up" className="grain relative mx-auto grid max-w-6xl gap-8 overflow-hidden rounded-[2.5rem] border border-line bg-panel p-8 sm:p-12 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-14">
           <div className="relative">
             <Eyebrow tone="blue">Where we work</Eyebrow>
-            <h2 className="text-3xl font-extrabold sm:text-5xl">Built for Port Harcourt.</h2>
-            <p className="mt-4 max-w-md text-slate">Sabihand is launching in Port Harcourt, Rivers State. Every artisan on the platform works in the city, so help is close and every job gets proper attention.</p>
+            <h2 className="text-3xl font-extrabold sm:text-5xl">Built for all of Nigeria.</h2>
+            <p className="mt-4 max-w-md text-slate">Sabihand is launching in Port Harcourt, Lagos and Abuja, and across every state in Nigeria, down to your local government area.</p>
             <div className="mt-7">
               <LinkButton href="/artisans" variant="gold">Find an artisan</LinkButton>
             </div>
           </div>
           <ul className="relative grid gap-3">
-            {[
-              ["Rivers State", "Our launch home, and our only focus for now."],
-              ["Near you", "Search by your part of the city, or let your phone find it."],
-              ["Properly checked", "Each profile lists the checks the Sabihand team actually did."],
-            ].map(([t, d]) => (
-              <li key={t} className="rounded-3xl border border-line bg-white/[0.03] px-5 py-4">
-                <p className="font-display text-lg font-extrabold">{t}</p>
-                <p className="mt-0.5 text-sm text-slate">{d}</p>
-              </li>
-            ))}
+            {LAUNCH_CITIES.map((c) => [c.name, c.blurb, `/artisans?area=state:${c.stateId}`])
+              .concat([[`All ${STATES.length - 1} states and the FCT`, "Search by state and local government, or let your phone find your area.", "/artisans"]])
+              .map(([t, d, href]) => (
+                <li key={t}>
+                  <Link href={href} className="block rounded-3xl border border-line bg-white/[0.03] px-5 py-4 transition hover:border-white/25 hover:bg-white/[0.06]">
+                    <p className="font-display text-lg font-extrabold">{t}</p>
+                    <p className="mt-0.5 text-sm text-slate">{d}</p>
+                  </Link>
+                </li>
+              ))}
           </ul>
         </div>
       </section>
@@ -107,7 +109,7 @@ export default function Home() {
         small
         flip
         eyebrow="For artisans"
-        title="Do you work with your hands in Port Harcourt?"
+        title="Do you work with your hands?"
         action={<LinkButton href="/artisan/join" variant="gold" className="!min-h-12 !px-8 !text-base">Create your free profile</LinkButton>}
       >
         <p>Plumber, electrician, tailor, mechanic, stylist, painter, welder, carpenter, tiler, cleaner or any of our other trades: show your prices and get requests from people near you. You pay a commission only when a job is completed.</p>

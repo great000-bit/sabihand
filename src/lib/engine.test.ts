@@ -270,19 +270,21 @@ describe("sample profiles", () => {
   });
 });
 
-describe("launch area", () => {
-  it("only Port Harcourt areas count", async () => {
-    const { isLaunchArea, LAUNCH_AREAS } = await import("./catalog");
-    expect(isLaunchArea("ph-gra")).toBe(true);
-    expect(isLaunchArea("rivers-port-harcourt")).toBe(true);
-    expect(isLaunchArea("lagos-ikeja")).toBe(false);
-    expect(isLaunchArea("rivers-bonny")).toBe(false);
-    expect(LAUNCH_AREAS.length).toBeGreaterThan(8);
+describe("nationwide launch", () => {
+  it("lists Port Harcourt, Lagos and Abuja first", async () => {
+    const { LAUNCH_CITIES } = await import("./catalog");
+    expect(LAUNCH_CITIES.map((c) => c.name)).toEqual(["Port Harcourt", "Lagos", "Abuja"]);
   });
-  it("search without an area shows only artisans serving the launch city", () => {
-    const here = artisan({ id: "p1", areaIds: ["ph-gra"] });
-    const away = artisan({ id: "l1", areaIds: ["lagos-yaba"] });
-    const out = searchArtisans({ artisans: [here, away], reviews: [] }, { launchOnly: true });
-    expect(out.map((a) => a.id)).toEqual(["p1"]);
+  it("search without an area shows artisans from every state", () => {
+    const ph = artisan({ id: "p1", areaIds: ["ph-gra"] });
+    const lagos = artisan({ id: "l1", areaIds: ["lagos-yaba"] });
+    const kano = artisan({ id: "k1", areaIds: ["kano-nassarawa"] });
+    const out = searchArtisans({ artisans: [ph, lagos, kano], reviews: [] }, {});
+    expect(out.map((a) => a.id).sort()).toEqual(["k1", "l1", "p1"]);
+  });
+  it("a state search finds artisans in that state only", () => {
+    const ph = artisan({ id: "p1", areaIds: ["ph-gra"] });
+    const lagos = artisan({ id: "l1", areaIds: ["lagos-yaba"] });
+    expect(searchArtisans({ artisans: [ph, lagos], reviews: [] }, { stateId: "rivers" }).map((a) => a.id)).toEqual(["p1"]);
   });
 });

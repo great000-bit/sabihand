@@ -1,16 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { authClient } from "@/lib/auth/client";
 import { AuthSlides } from "./auth-slides";
 import { ErrorNote } from "./ui";
+
+/**
+ * Apps like Instagram, Facebook, TikTok and Snapchat open links in their own browser. Google refuses to sign anyone in
+ * there ("disallowed_useragent"), so the person must open the page in Chrome or Safari first.
+ */
+export function inAppBrowser(ua: string): boolean {
+  return /FBAN|FBAV|FB_IAB|Instagram|Snapchat|TikTok|musical_ly|BytedanceWebview|Twitter|LinkedInApp|Line\/|MicroMessenger|; wv\)/i.test(ua);
+}
 
 /** Google is the only way in. Sign-in and sign-up are the same step: a new Google account becomes a new Sabihand account. */
 export function AuthForm({ mode, next, as, problem, disabled }: { mode: "sign-in" | "sign-up"; next: string; as: "customer" | "artisan"; problem?: string | null; disabled?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(problem ?? null);
   const [role, setRole] = useState<"customer" | "artisan">(as);
+  const inApp = useSyncExternalStore(
+    () => () => {},
+    () => inAppBrowser(navigator.userAgent),
+    () => false,
+  );
+  const [copied, setCopied] = useState(false);
   const up = mode === "sign-up";
   const unlock = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Never leave the button locked: if the browser has not left for Google after a while, let the person try again.
@@ -66,6 +80,19 @@ export function AuthForm({ mode, next, as, problem, disabled }: { mode: "sign-in
                 ))}
               </div>
             </fieldset>
+          )}
+          {inApp && (
+            <div role="alert" className="rounded-2xl border-2 border-gold/60 bg-gold/10 p-4 text-sm text-ink">
+              <p className="font-bold">Open Sabihand in Chrome or Safari to sign in.</p>
+              <p className="mt-1 text-slate">Google does not allow sign-in inside apps like Instagram, Facebook or TikTok. Tap the menu (⋮ or ···) and choose “Open in browser”, or copy the link below.</p>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard?.writeText(window.location.href).then(() => setCopied(true), () => setCopied(false))}
+                className="mt-3 inline-flex min-h-10 items-center rounded-full bg-gold px-4 text-sm font-bold text-midnight"
+              >
+                {copied ? "Link copied" : "Copy link"}
+              </button>
+            </div>
           )}
           <button
             type="button"
