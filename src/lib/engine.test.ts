@@ -117,6 +117,25 @@ describe("booking flow", () => {
     expect(t.payments[0].status).toBe("refunded");
     expect(t.reports[0].resolvedAt).toBeDefined();
   });
+  it("an admin who is also the customer on the job can still settle the dispute", () => {
+    const { s, id } = bookedJob();
+    const both: Viewer = { ...customer, isAdmin: true };
+    let t = e.raiseDispute(s, id, "Not finished", as(customer));
+    t = e.resolveDispute(t, id, "release", "Work checked by phone", as(both));
+    expect(t.bookings[0].status).toBe("completed");
+    expect(t.payments[0].status).toBe("released");
+  });
+  it("closes a report only when no money decision is left", () => {
+    const { s, id } = bookedJob();
+    let t = e.raiseDispute(s, id, "Late", as(customer));
+    const rid = t.reports[0].id;
+    expect(() => e.closeReport(t, rid, "", as(admin))).toThrow(/Release the payment or refund/);
+    expect(() => e.closeReport(t, rid, "", as(customer))).toThrow();
+    t = e.resolveDispute(t, id, "release", "ok", as(admin));
+    expect(() => e.closeReport(t, rid, "", as(admin))).toThrow(/already closed/);
+    const flagged: AppState = { ...t, reports: [{ id: "rx", kind: "artisan", targetId: "a1", reason: "Rude", reporterName: "Ada", createdAt: base.now }] };
+    expect(e.closeReport(flagged, "rx", "Spoke to the artisan", as(admin)).reports[0].resolution).toBe("Spoke to the artisan");
+  });
 });
 
 describe("who may do what", () => {
