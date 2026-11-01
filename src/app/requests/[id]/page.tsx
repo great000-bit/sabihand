@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import * as actions from "@/server/actions";
 import { actorOn } from "@/lib/access";
@@ -47,6 +47,12 @@ function Detail() {
   const [quoteDate, setQuoteDate] = useState("");
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
+  const router = useRouter();
+  // The team looks at other people's jobs inside the admin dashboard, never on the customer page.
+  useEffect(() => {
+    const found = state.bookings.find((x) => x.id === id);
+    if (found && actorOn(state, found, viewer) === "admin") router.replace(`/admin/requests/${id}`);
+  }, [state, viewer, id, router]);
 
   const b: Booking | undefined = state.bookings.find((x) => x.id === id);
   if (!b) return <Card className="p-10 text-center"><h1 className="text-2xl font-extrabold">Request not found</h1><p className="mt-1 text-slate">It may belong to another account.</p><Link href="/requests" className="mt-3 inline-block font-bold text-link">Back to requests</Link></Card>;
@@ -74,7 +80,7 @@ function Detail() {
         <Card className="p-6 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <Link href={back} className="text-sm font-bold text-link">← Back</Link>
+              <span className="flex flex-wrap gap-4"><Link href={back} className="text-sm font-bold text-link">← Back</Link>{viewer?.isAdmin && <Link href={`/admin/requests/${b.id}`} className="text-sm font-bold text-gold">Open in admin</Link>}</span>
               <h1 className="mt-2 text-3xl font-extrabold">{b.title}</h1>
               <p className="text-slate">
                 {tradeById(b.trade).label} · {artisan?.businessName} · {areaLabel(b.areaId)}
