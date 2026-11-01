@@ -53,22 +53,12 @@ export const AREAS: Area[] = [...NEIGHBOURHOODS, ...LGAS];
 const AREA_INDEX = new Map(AREAS.map((a) => [a.id, a]));
 const STATE_INDEX = new Map(STATES.map((s) => [s.id, s]));
 
-/** Sabihand is launching in one city for now. Everything that lists, searches or accepts an area works inside it. */
-export const LAUNCH_NAME = "Port Harcourt";
-export const LAUNCH_STATE_ID = "rivers";
-/** Port Harcourt and the local governments that make up the city and its edges. The neighbourhoods (ph-*) are inside the city. */
-const LAUNCH_LGA_IDS = ["rivers-port-harcourt", "rivers-obio-akpor", "rivers-eleme", "rivers-ikwerre", "rivers-oyigbo", "rivers-okrika"];
-/** GPS only counts as "in Port Harcourt" within this distance of one of its areas. */
-export const LAUNCH_RADIUS_KM = 40;
-
-/** Kept so old links like ?area=city:Lagos still parse; they now fall back to the whole launch area. */
-export const LAUNCH_CITIES: { name: string; stateId: string }[] = [{ name: LAUNCH_NAME, stateId: LAUNCH_STATE_ID }];
-
-export const LAUNCH_AREAS: Area[] = AREAS.filter((a) => a.id.startsWith("ph-") || LAUNCH_LGA_IDS.includes(a.id));
-const LAUNCH_INDEX = new Set(LAUNCH_AREAS.map((a) => a.id));
-export function isLaunchArea(id: string): boolean {
-  return LAUNCH_INDEX.has(id);
-}
+/** The first cities, listed in this order on the home page. Sabihand works in every state; each is a shortcut to its state's search. */
+export const LAUNCH_CITIES: { name: string; stateId: string; blurb: string }[] = [
+  { name: "Port Harcourt", stateId: "rivers", blurb: "Old GRA, Rumuokoro, Choba, Trans-Amadi and the rest of Rivers State." },
+  { name: "Lagos", stateId: "lagos", blurb: "Yaba, Ikeja, Surulere, Lekki and every local government in Lagos." },
+  { name: "Abuja", stateId: "fct", blurb: "Wuse, Garki, Gwarinpa, Kubwa and every area council in the FCT." },
+];
 
 /** The most areas one artisan can list. Kano, the biggest state, has 44 local governments. */
 /** "Ikeja, Lagos and 5 more" for a long list of areas. */

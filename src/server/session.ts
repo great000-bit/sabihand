@@ -56,7 +56,7 @@ async function sessionUser() {
       return null;
     }
     // Usually the library trying to renew cookies where pages may not: read the session directly instead.
-    console.error("getSession failed, reading the session directly", e);
+    console.warn("getSession could not renew cookies here, reading the session directly", e instanceof Error ? e.message : e);
     try {
       return await readSessionUser();
     } catch (e2) {
