@@ -17,6 +17,9 @@ export interface Ctx {
 
 const DENIED = "You cannot do that on this request.";
 
+/** The id the admin bot acts under. It has admin rights only inside the rules in src/lib/autopilot.ts. */
+export const AUTOPILOT_ID = "sabihand-autopilot";
+
 function mustFind<T extends { id: string }>(list: T[], id: string, what: string): T {
   const x = list.find((i) => i.id === id);
   if (!x) throw new Error(`${what} not found`);
@@ -210,7 +213,7 @@ export function decideVerification(state: AppState, artisanId: string, decision:
   if (!ctx.user.isAdmin) throw new Error(DENIED);
   const a = mustFind(state.artisans, artisanId, "Artisan");
   if (decision === "verified" && checks.length === 0) throw new Error("Tick at least one check you actually performed.");
-  const verification = { ...a.verification, status: decision, checks: decision === "verified" ? checks : [], decidedAt: ctx.now, note: note.trim() || undefined };
+  const verification = { ...a.verification, status: decision, checks: decision === "verified" ? checks : [], decidedAt: ctx.now, note: note.trim() || undefined, by: ctx.user.id === AUTOPILOT_ID ? ("autopilot" as const) : ("admin" as const) };
   return { ...state, artisans: replace(state.artisans, { ...a, verification }) };
 }
 

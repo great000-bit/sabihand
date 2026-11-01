@@ -74,3 +74,25 @@ export async function resolveAccount(accountNumber: string, bankCode: string): P
   const data = await call<{ account_name: string }>(`/bank/resolve?account_number=${encodeURIComponent(accountNumber)}&bank_code=${encodeURIComponent(bankCode)}`);
   return data.account_name;
 }
+
+export interface Transfer {
+  status: "success" | "pending" | "otp" | "failed" | "reversed" | string;
+  reference: string;
+  transfer_code?: string;
+}
+
+/**
+ * Sends money from the Paystack balance to a Nigerian bank account. The reference is fixed per payment, so
+ * Paystack refuses a second transfer for the same payment even if this is called twice.
+ * Needs a Paystack account with Transfers enabled, enough balance, and OTP for transfers switched off.
+ */
+export async function sendTransfer(input: { accountNumber: string; bankCode: string; accountName: string; amountKobo: number; reference: string; reason: string }): Promise<Transfer> {
+  const recipient = await call<{ recipient_code: string }>("/transferrecipient", {
+    method: "POST",
+    body: JSON.stringify({ type: "nuban", name: input.accountName, account_number: input.accountNumber, bank_code: input.bankCode, currency: "NGN" }),
+  });
+  return call<Transfer>("/transfer", {
+    method: "POST",
+    body: JSON.stringify({ source: "balance", amount: input.amountKobo, recipient: recipient.recipient_code, reference: input.reference, reason: input.reason, currency: "NGN" }),
+  });
+}

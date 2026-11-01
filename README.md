@@ -18,6 +18,7 @@ Live product: real accounts, real database, no sample data. Artisans sign up the
 | `PAYSTACK_SECRET_KEY` | Checkout. Without it the Pay button explains payment is not on yet. Set the webhook URL in Paystack to `/api/paystack/webhook` |
 | `BREVO_API_KEY`, `EMAIL_FROM`, `SITE_URL` | Email notifications (welcome, new request, price sent/accepted, payment held, job done, disputes to both sides and admins, dispute decisions, verification, payouts). Off until a key and a sender are set. With Brevo, `EMAIL_FROM` is the single sender you verified in Brevo (for example `Sabihand <you@gmail.com>`), no domain needed. `SITE_URL` is used for the links |
 | `RESEND_API_KEY`, `EMAIL_PROVIDER` | Optional: use Resend instead once Sabihand has a verified domain (`EMAIL_PROVIDER=resend` picks it when both keys are set) |
+| `CRON_SECRET` | Optional. Protects the daily Autopilot run (`/api/cron/autopilot`, scheduled in `vercel.json`). Autopilot itself is switched on and instructed in /admin/autopilot; automatic payouts need Paystack Transfers enabled with OTP off |
 | `ADMIN_USER_IDS` | Comma-separated Neon Auth user ids that may use `/admin` (or `ADMIN_EMAILS`, which also requires a verified email) |
 | `SITE_OFFLINE` | Set to `1` to hide the site: every page shows the Sabihand 404 page (API routes keep working). Set it on Production only, then redeploy. Delete it and redeploy to bring the site back |
 

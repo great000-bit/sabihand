@@ -1,5 +1,6 @@
 import { settleReference } from "@/server/payments";
 import { validSignature } from "@/server/paystack";
+import { transferSettled } from "@/server/autopilot";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,9 @@ export async function POST(req: Request) {
     const r = await settleReference(event.data.reference);
     // A non-2xx makes Paystack retry. Only retry on provider/database trouble, not on payments that can never apply.
     if (!r.ok && /try again|respond|save/i.test(r.error)) return new Response("retry", { status: 500 });
+  }
+  if ((event.event === "transfer.success" || event.event === "transfer.failed" || event.event === "transfer.reversed") && event.data?.reference) {
+    await transferSettled(event.data.reference, event.event === "transfer.success", event.event.replace("transfer.", ""));
   }
   return new Response("ok");
 }

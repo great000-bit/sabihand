@@ -14,6 +14,7 @@ const TITLES: Record<Section, [string, string]> = {
   verification: ["Verification", "Artisans waiting for the team to check them."],
   requests: ["Requests", "Every job on the marketplace. Open one to see its history and chat."],
   artisans: ["Artisans", "Everyone offering work on Sabihand. Open one to see their jobs, money and checks."],
+  autopilot: ["Autopilot", "The admin bot: switch it on or off and tell it exactly what it may do."],
   team: ["Admin team", "Who can use this admin area."],
 };
 
@@ -47,7 +48,7 @@ function useRail() {
 /** Which sidebar item a path belongs to, and whether it is a detail page inside it. */
 function sectionOf(path: string): { section: Section; detail: boolean } {
   const [, , first, second] = path.split("/");
-  const known: Section[] = ["disputes", "payouts", "verification", "requests", "artisans", "team"];
+  const known: Section[] = ["disputes", "payouts", "verification", "requests", "artisans", "autopilot", "team"];
   const section = (known as string[]).includes(first ?? "") ? (first as Section) : "overview";
   return { section, detail: Boolean(second) };
 }
@@ -143,6 +144,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           {item({ id: "verification", label: "Verification", count: pending.length })}
           {item({ id: "requests", label: "Requests" })}
           {item({ id: "artisans", label: "Artisans" })}
+          {item({ id: "autopilot", label: "Autopilot" })}
         </nav>
       </div>
       <div>

@@ -10,6 +10,7 @@ import { getViewer } from "./session";
 import { ConflictError, loadAll, persist, type Snapshot } from "./repo";
 import { newId } from "./ids";
 import { notifyChanges } from "./email";
+import { wakeAutopilot } from "./autopilot";
 import { ownsImage, pruneImages } from "./images";
 import { initializeTransaction, listBanks as paystackBanks, paystackEnabled, resolveAccount, type Bank } from "./paystack";
 
@@ -57,6 +58,7 @@ async function mutate(fn: (s: AppState, ctx: eng.Ctx) => AppState): Promise<Resu
     }
     revalidatePath("/", "layout");
     await notifyChanges(before.state, after);
+    wakeAutopilot("site change");
     return ok;
   }
   return { error: "That request changed while you were acting. Refresh and try again." };
@@ -155,7 +157,7 @@ export const saveBankDetails = async (artisanId: string, b: { bankName: string; 
 export const markPaidOut = async (paymentId: string, reference: string) => mutate((s, c) => eng.markPaidOut(s, str(paymentId, 60), str(reference, 80), c));
 export const submitVerification = async (artisanId: string) => mutate((s, c) => eng.submitVerification(s, str(artisanId, 60), c));
 export const decideVerification = async (artisanId: string, decision: "verified" | "rejected", checks: VerificationCheck[], note: string) =>
-  mutate((s, c) => eng.decideVerification(s, str(artisanId, 60), decision === "verified" ? "verified" : "rejected", (Array.isArray(checks) ? checks : []).filter((x) => ["phone", "id", "address", "guarantor"].includes(x)), str(note, 500), c));
+  mutate((s, c) => eng.decideVerification(s, str(artisanId, 60), decision === "verified" ? "verified" : "rejected", (Array.isArray(checks) ? checks : []).filter((x) => ["phone", "id", "address", "guarantor", "bank"].includes(x)), str(note, 500), c));
 
 /** Starts a Paystack checkout for an accepted quote. Returns the hosted payment page to send the customer to. */
 export async function startPayment(bookingId: string): Promise<Result & { url?: string }> {

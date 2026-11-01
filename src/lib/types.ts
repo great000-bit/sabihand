@@ -29,7 +29,7 @@ export interface Area {
   lng: number;
 }
 
-export type VerificationCheck = "phone" | "id" | "address" | "guarantor";
+export type VerificationCheck = "phone" | "id" | "address" | "guarantor" | "bank";
 export type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
 
 export interface Verification {
@@ -39,6 +39,8 @@ export interface Verification {
   submittedAt?: string;
   decidedAt?: string;
   note?: string;
+  /** Who made the decision. "autopilot" means the admin bot approved it under the rules the team set. */
+  by?: "admin" | "autopilot";
 }
 
 export interface ServicePrice {
