@@ -1,6 +1,7 @@
 import { getViewer } from "@/server/session";
 import { dbConfigured, sql } from "@/server/db";
 import { askedFor } from "@/lib/auth/next";
+import { welcomeOnce } from "@/server/email";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ export async function GET(req: Request) {
   const viewer = await getViewer();
   const headers = { "Cache-Control": "no-store" };
   if (!viewer) return Response.json({ ok: false, to: `/auth/sign-in?error=nosession${want ? `&next=${encodeURIComponent(want)}` : ""}` }, { headers });
+  welcomeOnce(viewer);
   let to = "/artisans";
   if (want) to = want;
   else if (await hasArtisanProfile(viewer.id)) to = "/artisan";
