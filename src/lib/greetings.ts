@@ -1,7 +1,7 @@
 /**
  * Greetings for the artisan dashboard, in the languages of the people Sabihand serves. They rotate every 30 seconds.
  * Time of day: morning before 12:00, afternoon until 16:00, evening after.
- * Ikwerre is waiting on the team to confirm the right greeting, so it is not in the rotation yet (see IKWERRE below).
+ * Ikwerre greeting confirmed by the team: "Meka" at any time of day.
  */
 export type DayPart = "morning" | "afternoon" | "evening";
 
@@ -16,10 +16,8 @@ export const GREETINGS: Greeting[] = [
   { language: "Igbo", text: { morning: "Ụtụtụ ọma", afternoon: "Ehihie ọma", evening: "Mgbede ọma" } },
   { language: "Hausa", text: { morning: "Ina kwana", afternoon: "Ina wuni", evening: "Barka da yamma" } },
   { language: "Pidgin", text: { morning: "Good morning o", afternoon: "How far", evening: "How your day go" } },
+  { language: "Ikwerre", text: { morning: "Meka", afternoon: "Meka", evening: "Meka" } },
 ];
-
-/** Add to GREETINGS once a native speaker has confirmed the words. */
-export const IKWERRE: Greeting | null = null;
 
 export const ROTATE_MS = 30_000;
 
@@ -30,7 +28,7 @@ export function dayPart(hour: number): DayPart {
 }
 
 /** The greeting for a moment in time: which language is on, and its words for the time of day. */
-export function greetingAt(ms: number, hour: number, list: Greeting[] = IKWERRE ? [...GREETINGS, IKWERRE] : GREETINGS) {
+export function greetingAt(ms: number, hour: number, list: Greeting[] = GREETINGS) {
   const g = list[Math.floor(ms / ROTATE_MS) % list.length];
   return { language: g.language, text: g.text[dayPart(hour)] };
 }

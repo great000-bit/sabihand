@@ -55,7 +55,7 @@ const VIEWS: View[] = ["overview", "jobs", "reviews", "photos", "payout", "verif
 
 /* ------------------------------------------------------------------ greeting */
 
-/** "Good morning, Ada" in English, Yorùbá, Igbo, Hausa and Pidgin, a new language every 30 seconds. */
+/** "Good morning, Ada" in English, Yorùbá, Igbo, Hausa, Pidgin and Ikwerre, a new language every 30 seconds. */
 function Greeting({ name }: { name: string }) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
