@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { useStore } from "@/lib/store";
 import * as actions from "@/server/actions";
 import { addAdmin, listAdmins, removeAdmin, type AdminRow } from "@/server/admin-actions";
+import { issueTemporaryPassword } from "@/server/admin-auth/actions";
 import { areaLabel, areaSummary, tradeById } from "@/lib/catalog";
 import { artisanPayoutKobo, commissionKobo, formatNaira } from "@/lib/money";
 import { ratingSummary } from "@/lib/reviews";
@@ -21,7 +22,7 @@ export const CHECKS: { id: VerificationCheck; label: string }[] = [
   { id: "bank", label: "Bank account name matched by the bank" },
 ];
 
-export type Section = "overview" | "disputes" | "payouts" | "verification" | "requests" | "artisans" | "autopilot" | "team";
+export type Section = "overview" | "disputes" | "payouts" | "verification" | "requests" | "artisans" | "autopilot" | "team" | "security";
 
 /** Small line icons, drawn on a 24px grid. */
 export const ICONS = {
@@ -34,6 +35,8 @@ export const ICONS = {
   back: <path d="M15 6l-6 6 6 6" />,
   autopilot: <><rect x="4.5" y="8" width="15" height="11" rx="3" /><path d="M12 8V4.5M9 13h.01M15 13h.01M9.5 16.5h5M2.5 12.5v2M21.5 12.5v2" /></>,
   team: <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.6-3.4 3.3-5.5 6.5-5.5s5.9 2.1 6.5 5.5M16 4.3a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.7 2.7 3 5.2" />,
+  security: <><rect x="5" y="10.5" width="14" height="10" rx="2.5" /><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3M12 14.5v2.5" /></>,
+  logout: <path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" />,
   site: <path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" />,
   help: <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17v.01" />,
   search: <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" />,
@@ -483,6 +486,7 @@ export function Team() {
   const [email, setEmail] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [issued, setIssued] = useState<{ email: string; password: string } | null>(null);
   const load = useCallback(async () => {
     const r = await listAdmins();
     setRows(r.admins);
@@ -502,7 +506,15 @@ export function Team() {
   return (
     <div className="space-y-4">
       <Box className="p-5">
-        <p className="text-sm text-slate">Add someone by the email they signed up with. They get the admin area as soon as they reload.</p>
+        <p className="text-sm text-slate">Add someone by the email they signed up with, then use “Set sign-in password” to give them a one-time password. The admin area opens only with email and password, never with Google, and they must choose their own password at first sign-in.</p>
+        {issued && (
+          <div role="status" className="mt-3 rounded-xl border border-gold/40 bg-gold/10 p-4 text-sm">
+            <p className="font-bold">One-time password for {issued.email}</p>
+            <p className="mt-2 select-all rounded-lg bg-black/40 px-3 py-2 font-mono text-base tracking-wide">{issued.password}</p>
+            <p className="mt-2 text-slate">Shown only now. Give it to them in person or by a private channel; they will be asked to replace it at first sign-in.</p>
+            <button onClick={() => setIssued(null)} className="mt-2 text-xs font-bold text-gold">I have passed it on, hide it</button>
+          </div>
+        )}
         <form
           className="mt-3 flex flex-wrap gap-2"
           onSubmit={async (e) => {
@@ -531,6 +543,21 @@ export function Team() {
               <p className="truncate text-sm text-slate">{r.email}</p>
             </div>
             {!r.super && (
+              <span className="flex flex-wrap gap-2">
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={async () => {
+                  if (!window.confirm(`Give ${r.email} a new one-time password? Any password they have now stops working.`)) return;
+                  setBusy(true);
+                  const x = await issueTemporaryPassword(r.userId);
+                  setBusy(false);
+                  setErr(x.error);
+                  if (x.password) setIssued({ email: x.email ?? r.email, password: x.password });
+                }}
+              >
+                Set sign-in password
+              </Button>
               <Button
                 variant="ghost"
                 disabled={busy}
@@ -544,6 +571,7 @@ export function Team() {
               >
                 Remove
               </Button>
+              </span>
             )}
           </div>
         ))}

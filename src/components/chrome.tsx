@@ -8,6 +8,7 @@ import { authClient } from "@/lib/auth/client";
 import { useStore } from "@/lib/store";
 import { useUnread } from "@/lib/unread";
 import { UnreadPill } from "./chat-panel";
+import { adminSignOut } from "@/server/admin-auth/actions";
 
 /** The wordmark. On a dark page it switches to the light-on-midnight version by itself. */
 export function Logo({ dark = false, width = 150 }: { dark?: boolean; width?: number }) {
@@ -21,14 +22,35 @@ export function Logo({ dark = false, width = 150 }: { dark?: boolean; width?: nu
   );
 }
 
-function useNav() {
+type NavItem = { href: string; label: string };
+
+/**
+ * What each kind of account can do, and nothing else. Guests see how it works; customers find and book artisans;
+ * artisans run their jobs (they do not book other artisans). The server enforces the same split.
+ */
+function useNav(): NavItem[] {
   const { viewer, me } = useStore();
-  const items = [{ href: "/artisans", label: "Find artisans" }];
-  if (viewer) items.push({ href: "/requests", label: "My requests" });
-  items.push(me ? { href: "/artisan", label: "My jobs" } : { href: "/artisan/join", label: "For artisans" });
-  if (!viewer) items.splice(1, 0, { href: "/#how-it-works", label: "How it works" });
+  if (!viewer)
+    return [
+      { href: "/artisans", label: "Find artisans" },
+      { href: "/#how-it-works", label: "How it works" },
+      { href: "/artisan/join", label: "For artisans" },
+    ];
+  const items: NavItem[] = me
+    ? [
+        { href: "/artisan", label: "Dashboard" },
+        { href: `/artisans/${me.id}`, label: "My profile" },
+      ]
+    : [
+        { href: "/artisans", label: "Find artisans" },
+        { href: "/requests", label: "My requests" },
+      ];
+  if (viewer.isAdmin) items.push({ href: "/admin", label: "Admin" });
   return items;
 }
+
+/** Hidden on the sign-in hand-over screen, which covers the whole window by itself. */
+const bare = (path: string) => path.startsWith("/admin") || path.startsWith("/continue");
 
 function Avatar({ name, image }: { name: string; image?: string }) {
   if (image) {
@@ -41,17 +63,18 @@ function Avatar({ name, image }: { name: string; image?: string }) {
 
 /** `guestView` always shows the Sign in and Get started buttons: the landing page keeps the signed-in person off the page. */
 function AccountMenu({ guestView = false }: { guestView?: boolean }) {
-  const { viewer } = useStore();
+  const { viewer, me } = useStore();
   const [open, setOpen] = useState(false);
   if (!viewer || guestView) {
     return (
       <div className="flex items-center gap-2">
-        <Link href="/auth/sign-in" className="hidden min-h-10 items-center rounded-full px-4 text-[13px] font-extrabold uppercase tracking-wide text-ink hover:bg-white/10 sm:inline-flex">
+        {/* Plain links (full page loads): the browser keeps this page up until the next one is ready, so nothing half-built shows. */}
+        <a href="/auth/sign-in" className="hidden min-h-10 items-center rounded-full px-4 text-[13px] font-extrabold uppercase tracking-wide text-ink hover:bg-white/10 sm:inline-flex">
           Sign in
-        </Link>
-        <Link href="/auth/sign-up" className="inline-flex min-h-10 items-center whitespace-nowrap rounded-full bg-gold px-4 text-[13px] font-extrabold uppercase tracking-wide text-midnight transition hover:brightness-110 sm:px-6">
+        </a>
+        <a href="/auth/sign-up" className="inline-flex min-h-10 items-center whitespace-nowrap rounded-full bg-gold px-4 text-[13px] font-extrabold uppercase tracking-wide text-midnight transition hover:brightness-110 sm:px-6">
           Get started
-        </Link>
+        </a>
       </div>
     );
   }
@@ -68,10 +91,15 @@ function AccountMenu({ guestView = false }: { guestView?: boolean }) {
             <p className="truncate font-bold">{viewer.name}</p>
             <p className="truncate text-sm text-muted">{viewer.email}</p>
           </div>
+          {me ? (
+            <Link role="menuitem" href="/artisan" onClick={() => setOpen(false)} className="mt-1 block rounded-xl px-3 py-2 text-sm font-bold hover:bg-white/5">Dashboard</Link>
+          ) : (
+            <Link role="menuitem" href="/artisan/join" onClick={() => setOpen(false)} className="mt-1 block rounded-xl px-3 py-2 text-sm font-bold hover:bg-white/5">Offer your services</Link>
+          )}
           <button
             role="menuitem"
             onClick={async () => {
-              await authClient.signOut();
+              await Promise.allSettled([authClient.signOut(), viewer.isAdmin ? adminSignOut() : Promise.resolve()]);
               // Full reload on purpose: clears every piece of signed-in state the server rendered.
               // eslint-disable-next-line @next/next/no-location-assign-relative-destination
               window.location.href = "/";
@@ -101,7 +129,7 @@ export function Header() {
   const [menu, setMenu] = useState(false);
   const active = (href: string) => path === href || path.startsWith(href + "/");
   // The admin area has its own sidebar layout.
-  if (path.startsWith("/admin")) return null;
+  if (bare(path)) return null;
   return (
     <header className="sticky top-0 z-30 px-3 pt-3 sm:px-6">
       <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto] items-center gap-3 rounded-full border border-white/10 bg-black/60 py-2 pl-5 pr-2 shadow-[0_10px_40px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl md:grid-cols-[1fr_auto_1fr]">
@@ -143,7 +171,10 @@ export function Header() {
 
 export function Footer() {
   const path = usePathname();
-  if (path.startsWith("/admin")) return null;
+  const { viewer, me } = useStore();
+  if (bare(path)) return null;
+  const customer = !me;
+  const artisan = !viewer || Boolean(me);
   return (
     <footer className="border-t border-line bg-surface">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-[1.4fr_1fr_1fr] sm:px-6">
@@ -151,20 +182,30 @@ export function Footer() {
           <Logo width={128} />
           <p className="mt-4 max-w-xs text-sm text-slate">Trusted hands, near you. Verified plumbers, electricians, tailors and carpenters, with the price agreed before the work starts.</p>
         </div>
-        <div>
-          <h2 className="font-display text-sm font-extrabold uppercase tracking-widest text-muted">Customers</h2>
-          <ul className="mt-3 space-y-2 text-sm font-semibold">
-            <li><Link href="/artisans" className="hover:text-link">Find an artisan</Link></li>
-            <li><Link href="/requests" className="hover:text-link">My requests</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h2 className="font-display text-sm font-extrabold uppercase tracking-widest text-muted">Artisans</h2>
-          <ul className="mt-3 space-y-2 text-sm font-semibold">
-            <li><Link href="/artisan/join" className="hover:text-link">Create your profile</Link></li>
-            <li><Link href="/artisan" className="hover:text-link">My jobs</Link></li>
-          </ul>
-        </div>
+        {customer && (
+          <div>
+            <h2 className="font-display text-sm font-extrabold uppercase tracking-widest text-muted">Customers</h2>
+            <ul className="mt-3 space-y-2 text-sm font-semibold">
+              <li><Link href="/artisans" className="hover:text-link">Find an artisan</Link></li>
+              {viewer && <li><Link href="/requests" className="hover:text-link">My requests</Link></li>}
+            </ul>
+          </div>
+        )}
+        {artisan && (
+          <div>
+            <h2 className="font-display text-sm font-extrabold uppercase tracking-widest text-muted">Artisans</h2>
+            <ul className="mt-3 space-y-2 text-sm font-semibold">
+              {me ? (
+                <>
+                  <li><Link href="/artisan" className="hover:text-link">Dashboard</Link></li>
+                  <li><Link href={`/artisans/${me.id}`} className="hover:text-link">My public profile</Link></li>
+                </>
+              ) : (
+                <li><Link href="/artisan/join" className="hover:text-link">Create your profile</Link></li>
+              )}
+            </ul>
+          </div>
+        )}
       </div>
       <div className="border-t border-line px-4 py-5 text-center text-[13px] text-muted">
         <p>© 2026 Sabihand · Serving all 36 states and the FCT</p>

@@ -6,6 +6,7 @@ import { useState, useSyncExternalStore, type ReactNode } from "react";
 import { useStore } from "@/lib/store";
 import { Logo } from "@/components/chrome";
 import { ICONS, Icon, Quiet, Search, type Section } from "./parts";
+import { adminSignOut } from "@/server/admin-auth/actions";
 
 const TITLES: Record<Section, [string, string]> = {
   overview: ["Dashboard", "Run the marketplace: money, problems and people in one place."],
@@ -16,6 +17,7 @@ const TITLES: Record<Section, [string, string]> = {
   artisans: ["Artisans", "Everyone offering work on Sabihand. Open one to see their jobs, money and checks."],
   autopilot: ["Autopilot", "The admin bot: switch it on or off and tell it exactly what it may do."],
   team: ["Admin team", "Who can use this admin area."],
+  security: ["Security", "Your password, two-step sign-in, open sessions and the sign-in log."],
 };
 
 // Desktop sidebar open/closed, remembered per browser.
@@ -48,7 +50,7 @@ function useRail() {
 /** Which sidebar item a path belongs to, and whether it is a detail page inside it. */
 function sectionOf(path: string): { section: Section; detail: boolean } {
   const [, , first, second] = path.split("/");
-  const known: Section[] = ["disputes", "payouts", "verification", "requests", "artisans", "autopilot", "team"];
+  const known: Section[] = ["disputes", "payouts", "verification", "requests", "artisans", "autopilot", "team", "security"];
   const section = (known as string[]).includes(first ?? "") ? (first as Section) : "overview";
   return { section, detail: Boolean(second) };
 }
@@ -151,8 +153,22 @@ export function AdminShell({ children }: { children: ReactNode }) {
         {heading("Preference")}
         <div className="grid gap-0.5">
           {viewer.isSuperAdmin && item({ id: "team", label: "Admin team" })}
+          {item({ id: "security", label: "Security" })}
           {link("/disputes", "help", "Dispute policy")}
           {link("/", "site", "Back to site")}
+          <button
+            onClick={async () => {
+              await adminSignOut();
+              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+              window.location.href = "/";
+            }}
+            aria-label={compact ? "Sign out of admin" : undefined}
+            title={compact ? "Sign out of admin" : undefined}
+            className={`flex min-h-10 items-center gap-3 rounded-xl text-sm font-medium text-slate hover:bg-white/[0.04] hover:text-alert ${compact ? "justify-center" : "px-3"}`}
+          >
+            <Icon name="logout" className="h-[18px] w-[18px]" />
+            {!compact && "Sign out of admin"}
+          </button>
         </div>
       </div>
       {!compact && <div className="mt-auto rounded-2xl border border-white/[0.07] bg-[radial-gradient(120%_90%_at_50%_0%,rgba(227,169,43,0.18),transparent_70%)] p-4 text-center">

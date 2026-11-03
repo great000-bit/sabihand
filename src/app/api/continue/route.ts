@@ -1,18 +1,9 @@
 import { getViewer } from "@/server/session";
-import { dbConfigured, sql } from "@/server/db";
+import { isArtisanAccount } from "@/server/roles";
 import { askedFor } from "@/lib/auth/next";
 import { welcomeOnce } from "@/server/email";
 
 export const dynamic = "force-dynamic";
-
-async function hasArtisanProfile(userId: string): Promise<boolean> {
-  if (!dbConfigured) return false;
-  try {
-    return ((await sql()`select 1 from app.artisans where owner_id = ${userId} limit 1`) as unknown[]).length > 0;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Where a person goes after signing in: a page they asked for, their jobs if they are an artisan, the artisan sign-up
@@ -28,8 +19,10 @@ export async function GET(req: Request) {
   if (!viewer) return Response.json({ ok: false, to: `/auth/sign-in?error=nosession${want ? `&next=${encodeURIComponent(want)}` : ""}` }, { headers });
   welcomeOnce(viewer);
   let to = "/artisans";
-  if (want) to = want;
-  else if (await hasArtisanProfile(viewer.id)) to = "/artisan";
+  const artisan = await isArtisanAccount(viewer.id);
+  // An artisan asked for the customer pages (search, requests) goes to their dashboard instead.
+  if (want && !(artisan && /^\/(artisans|requests)(\?|$)/.test(want))) to = want;
+  else if (artisan) to = "/artisan";
   else if (as === "artisan") to = "/artisan/join";
   return Response.json({ ok: true, to }, { headers });
 }

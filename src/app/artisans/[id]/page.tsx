@@ -47,7 +47,7 @@ function ShareButton() {
 
 export default function ArtisanProfile() {
   const { id } = useParams<{ id: string }>();
-  const { state, viewer, act, busy } = useStore();
+  const { state, viewer, act, busy, me } = useStore();
   const router = useRouter();
   const a = state.artisans.find((x) => x.id === id);
   const [title, setTitle] = useState("");
@@ -101,7 +101,7 @@ export default function ArtisanProfile() {
               <div className="-mt-14 flex items-end justify-between gap-3 sm:-mt-16">
                 <Avatar name={a.name} size={112} trade={a.trade} ring verified={v.status === "verified"} photoId={a.photoId} />
                 <div className="mb-1 hidden gap-2 sm:flex">
-                  <a href="#request" className="inline-flex min-h-11 items-center rounded-full bg-gold px-6 text-[15px] font-extrabold text-midnight hover:brightness-95">Request a quote</a>
+                  {!me && <a href="#request" className="inline-flex min-h-11 items-center rounded-full bg-gold px-6 text-[15px] font-extrabold text-midnight hover:brightness-95">Request a quote</a>}
                   <ShareButton />
                 </div>
               </div>
@@ -124,7 +124,7 @@ export default function ArtisanProfile() {
                 <div className="p-3"><p className="font-display text-2xl font-extrabold">{a.services.length}</p><p className="text-xs font-semibold uppercase tracking-wide text-muted">{a.services.length === 1 ? "Service" : "Services"}</p></div>
               </div>
               <div className="mt-5 flex gap-2 sm:hidden">
-                <a href="#request" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-gold px-6 text-[15px] font-extrabold text-midnight">Request a quote</a>
+                {!me && <a href="#request" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-gold px-6 text-[15px] font-extrabold text-midnight">Request a quote</a>}
                 <ShareButton />
               </div>
             </div>
@@ -244,6 +244,8 @@ export default function ArtisanProfile() {
             <p className="mt-3 text-slate">This is your own profile. Customers will see this page and can send you requests.</p>
           ) : a.sample ? (
             <p className="mt-3 text-slate">This is a sample profile that shows how an artisan page will look. It is not a real business and cannot be booked yet.</p>
+          ) : me ? (
+            <p className="mt-3 text-slate">You are signed in with an artisan account, which takes jobs rather than booking them. To book {a.name.split(" ")[0]}, use a separate customer account.</p>
           ) : !viewer ? (
             <>
               <p className="mb-5 mt-1 text-slate">Create a free account to send {a.name.split(" ")[0]} your request. You pay nothing until you accept a quote.</p>
