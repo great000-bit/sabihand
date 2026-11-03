@@ -55,7 +55,7 @@ const VIEWS: View[] = ["overview", "jobs", "reviews", "photos", "payout", "verif
 
 /* ------------------------------------------------------------------ greeting */
 
-/** "Good morning, Ada" in English, Yorùbá, Igbo, Hausa and Pidgin, a new language every 30 seconds. */
+/** "Good morning, Ada" in English, Yorùbá, Igbo, Hausa, Pidgin and Ikwerre, a new language every 30 seconds. */
 function Greeting({ name }: { name: string }) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
@@ -79,7 +79,7 @@ function Greeting({ name }: { name: string }) {
           exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
           transition={{ duration: 0.45, ease: [0.2, 0.7, 0.2, 1] }}
           className="inline-block"
-          lang={{ Yorùbá: "yo", Igbo: "ig", Hausa: "ha", Pidgin: "pcm" }[g.language] ?? "en"}
+          lang={{ Yorùbá: "yo", Igbo: "ig", Hausa: "ha", Pidgin: "pcm", Ikwerre: "ikw" }[g.language] ?? "en"}
           title={g.language}
         >
           <span className="bg-[linear-gradient(100deg,#F6D27A,#E3A92B_55%,#C78B1C)] bg-clip-text text-transparent">{g.text}</span>
