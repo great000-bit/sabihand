@@ -77,4 +77,11 @@ describe("notifications", () => {
     expect(html).toContain("Ada &lt;b&gt;Obi&lt;/b&gt;");
     expect(text).toContain("https://x.test/requests/1");
   });
+  it("picks the picture by who the email is for", () => {
+    const base = { subject: "s", lines: ["l"], path: "/", cta: "c" };
+    expect(renderEmail({ ...base, toUserId: "u", audience: "artisan" }, "https://x.test").html).toContain("https://x.test/email/hero-artisan.jpg");
+    expect(renderEmail({ ...base, toUserId: "u", audience: "customer" }, "https://x.test").html).toContain("/email/hero-customer.jpg");
+    expect(renderEmail({ ...base, toUserId: ADMINS }, "https://x.test").html).toContain("/email/hero-team.jpg");
+    expect(welcomeNotice("u1", "Ada").audience).toBeUndefined();
+  });
 });
