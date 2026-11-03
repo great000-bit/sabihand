@@ -27,6 +27,7 @@ type NavItem = { href: string; label: string };
 /**
  * What each kind of account can do, and nothing else. Guests see how it works; customers find and book artisans;
  * artisans run their jobs (they do not book other artisans). The server enforces the same split.
+ * The admin area is never linked from the site menu: admins open /admin directly.
  */
 function useNav(): NavItem[] {
   const { viewer, me } = useStore();
@@ -45,7 +46,6 @@ function useNav(): NavItem[] {
         { href: "/artisans", label: "Find artisans" },
         { href: "/requests", label: "My requests" },
       ];
-  if (viewer.isAdmin) items.push({ href: "/admin", label: "Admin" });
   return items;
 }
 
