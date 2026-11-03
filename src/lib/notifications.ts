@@ -14,6 +14,8 @@ export interface Notice {
   lines: string[];
   path: string;
   cta: string;
+  /** Who it is for, which picks the picture at the top. Admin emails are recognised by toUserId. */
+  audience?: "customer" | "artisan";
 }
 
 const same = (a: Booking, b: Booking) => a.status === b.status && a.quote?.sentAt === b.quote?.sentAt && a.artisanMarkedDoneAt === b.artisanMarkedDoneAt;
@@ -31,8 +33,8 @@ export function noticesFor(before: AppState, after: AppState): Notice[] {
     const a = owner(b.artisanId);
     if (!a) continue;
     const was = prev.get(b.id);
-    const art = (n: Omit<Notice, "toUserId">): Notice => ({ toUserId: a.ownerId, ...n });
-    const cust = (n: Omit<Notice, "toUserId">): Notice => ({ toUserId: b.customerId, ...n });
+    const art = (n: Omit<Notice, "toUserId">): Notice => ({ toUserId: a.ownerId, audience: "artisan", ...n });
+    const cust = (n: Omit<Notice, "toUserId">): Notice => ({ toUserId: b.customerId, audience: "customer", ...n });
     const jobPath = `/requests/${b.id}`;
     const who = a.businessName || a.name;
 
@@ -80,7 +82,7 @@ export function noticesFor(before: AppState, after: AppState): Notice[] {
   for (const a of after.artisans) {
     const was = old.get(a.id);
     if (!was) {
-      out.push({ toUserId: a.ownerId, subject: "Your Sabihand artisan profile is live", lines: [`Welcome, ${a.name}. Customers near you can now find ${a.businessName || "you"}.`, "Get verified to show the Verified badge, and add your bank details so we can pay you."], path: "/artisan", cta: "Open your dashboard" });
+      out.push({ toUserId: a.ownerId, audience: "artisan", subject: "Your Sabihand artisan profile is live", lines: [`Welcome, ${a.name}. Customers near you can now find ${a.businessName || "you"}.`, "Get verified to show the Verified badge, and add your bank details so we can pay you."], path: "/artisan", cta: "Open your dashboard" });
       out.push({ toUserId: ADMINS, subject: `New artisan: ${a.businessName || a.name}`, lines: [`${a.name} joined as an artisan (${tradeById(a.trade)?.label ?? a.trade}).`, "Check their details when they ask to be verified."], path: "/admin", cta: "Open admin" });
       continue;
     }
@@ -89,8 +91,8 @@ export function noticesFor(before: AppState, after: AppState): Notice[] {
       out.push({ toUserId: ADMINS, subject: `Verify ${a.businessName || a.name}`, lines: [`${a.name} asked to be verified.`], path: "/admin", cta: "Review in admin" });
       continue;
     }
-    if (a.verification.status === "verified") out.push({ toUserId: a.ownerId, subject: "You are verified on Sabihand", lines: ["Our team checked your details and your profile now shows the Verified badge.", "Customers search verified artisans first."], path: `/artisans/${a.id}`, cta: "See your profile" });
-    else if (a.verification.status === "rejected") out.push({ toUserId: a.ownerId, subject: "Your verification needs attention", lines: ["We could not verify your profile yet.", ...(a.verification.note ? [`Note from our team: ${a.verification.note}`] : [])], path: "/artisan", cta: "Open your dashboard" });
+    if (a.verification.status === "verified") out.push({ toUserId: a.ownerId, audience: "artisan", subject: "You are verified on Sabihand", lines: ["Our team checked your details and your profile now shows the Verified badge.", "Customers search verified artisans first."], path: `/artisans/${a.id}`, cta: "See your profile" });
+    else if (a.verification.status === "rejected") out.push({ toUserId: a.ownerId, audience: "artisan", subject: "Your verification needs attention", lines: ["We could not verify your profile yet.", ...(a.verification.note ? [`Note from our team: ${a.verification.note}`] : [])], path: "/artisan", cta: "Open your dashboard" });
   }
   const oldPay = new Map(before.payments.map((p) => [p.id, p]));
   for (const p of after.payments) {
@@ -98,7 +100,7 @@ export function noticesFor(before: AppState, after: AppState): Notice[] {
     const b = after.bookings.find((x) => x.id === p.bookingId);
     const a = b && owner(b.artisanId);
     if (!a || !b) continue;
-    out.push({ toUserId: a.ownerId, subject: `We sent your money for ${b.title}`, lines: [`${formatNaira(p.amountKobo - p.commissionKobo)} is on its way to your bank account for ${b.title}.`, `Transfer reference: ${p.payout.reference}`], path: "/artisan", cta: "See your payouts" });
+    out.push({ toUserId: a.ownerId, audience: "artisan", subject: `We sent your money for ${b.title}`, lines: [`${formatNaira(p.amountKobo - p.commissionKobo)} is on its way to your bank account for ${b.title}.`, `Transfer reference: ${p.payout.reference}`], path: "/artisan", cta: "See your payouts" });
   }
 
   const oldReports = new Set(before.reports.map((r) => r.id));
@@ -117,18 +119,32 @@ export function welcomeNotice(userId: string, name: string): Notice {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+/**
+ * The email layout, after the team's poster reference: Sabihand gold, a cream card with a big bold headline, a
+ * midnight button, then a photo panel. Tables and inline styles only, so Gmail, Outlook and Apple Mail agree.
+ * Images are served from the site (public/email/), so they need the absolute site address.
+ */
 export function renderEmail(n: Notice, siteUrl: string): { html: string; text: string } {
-  const url = `${siteUrl.replace(/\/$/, "")}${n.path}`;
-  const html = `<!doctype html><html><body style="margin:0;padding:0;background:#05070d">
-<div style="background:#05070d;padding:32px 12px;font-family:Arial,Helvetica,sans-serif">
-<div style="max-width:480px;margin:0 auto;background:#0B1F4B;border-radius:20px;padding:28px 24px;color:#ffffff">
-<p style="margin:0 0 24px;font-size:15px;font-weight:bold;letter-spacing:4px;color:#E3A92B">SABIHAND</p>
-<h1 style="font-size:21px;line-height:1.3;margin:0 0 16px;color:#ffffff">${esc(n.subject)}</h1>
-${n.lines.map((l) => `<p style="font-size:15px;line-height:1.55;margin:0 0 12px;color:#c9d2e6">${esc(l)}</p>`).join("\n")}
-<p style="margin:24px 0 8px"><a href="${esc(url)}" style="background:#E3A92B;color:#0B1F4B;font-weight:bold;text-decoration:none;padding:12px 22px;border-radius:999px;display:inline-block">${esc(n.cta)}</a></p>
-</div>
-<p style="max-width:480px;margin:16px auto 0;font-size:12px;line-height:1.5;color:#7a869c;text-align:center">Sabihand · Trusted Hands Near You.<br>You get this email because of activity on your Sabihand account.</p>
-</div></body></html>`;
+  const site = siteUrl.replace(/\/$/, "");
+  const url = `${site}${n.path}`;
+  const hero = n.toUserId === ADMINS ? "team" : n.audience === "artisan" ? "artisan" : "customer";
+  const font = "'Space Grotesk','Helvetica Neue',Helvetica,Arial,sans-serif";
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(n.subject)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:#E3A92B">
+<span style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(n.lines[0] ?? "")}</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#E3A92B"><tr><td align="center" style="padding:28px 12px 32px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
+<tr><td style="background:#FBE3A0;border-radius:28px;padding:30px 28px 32px;font-family:${font}">
+<img src="${site}/email/wordmark.png" width="140" height="20" alt="Sabihand" style="display:block;border:0;width:140px;height:auto">
+<h1 style="margin:26px 0 16px;font-family:${font};font-size:32px;line-height:1.12;font-weight:700;letter-spacing:-0.5px;color:#0B1F4B">${esc(n.subject)}</h1>
+${n.lines.map((l) => `<p style="margin:0 0 12px;font-family:${font};font-size:16px;line-height:1.55;color:#3A3423">${esc(l)}</p>`).join("\n")}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:22px"><tr><td style="background:#0B1F4B;border-radius:999px"><a href="${esc(url)}" style="display:inline-block;padding:14px 26px;font-family:${font};font-size:15px;font-weight:700;color:#FBE3A0;text-decoration:none;border-radius:999px">${esc(n.cta)} &rarr;</a></td></tr></table>
+</td></tr>
+<tr><td style="padding-top:14px"><a href="${esc(url)}"><img src="${site}/email/hero-${hero}.jpg" width="560" alt="" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:28px"></a></td></tr>
+<tr><td align="center" style="padding:22px 12px 0;font-family:${font};font-size:12px;line-height:1.6;color:#0B1F4B">
+<strong>Sabihand</strong> &middot; Trusted Hands Near You.<br>You get this email because of activity on your Sabihand account.</td></tr>
+</table></td></tr></table></body></html>`;
   const text = `${n.subject}\n\n${n.lines.join("\n\n")}\n\n${n.cta}: ${url}\n\nSabihand`;
   return { html, text };
 }
