@@ -81,6 +81,8 @@ describe("requests", () => {
   });
   it("blocks booking yourself, bad phones, thin descriptions and unserved areas", () => {
     expect(() => e.createRequest(empty(), request, as(owner))).toThrow(/own profile/);
+    // An artisan account takes jobs; it cannot book another artisan.
+    expect(() => e.createRequest(empty([artisan(), artisan({ id: "a2", ownerId: stranger.id })]), request, as(stranger))).toThrow(/Artisan accounts/);
     expect(() => e.createRequest(empty(), { ...request, phone: "abc" }, as(customer))).toThrow(/mobile number/);
     expect(() => e.createRequest(empty(), { ...request, description: "short" }, as(customer))).toThrow();
     expect(() => e.createRequest(empty(), { ...request, areaId: "abuja-wuse" }, as(customer))).toThrow(/does not serve/);

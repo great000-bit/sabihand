@@ -7,6 +7,7 @@ import { actorOn } from "@/lib/access";
 import { nairaToKobo } from "@/lib/money";
 import type { AppState, Trade, VerificationCheck } from "@/lib/types";
 import { getViewer } from "./session";
+import { audit } from "./admin-auth/guard";
 import { ConflictError, loadAll, persist, type Snapshot } from "./repo";
 import { newId } from "./ids";
 import { notifyChanges } from "./email";
@@ -32,7 +33,7 @@ function str(v: unknown, max = 2000): string {
  * If someone else wrote to the same rows in between, the whole step is replayed on fresh data, so a stale screen
  * can never overwrite newer work: the engine simply re-checks the rules against what is true now.
  */
-async function mutate(fn: (s: AppState, ctx: eng.Ctx) => AppState): Promise<Result> {
+async function mutate(fn: (s: AppState, ctx: eng.Ctx) => AppState, auditAs?: { action: string; detail: Record<string, unknown> }): Promise<Result> {
   const user = await getViewer();
   if (!user) return { error: SIGN_IN };
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -57,6 +58,7 @@ async function mutate(fn: (s: AppState, ctx: eng.Ctx) => AppState): Promise<Resu
       return { error: SAVE_FAILED };
     }
     revalidatePath("/", "layout");
+    if (user.isAdmin && auditAs) await audit(auditAs.action, { userId: user.id, email: user.email }, auditAs.detail);
     await notifyChanges(before.state, after);
     wakeAutopilot("site change");
     return ok;
@@ -102,11 +104,11 @@ export const confirmDone = async (bookingId: string) => mutate((s, c) => eng.con
 export const cancelBooking = async (bookingId: string) => mutate((s, c) => eng.cancelBooking(s, str(bookingId, 60), c));
 export const raiseDispute = async (bookingId: string, reason: string) => mutate((s, c) => eng.raiseDispute(s, str(bookingId, 60), str(reason, 1000), c));
 export const resolveDispute = async (bookingId: string, outcome: "release" | "refund", note: string) =>
-  mutate((s, c) => eng.resolveDispute(s, str(bookingId, 60), outcome === "release" ? "release" : "refund", str(note, 1000) || (outcome === "release" ? "Resolved in the artisan's favour" : "Resolved in the customer's favour"), c));
+  mutate((s, c) => eng.resolveDispute(s, str(bookingId, 60), outcome === "release" ? "release" : "refund", str(note, 1000) || (outcome === "release" ? "Resolved in the artisan's favour" : "Resolved in the customer's favour"), c), { action: "dispute_resolved", detail: { bookingId: String(bookingId), outcome } });
 export const submitReview = async (bookingId: string, rating: number, text: string) => mutate((s, c) => eng.submitReview(s, str(bookingId, 60), Number(rating), str(text, 1000), c));
 export const reportReview = async (reviewId: string, reason: string) => mutate((s, c) => eng.reportReview(s, str(reviewId, 60), str(reason, 1000), c));
-export const moderateReview = async (reportId: string, hide: boolean) => mutate((s, c) => eng.moderateReview(s, str(reportId, 60), hide === true, c));
-export const closeReport = async (reportId: string, note: string) => mutate((s, c) => eng.closeReport(s, str(reportId, 60), str(note, 1000), c));
+export const moderateReview = async (reportId: string, hide: boolean) => mutate((s, c) => eng.moderateReview(s, str(reportId, 60), hide === true, c), { action: "review_moderated", detail: { reportId: String(reportId), hide: hide === true } });
+export const closeReport = async (reportId: string, note: string) => mutate((s, c) => eng.closeReport(s, str(reportId, 60), str(note, 1000), c), { action: "report_closed", detail: { reportId: String(reportId) } });
 /** The banks to choose from, with codes. Empty when live lookup is not switched on: the form then falls back to typing. */
 export async function listBanks(): Promise<{ error: string | null; banks: Bank[] }> {
   if (!(await getViewer())) return { error: SIGN_IN, banks: [] };
@@ -154,10 +156,10 @@ export const saveBankDetails = async (artisanId: string, b: { bankName: string; 
   }
   return mutate((s, c) => eng.saveBankDetails(s, str(artisanId, 60), { bankName, accountNumber, accountName, bankCode: bankCode || undefined, verified }, c));
 };
-export const markPaidOut = async (paymentId: string, reference: string) => mutate((s, c) => eng.markPaidOut(s, str(paymentId, 60), str(reference, 80), c));
+export const markPaidOut = async (paymentId: string, reference: string) => mutate((s, c) => eng.markPaidOut(s, str(paymentId, 60), str(reference, 80), c), { action: "payout_marked", detail: { paymentId: String(paymentId) } });
 export const submitVerification = async (artisanId: string) => mutate((s, c) => eng.submitVerification(s, str(artisanId, 60), c));
 export const decideVerification = async (artisanId: string, decision: "verified" | "rejected", checks: VerificationCheck[], note: string) =>
-  mutate((s, c) => eng.decideVerification(s, str(artisanId, 60), decision === "verified" ? "verified" : "rejected", (Array.isArray(checks) ? checks : []).filter((x) => ["phone", "id", "address", "guarantor", "bank"].includes(x)), str(note, 500), c));
+  mutate((s, c) => eng.decideVerification(s, str(artisanId, 60), decision === "verified" ? "verified" : "rejected", (Array.isArray(checks) ? checks : []).filter((x) => ["phone", "id", "address", "guarantor", "bank"].includes(x)), str(note, 500), c), { action: "verification_decided", detail: { artisanId: String(artisanId), decision } });
 
 /** Starts a Paystack checkout for an accepted quote. Returns the hosted payment page to send the customer to. */
 export async function startPayment(bookingId: string): Promise<Result & { url?: string }> {

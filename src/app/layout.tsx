@@ -50,7 +50,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ScrollTop />
           </Suspense>
           <Header />
-          <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-8 sm:px-6">{children}</main>
+          {/* At least a full screen tall: the footer always starts below the fold, so it can never show on its own while a page opens. */}
+          <main className="mx-auto min-h-[100svh] w-full max-w-6xl px-4 pb-24 pt-8 sm:px-6">{children}</main>
           <Footer />
         </StoreProvider>
       </body>

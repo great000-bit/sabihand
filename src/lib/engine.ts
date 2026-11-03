@@ -52,6 +52,8 @@ export function createRequest(
   const a = mustFind(state.artisans, input.artisanId, "Artisan");
   if (a.sample) throw new Error("This is a sample profile for demonstration, so it cannot be booked yet.");
   if (a.ownerId === ctx.user.id) throw new Error("You cannot book your own profile.");
+  // Each account has one role: an artisan account takes jobs, it does not book other artisans.
+  if (state.artisans.some((x) => x.ownerId === ctx.user.id)) throw new Error("Artisan accounts take jobs; they cannot book other artisans. Use a customer account to book.");
   if (a.verification.status === "rejected") throw new Error("This artisan is not taking requests.");
   const phone = normalisePhone(input.phone);
   if (!phone) throw new Error("Enter a Nigerian mobile number the artisan can reach you on, like 0803 123 4567.");

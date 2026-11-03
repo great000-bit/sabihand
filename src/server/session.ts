@@ -4,12 +4,13 @@ import type { Viewer } from "@/lib/types";
 import { authConfigured, getAuth } from "@/lib/auth/server";
 import { AUTH_WAIT_MS, TimeoutError, authPaused, pauseAuth, resumeAuth, withTimeout } from "@/lib/auth/timeout";
 import { dbConfigured, sql } from "./db";
+import { readAdminSession } from "./admin-auth/guard";
 
 const list = (v: string | undefined) => (v ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
 
 /**
  * The signed-in person, resolved on the server from the session cookie.
- * Super admins are named in SUPER_ADMIN_USER_IDS. Admins are those a super admin added (app.admins), plus anyone in
+ * Admin rights come only from an admin session (email + password, see admin-auth). Super admins are named in SUPER_ADMIN_USER_IDS. Admins are those a super admin added (app.admins), plus anyone in
  * ADMIN_USER_IDS, or ADMIN_EMAILS when the address is verified. A super admin is always an admin.
  */
 async function addedAsAdmin(id: string): Promise<boolean> {
@@ -67,19 +68,49 @@ async function sessionUser() {
   }
 }
 
+/** Admin rights for an account: named in the site settings, or added by a super admin. */
+async function rolesFor(id: string, email: string, emailVerified: boolean): Promise<{ isAdmin: boolean; isSuperAdmin: boolean }> {
+  const isSuperAdmin = list(process.env.SUPER_ADMIN_USER_IDS).includes(id.toLowerCase());
+  const isAdmin = isSuperAdmin || list(process.env.ADMIN_USER_IDS).includes(id.toLowerCase()) || (emailVerified && list(process.env.ADMIN_EMAILS).includes(email.toLowerCase())) || (await addedAsAdmin(id));
+  return { isAdmin, isSuperAdmin };
+}
+
+/**
+ * The admin signed in with email + password on this browser (see admin-auth/guard.ts), when that account still has
+ * admin rights and has replaced its first password. Only this path ever gives admin rights.
+ */
+async function adminViewer(): Promise<Viewer | null> {
+  const s = await readAdminSession();
+  if (!s || s.mustChange) return null;
+  const r = await rolesFor(s.userId, s.email, true);
+  if (!r.isAdmin) return null;
+  return { id: s.userId, name: s.name || s.email.split("@")[0], email: s.email, ...r };
+}
+
+/**
+ * Who is signed in. An admin session (email + password) wins; otherwise the Google session, which never carries
+ * admin rights, even for an admin's own account.
+ */
 export const getViewer = cache(async (): Promise<Viewer | null> => {
+  try {
+    const admin = await adminViewer();
+    if (admin) return admin;
+  } catch (e) {
+    console.error("admin session read failed", e);
+  }
   if (!authConfigured) return null;
   try {
     const u = await sessionUser();
     if (!u) return null;
     const email = String(u.email ?? "");
     const id = String(u.id);
-    const isSuperAdmin = list(process.env.SUPER_ADMIN_USER_IDS).includes(id.toLowerCase());
-    const isAdmin = isSuperAdmin || list(process.env.ADMIN_USER_IDS).includes(id.toLowerCase()) || (u.emailVerified === true && list(process.env.ADMIN_EMAILS).includes(email.toLowerCase())) || (await addedAsAdmin(id));
     const image = typeof u.image === "string" && /^https:\/\//.test(u.image) ? u.image : undefined;
-    return { id, name: String(u.name || email.split("@")[0] || "Customer"), email, image, isAdmin, isSuperAdmin };
+    return { id, name: String(u.name || email.split("@")[0] || "Customer"), email, image, isAdmin: false, isSuperAdmin: false };
   } catch (e) {
     console.error("could not read the signed-in person", e);
     return null;
   }
 });
+
+/** Admin rights of an account, for the admin sign-in check. */
+export const adminRolesFor = rolesFor;

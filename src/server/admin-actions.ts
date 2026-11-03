@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { sql } from "./db";
 import { getViewer } from "./session";
+import { audit } from "./admin-auth/guard";
 
 export interface AdminRow {
   userId: string;
@@ -55,6 +56,7 @@ export async function addAdmin(email: string): Promise<{ error: string | null }>
     const u = found[0];
     if (list(process.env.SUPER_ADMIN_USER_IDS).includes(u.id.toLowerCase())) return { error: "That person is already a super admin." };
     await db`insert into app.admins (user_id, email, name, added_by) values (${u.id}, ${u.email}, ${u.name}, ${me.id}) on conflict (user_id) do nothing`;
+    await audit("admin_added", { userId: me.id, email: me.email }, { added: u.email });
     revalidatePath("/", "layout");
     return { error: null };
   } catch (err) {
@@ -64,12 +66,17 @@ export async function addAdmin(email: string): Promise<{ error: string | null }>
 }
 
 export async function removeAdmin(userId: string): Promise<{ error: string | null }> {
-  if (!(await superAdmin())) return { error: NOT_ALLOWED };
+  const me = await superAdmin();
+  if (!me) return { error: NOT_ALLOWED };
   const id = String(userId ?? "").trim();
   if (!id) return { error: "Choose who to remove." };
   if (list(process.env.SUPER_ADMIN_USER_IDS).includes(id.toLowerCase())) return { error: "A super admin cannot be removed here." };
   try {
     await sql()`delete from app.admins where user_id = ${id}`;
+    // Their admin password and any open admin sessions go with the role.
+    await sql()`delete from app.admin_sessions where user_id = ${id}`;
+    await sql()`delete from app.admin_credentials where user_id = ${id}`;
+    await audit("admin_removed", { userId: me.id, email: me.email }, { removed: id });
     revalidatePath("/", "layout");
     return { error: null };
   } catch (err) {
