@@ -201,3 +201,24 @@ select option:disabled {
 @media (prefers-reduced-motion: reduce) {
   .splash-glyph { animation: none; stroke-dashoffset: 0; fill: var(--fill); stroke: var(--fill); filter: none; }
 }
+
+/* Email confirmed (src/components/verify-email-form.tsx): ring pops, tick draws, gold rays burst, text rises. */
+.verified-badge { position: relative; display: grid; place-items: center; width: 96px; height: 96px; }
+.verified-circle { fill: #0b7a4b; transform-origin: 48px 48px; transform: scale(0); animation: verified-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) forwards; }
+.verified-tick { fill: none; stroke: #fff; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 60; stroke-dashoffset: 60; animation: verified-draw 0.45s ease-out 0.4s forwards; }
+.verified-ring { position: absolute; inset: 0; border-radius: 999px; border: 3px solid #e3a92b; opacity: 0; animation: verified-ring 0.9s ease-out 0.35s forwards; }
+.verified-ray { position: absolute; left: 50%; top: 50%; width: 4px; height: 14px; margin: -7px 0 0 -2px; border-radius: 4px; background: #e3a92b; opacity: 0; transform: rotate(var(--r)) translateY(-40px); animation: verified-ray 0.7s ease-out 0.45s forwards; }
+.verified-text { opacity: 0; transform: translateY(10px); animation: verified-rise 0.5s ease-out 0.7s forwards; }
+.verified-text-2 { animation-delay: 0.85s; }
+.verified-text-3 { animation-delay: 1s; }
+.verify-shake { animation: verify-shake 0.35s ease-in-out; }
+@keyframes verified-pop { to { transform: scale(1); } }
+@keyframes verified-draw { to { stroke-dashoffset: 0; } }
+@keyframes verified-ring { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.7); } }
+@keyframes verified-ray { 0% { opacity: 0; transform: rotate(var(--r)) translateY(-40px) scaleY(0.4); } 40% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--r)) translateY(-66px) scaleY(1); } }
+@keyframes verified-rise { to { opacity: 1; transform: none; } }
+@keyframes verify-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) {
+  .verified-circle, .verified-tick, .verified-text { animation: none; transform: none; opacity: 1; stroke-dashoffset: 0; }
+  .verified-ring, .verified-ray { display: none; }
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as e from "./engine";
-import { ADMINS, noticesFor, renderEmail, welcomeNotice } from "./notifications";
+import { ADMINS, noticesFor, renderCodeEmail, renderEmail, welcomeNotice } from "./notifications";
 import { nairaToKobo } from "./money";
 import type { AppState, Artisan, Viewer } from "./types";
 
@@ -83,5 +83,16 @@ describe("notifications", () => {
     expect(renderEmail({ ...base, toUserId: "u", audience: "customer" }, "https://x.test").html).toContain("/email/hero-customer.jpg");
     expect(renderEmail({ ...base, toUserId: ADMINS }, "https://x.test").html).toContain("/email/hero-team.jpg");
     expect(welcomeNotice("u1", "Ada").audience).toBeUndefined();
+  });
+});
+
+describe("code email", () => {
+  it("shows the code, the white logo and escapes the name", () => {
+    const m = renderCodeEmail("Ada <b>", "042917", "https://x.test/");
+    expect(m.subject).toBe("042917 is your Sabihand code");
+    expect(m.html).toContain(">042917<");
+    expect(m.html).toContain("https://x.test/email/wordmark-white.png");
+    expect(m.html).not.toContain("<b>");
+    expect(m.text).toContain("042917");
   });
 });
