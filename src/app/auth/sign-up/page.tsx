@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getViewer } from "@/server/session";
 import { AuthForm } from "@/components/auth-form";
 import { askedFor, continueUrl, signInErrorCodes, signInProblem } from "@/lib/auth/next";
-import { authConfigured } from "@/lib/auth/server";
+import { authConfigured, authProbeUrl } from "@/lib/auth/server";
 
 export const metadata = { title: "Create account" };
 
@@ -16,5 +16,5 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ n
   if (!codes.includes("nosession") && (await getViewer())) redirect(continueUrl(askedFor(next), as === "artisan"));
   // Coming back here with an error, or with an unused one-time code, means sign-in did not finish.
   const problem = authConfigured ? signInProblem(error, verifier) : "Sign-in is not available in this environment.";
-  return <AuthForm mode="sign-up" next={askedFor(next)} as={as === "artisan" || askedFor(next).startsWith("/artisan/join") ? "artisan" : "customer"} problem={problem} disabled={!authConfigured} />;
+  return <AuthForm mode="sign-up" next={askedFor(next)} as={as === "artisan" || askedFor(next).startsWith("/artisan/join") ? "artisan" : "customer"} problem={problem} disabled={!authConfigured} probe={authProbeUrl()} />;
 }

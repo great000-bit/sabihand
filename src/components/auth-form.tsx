@@ -1,21 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useActionState, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { authClient } from "@/lib/auth/client";
+import { signInWithEmail, signUpWithEmail } from "@/app/auth/actions";
+import { inAppBrowser } from "@/lib/auth/in-app";
 import { AuthSlides } from "./auth-slides";
-import { ErrorNote } from "./ui";
+import { Button, ErrorNote, Field, inputCls } from "./ui";
+
 
 /**
- * Apps like Instagram, Facebook, TikTok and Snapchat open links in their own browser. Google refuses to sign anyone in
- * there ("disallowed_useragent"), so the person must open the page in Chrome or Safari first.
+ * Two ways in. Google: sign-in and sign-up are the same step. Email and password: runs on our server, so it works on
+ * networks whose DNS cannot find the auth service that Google sign-in has to pass through (seen on Nigerian mobile data).
+ * `probe` is that auth service's health URL: if this browser cannot reach it, we say so and point to email instead.
  */
-export function inAppBrowser(ua: string): boolean {
-  return /FBAN|FBAV|FB_IAB|Instagram|Snapchat|TikTok|musical_ly|BytedanceWebview|Twitter|LinkedInApp|Line\/|MicroMessenger|; wv\)/i.test(ua);
-}
-
-/** Google is the only way in. Sign-in and sign-up are the same step: a new Google account becomes a new Sabihand account. */
-export function AuthForm({ mode, next, as, problem, disabled }: { mode: "sign-in" | "sign-up"; next: string; as: "customer" | "artisan"; problem?: string | null; disabled?: boolean }) {
+export function AuthForm({ mode, next, as, problem, disabled, probe }: { mode: "sign-in" | "sign-up"; next: string; as: "customer" | "artisan"; problem?: string | null; disabled?: boolean; probe?: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(problem ?? null);
   const [role, setRole] = useState<"customer" | "artisan">(as);
@@ -25,6 +24,16 @@ export function AuthForm({ mode, next, as, problem, disabled }: { mode: "sign-in
     () => false,
   );
   const [copied, setCopied] = useState(false);
+  const [googleBlocked, setGoogleBlocked] = useState(false);
+  const [emailState, emailRun, emailPending] = useActionState(mode === "sign-up" ? signUpWithEmail : signInWithEmail, null);
+  // Can this network find the auth service Google sign-in goes through? A DNS failure rejects; any answer resolves.
+  useEffect(() => {
+    if (!probe) return;
+    let live = true;
+    fetch(probe, { mode: "no-cors", cache: "no-store", signal: AbortSignal.timeout(8000) })
+      .then(() => live && setGoogleBlocked(false), () => live && setGoogleBlocked(true));
+    return () => { live = false; };
+  }, [probe]);
   const up = mode === "sign-up";
   const unlock = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Never leave the button locked: if the browser has not left for Google after a while, let the person try again.
@@ -109,6 +118,37 @@ export function AuthForm({ mode, next, as, problem, disabled }: { mode: "sign-in
             {busy ? "Opening Google..." : up ? "Sign up with Google" : "Continue with Google"}
           </button>
           <ErrorNote message={error} />
+          {googleBlocked && (
+            <p role="status" className="rounded-2xl border-2 border-gold/60 bg-gold/10 p-3 text-sm text-ink">
+              Your network can’t reach Google sign-in right now. Use your email and password below, or switch to Wi-Fi.
+            </p>
+          )}
+          <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-muted" aria-hidden>
+            <span className="h-px flex-1 bg-line" />or with email<span className="h-px flex-1 bg-line" />
+          </div>
+          <form action={emailRun} className="grid gap-4">
+            <input type="hidden" name="landing" value={landing} />
+            {up && (
+              <Field label="Your name">
+                <input name="name" autoComplete="name" required maxLength={80} className={inputCls} />
+              </Field>
+            )}
+            <Field label="Email address">
+              <input name="email" type="email" autoComplete="email" inputMode="email" required className={inputCls} />
+            </Field>
+            <Field label="Password" hint={up ? "At least 8 characters." : undefined}>
+              <input name="password" type="password" autoComplete={up ? "new-password" : "current-password"} minLength={up ? 8 : undefined} maxLength={128} required className={inputCls} />
+            </Field>
+            {!up && (
+              <Link href="/auth/forgot-password" className="-mt-2 justify-self-end text-sm font-bold text-link">
+                Forgot your password?
+              </Link>
+            )}
+            <ErrorNote message={emailState?.error ?? null} />
+            <Button type="submit" disabled={emailPending || disabled} className="w-full">
+              {emailPending ? "One moment..." : up ? "Create account" : "Sign in"}
+            </Button>
+          </form>
           {up && (
             <p className="text-center text-xs text-muted">
               By creating an account you agree to our <Link href="/terms" className="font-bold text-link">Terms</Link> and <Link href="/privacy" className="font-bold text-link">Privacy policy</Link>.

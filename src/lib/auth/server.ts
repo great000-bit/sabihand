@@ -13,3 +13,10 @@ export function getAuth() {
   });
   return instance;
 }
+
+/** The auth service's health page, which the sign-in page pings from the browser to see if Google sign-in can work. */
+export function authProbeUrl(): string | undefined {
+  const base = process.env.NEON_AUTH_BASE_URL;
+  return base ? `${base.replace(/\/$/, "")}/ok` : undefined;
+}
+
