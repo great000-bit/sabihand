@@ -87,11 +87,11 @@ describe("notifications", () => {
 });
 
 describe("code email", () => {
-  it("shows the code, the white logo and escapes the name", () => {
+  it("shows the code, the logo and escapes the name", () => {
     const m = renderCodeEmail("Ada <b>", "042917", "https://x.test/");
     expect(m.subject).toBe("042917 is your Sabihand code");
     expect(m.html).toContain(">042917<");
-    expect(m.html).toContain("https://x.test/email/wordmark-white.png");
+    expect(m.html).toContain("https://x.test/email/logo-chip.png");
     expect(m.html).not.toContain("<b>");
     expect(m.text).toContain("042917");
   });
