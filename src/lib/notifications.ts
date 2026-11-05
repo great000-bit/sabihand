@@ -117,6 +117,10 @@ export function welcomeNotice(userId: string, name: string): Notice {
   return { toUserId: userId, subject: "Welcome to Sabihand", lines: [`Hi ${first}, welcome to Sabihand.`, "Find a verified artisan near you, get a price before they come, and pay safely. We hold your money until the job is done.", "Are you an artisan? Create your profile and let customers near you find you."], path: "/artisans", cta: "Find an artisan" };
 }
 
+/** The white wordmark on a midnight pill: readable on the cream card and in mail apps that darken emails. */
+const logo = (site: string) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#0B1F4B;border-radius:999px;padding:11px 18px"><img src="${site}/email/wordmark-white.png" width="126" height="18" alt="Sabihand" style="display:block;border:0;width:126px;height:auto"></td></tr></table>`;
+
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /**
@@ -136,7 +140,7 @@ export function renderEmail(n: Notice, siteUrl: string): { html: string; text: s
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#E3A92B"><tr><td align="center" style="padding:28px 12px 32px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
 <tr><td style="background:#FBE3A0;border-radius:28px;padding:30px 28px 32px;font-family:${font}">
-<img src="${site}/email/wordmark.png" width="140" height="20" alt="Sabihand" style="display:block;border:0;width:140px;height:auto">
+${logo(site)}
 <h1 style="margin:26px 0 16px;font-family:${font};font-size:32px;line-height:1.12;font-weight:700;letter-spacing:-0.5px;color:#0B1F4B">${esc(n.subject)}</h1>
 ${n.lines.map((l) => `<p style="margin:0 0 12px;font-family:${font};font-size:16px;line-height:1.55;color:#3A3423">${esc(l)}</p>`).join("\n")}
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:22px"><tr><td style="background:#0B1F4B;border-radius:999px"><a href="${esc(url)}" style="display:inline-block;padding:14px 26px;font-family:${font};font-size:15px;font-weight:700;color:#FBE3A0;text-decoration:none;border-radius:999px">${esc(n.cta)} &rarr;</a></td></tr></table>
@@ -147,4 +151,30 @@ ${n.lines.map((l) => `<p style="margin:0 0 12px;font-family:${font};font-size:16
 </table></td></tr></table></body></html>`;
   const text = `${n.subject}\n\n${n.lines.join("\n\n")}\n\n${n.cta}: ${url}\n\nSabihand`;
   return { html, text };
+}
+
+/** The 6-digit email check code, in the same poster style: big spaced digits on a midnight panel. */
+export function renderCodeEmail(name: string, code: string, siteUrl: string): { subject: string; html: string; text: string } {
+  const site = siteUrl.replace(/\/$/, "");
+  const first = name.trim().split(/\s+/)[0] || "there";
+  const font = "'Space Grotesk','Helvetica Neue',Helvetica,Arial,sans-serif";
+  const subject = `${code} is your Sabihand code`;
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(subject)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:#E3A92B">
+<span style="display:none;max-height:0;overflow:hidden;opacity:0">Your code is ${esc(code)}. It works for 15 minutes.</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#E3A92B"><tr><td align="center" style="padding:28px 12px 32px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
+<tr><td style="background:#FBE3A0;border-radius:28px;padding:30px 28px 32px;font-family:${font}">
+${logo(site)}
+<h1 style="margin:26px 0 16px;font-family:${font};font-size:32px;line-height:1.12;font-weight:700;letter-spacing:-0.5px;color:#0B1F4B">Confirm your email</h1>
+<p style="margin:0 0 18px;font-family:${font};font-size:16px;line-height:1.55;color:#3A3423">Hi ${esc(first)}, enter this code on Sabihand to finish creating your account.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#0B1F4B;border-radius:20px;padding:18px 26px;font-family:${font};font-size:38px;line-height:1;font-weight:700;letter-spacing:10px;color:#FFFFFF">${esc(code)}</td></tr></table>
+<p style="margin:18px 0 0;font-family:${font};font-size:14px;line-height:1.55;color:#3A3423">It works for 15 minutes. If you did not sign up for Sabihand, you can ignore this email.</p>
+</td></tr>
+<tr><td align="center" style="padding:22px 12px 0;font-family:${font};font-size:12px;line-height:1.6;color:#0B1F4B">
+<strong>Sabihand</strong> &middot; Trusted Hands Near You.</td></tr>
+</table></td></tr></table></body></html>`;
+  const text = `Hi ${first},\n\nYour Sabihand code is ${code}. Enter it on Sabihand to finish creating your account. It works for 15 minutes.\n\nIf you did not sign up for Sabihand, ignore this email.`;
+  return { subject, html, text };
 }

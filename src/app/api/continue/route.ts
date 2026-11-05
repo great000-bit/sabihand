@@ -2,6 +2,7 @@ import { getViewer } from "@/server/session";
 import { isArtisanAccount } from "@/server/roles";
 import { askedFor } from "@/lib/auth/next";
 import { welcomeOnce } from "@/server/email";
+import { emailConfirmed } from "@/server/email-check";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,13 @@ export async function GET(req: Request) {
   const viewer = await getViewer();
   const headers = { "Cache-Control": "no-store" };
   if (!viewer) return Response.json({ ok: false, to: `/auth/sign-in?error=nosession${want ? `&next=${encodeURIComponent(want)}` : ""}` }, { headers });
+  // Accounts made with email and password confirm their address with a 6-digit code before going anywhere.
+  if (!(await emailConfirmed(viewer.id))) {
+    const q = new URLSearchParams();
+    if (want) q.set("next", want);
+    if (as === "artisan") q.set("as", "artisan");
+    return Response.json({ ok: true, to: `/auth/verify${q.size ? `?${q}` : ""}` }, { headers });
+  }
   welcomeOnce(viewer);
   let to = "/artisans";
   const artisan = await isArtisanAccount(viewer.id);
