@@ -117,9 +117,12 @@ export function welcomeNotice(userId: string, name: string): Notice {
   return { toUserId: userId, subject: "Welcome to Sabihand", lines: [`Hi ${first}, welcome to Sabihand.`, "Find a verified artisan near you, get a price before they come, and pay safely. We hold your money until the job is done.", "Are you an artisan? Create your profile and let customers near you find you."], path: "/artisans", cta: "Find an artisan" };
 }
 
-/** The white wordmark on a midnight pill: readable on the cream card and in mail apps that darken emails. */
+/**
+ * The blue wordmark on a white chip, both baked into one image. Mail apps in dark mode recolour backgrounds and text
+ * but not images, so the logo stays blue on white whether the card shows cream (light) or dark (Gmail dark mode).
+ */
 const logo = (site: string) =>
-  `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#0B1F4B;border-radius:999px;padding:11px 18px"><img src="${site}/email/wordmark-white.png" width="126" height="18" alt="Sabihand" style="display:block;border:0;width:126px;height:auto"></td></tr></table>`;
+  `<img src="${site}/email/logo-chip.png" width="180" height="44" alt="Sabihand" style="display:block;border:0;width:180px;height:auto">`;
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
