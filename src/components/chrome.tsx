@@ -53,10 +53,12 @@ function useNav(): NavItem[] {
 const bare = (path: string) => path.startsWith("/admin") || path.startsWith("/continue");
 
 function Avatar({ name, image }: { name: string; image?: string }) {
-  if (image) {
+  // If Google's picture host can't be reached on this network, fall back to the initial instead of a broken image.
+  const [broken, setBroken] = useState(false);
+  if (image && !broken) {
     // Google's picture; its host blocks hotlinks that send a referrer.
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={image} alt="" width={36} height={36} referrerPolicy="no-referrer" className="h-9 w-9 rounded-full object-cover" />;
+    return <img src={image} alt="" width={36} height={36} referrerPolicy="no-referrer" onError={() => setBroken(true)} className="h-9 w-9 rounded-full object-cover" />;
   }
   return <span className="flex h-9 w-9 items-center justify-center rounded-full bg-midnight font-display text-sm font-extrabold text-gold">{name.trim()[0]?.toUpperCase()}</span>;
 }

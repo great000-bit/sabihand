@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { inAppBrowser } from "@/components/auth-form";
+import { inAppBrowser } from "@/lib/auth/in-app";
 
 describe("in-app browser detection", () => {
   it("spots app browsers Google refuses", () => {

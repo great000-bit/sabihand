@@ -2,6 +2,15 @@ import type { NextConfig } from "next";
 
 const dev = process.env.NODE_ENV !== "production";
 
+/** The auth service's origin: the sign-in page pings it to tell whether this network can reach Google sign-in. */
+const authOrigin = (() => {
+  try {
+    return process.env.NEON_AUTH_BASE_URL ? ` ${new URL(process.env.NEON_AUTH_BASE_URL).origin}` : "";
+  } catch {
+    return "";
+  }
+})();
+
 /**
  * Content Security Policy: pages may only load code, styles, fonts and connections from this site (plus Google Fonts
  * for the offline page), can never be framed by another site (stops clickjacking), and cannot post forms elsewhere.
@@ -13,7 +22,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
-  `connect-src 'self'${dev ? " ws: http://localhost:*" : ""}`,
+  `connect-src 'self'${authOrigin}${dev ? " ws: http://localhost:*" : ""}`,
   "frame-src 'none'",
   "frame-ancestors 'none'",
   "object-src 'none'",
