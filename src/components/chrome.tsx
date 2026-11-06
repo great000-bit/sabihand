@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { useStore } from "@/lib/store";
@@ -51,6 +51,10 @@ function useNav(): NavItem[] {
 
 /** Hidden on the sign-in hand-over screen, which covers the whole window by itself. */
 const bare = (path: string) => path.startsWith("/admin") || path.startsWith("/continue");
+
+/** Policy pages are for reading: no role menu or account menu, just the logo and a way back. */
+const LEGAL = ["/terms", "/privacy", "/disputes"];
+const legal = (path: string) => LEGAL.includes(path);
 
 function Avatar({ name, image }: { name: string; image?: string }) {
   // If Google's picture host can't be reached on this network, fall back to the initial instead of a broken image.
@@ -118,6 +122,7 @@ function AccountMenu({ guestView = false }: { guestView?: boolean }) {
 
 export function Header() {
   const path = usePathname();
+  const router = useRouter();
   const items = useNav();
   const { state, viewer } = useStore();
   const unread = useUnread();
@@ -132,6 +137,20 @@ export function Header() {
   const active = (href: string) => path === href || path.startsWith(href + "/");
   // The admin area has its own sidebar layout.
   if (bare(path)) return null;
+  if (legal(path))
+    return (
+      <header className="sticky top-0 z-30 px-3 pt-3 sm:px-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full border border-white/10 bg-black/60 py-2 pl-5 pr-2 backdrop-blur-xl">
+          <Link href="/" aria-label="Sabihand home"><Logo width={132} /></Link>
+          <button
+            onClick={() => (window.history.length > 1 ? router.back() : router.push("/"))}
+            className="flex h-10 items-center gap-1.5 rounded-full border border-white/15 px-4 text-sm font-bold text-slate hover:text-white"
+          >
+            <span aria-hidden>←</span> Back
+          </button>
+        </div>
+      </header>
+    );
   return (
     <header className="sticky top-0 z-30 px-3 pt-3 sm:px-6">
       <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto] items-center gap-3 rounded-full border border-white/10 bg-black/60 py-2 pl-5 pr-2 shadow-[0_10px_40px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl md:grid-cols-[1fr_auto_1fr]">
