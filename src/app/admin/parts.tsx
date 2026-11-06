@@ -22,7 +22,7 @@ export const CHECKS: { id: VerificationCheck; label: string }[] = [
   { id: "bank", label: "Bank account name matched by the bank" },
 ];
 
-export type Section = "overview" | "disputes" | "payouts" | "verification" | "requests" | "artisans" | "autopilot" | "team" | "security";
+export type Section = "overview" | "disputes" | "payouts" | "verification" | "requests" | "artisans" | "autopilot" | "users" | "team" | "security" | "policy";
 
 /** Small line icons, drawn on a 24px grid. */
 export const ICONS = {
@@ -34,6 +34,8 @@ export const ICONS = {
   artisans: <path d="M14.5 6.5a4 4 0 0 1-5.6 5.6L4 17l3 3 4.9-4.9a4 4 0 0 1 5.6-5.6l-2.6 2.6-2.4-.6-.6-2.4zM14 4.2" />,
   back: <path d="M15 6l-6 6 6 6" />,
   autopilot: <><rect x="4.5" y="8" width="15" height="11" rx="3" /><path d="M12 8V4.5M9 13h.01M15 13h.01M9.5 16.5h5M2.5 12.5v2M21.5 12.5v2" /></>,
+  users: <><circle cx="12" cy="8" r="3.8" /><path d="M4.5 20.5c.8-4 3.8-6.5 7.5-6.5s6.7 2.5 7.5 6.5" /></>,
+  policy: <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17v.01" />,
   team: <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.6-3.4 3.3-5.5 6.5-5.5s5.9 2.1 6.5 5.5M16 4.3a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.7 2.7 3 5.2" />,
   security: <><rect x="5" y="10.5" width="14" height="10" rx="2.5" /><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3M12 14.5v2.5" /></>,
   logout: <path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" />,

@@ -16,6 +16,8 @@ const TITLES: Record<Section, [string, string]> = {
   requests: ["Requests", "Every job on the marketplace. Open one to see its history and chat."],
   artisans: ["Artisans", "Everyone offering work on Sabihand. Open one to see their jobs, money and checks."],
   autopilot: ["Autopilot", "The admin bot: switch it on or off and tell it exactly what it may do."],
+  users: ["Users", "Everyone with an account: when they joined, how they sign in and what they have done."],
+  policy: ["Dispute policy", "How problems are handled, as customers and artisans read it."],
   team: ["Admin team", "Who can use this admin area."],
   security: ["Security", "Your password, two-step sign-in, open sessions and the sign-in log."],
 };
@@ -50,7 +52,7 @@ function useRail() {
 /** Which sidebar item a path belongs to, and whether it is a detail page inside it. */
 function sectionOf(path: string): { section: Section; detail: boolean } {
   const [, , first, second] = path.split("/");
-  const known: Section[] = ["disputes", "payouts", "verification", "requests", "artisans", "autopilot", "team", "security"];
+  const known: Section[] = ["disputes", "payouts", "verification", "requests", "artisans", "users", "autopilot", "team", "security", "policy"];
   const section = (known as string[]).includes(first ?? "") ? (first as Section) : "overview";
   return { section, detail: Boolean(second) };
 }
@@ -58,6 +60,7 @@ function sectionOf(path: string): { section: Section; detail: boolean } {
 const DETAIL_TITLES: Partial<Record<Section, [string, string]>> = {
   requests: ["Request", "The job, its money, any problem, the history and the chat."],
   artisans: ["Artisan", "Contact, checks, bank, jobs and reviews for one artisan."],
+  users: ["User", "One account: details, sign-ins and everything they have done."],
 };
 
 /** The admin frame every /admin page sits in: sidebar (rail on desktop, drawer on phones) and top bar. */
@@ -146,6 +149,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           {item({ id: "verification", label: "Verification", count: pending.length })}
           {item({ id: "requests", label: "Requests" })}
           {item({ id: "artisans", label: "Artisans" })}
+          {item({ id: "users", label: "Users" })}
           {item({ id: "autopilot", label: "Autopilot" })}
         </nav>
       </div>
@@ -154,7 +158,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="grid gap-0.5">
           {viewer.isSuperAdmin && item({ id: "team", label: "Admin team" })}
           {item({ id: "security", label: "Security" })}
-          {link("/disputes", "help", "Dispute policy")}
+          {item({ id: "policy", label: "Dispute policy" })}
           {link("/", "site", "Back to site")}
           <button
             onClick={async () => {
